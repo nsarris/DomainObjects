@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainObjects", "DomainObje
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestConsoleApp1", "TestConsoleApp1\TestConsoleApp1.csproj", "{6B2FD25B-0367-4EF1-8FE4-AC5D1AE26C83}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dynamix", "..\Dynamix\Dynamix\Dynamix.csproj", "{8CD44B0C-C50D-4328-8EFD-9B0B4DD9BDD2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dynamix", "Dynamix\Dynamix\Dynamix.csproj", "{8CD44B0C-C50D-4328-8EFD-9B0B4DD9BDD2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
