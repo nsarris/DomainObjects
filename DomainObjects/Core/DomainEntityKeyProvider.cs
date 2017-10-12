@@ -13,7 +13,12 @@ namespace DomainObjects.Core
 
     public interface IKeyProvider
     {
-        object GetKey(object o);
+        object GetKey();
+    }
+
+    public interface IKeyProvider<TKey> : IKeyProvider
+    {
+        TKey GetKey();
     }
 
     public static class DomainEntityKeyProvider
@@ -99,7 +104,7 @@ namespace DomainObjects.Core
         }
     }
 
-    public class DomainEntityKeyProvider<TKey>
+    public class DomainEntityKeyProvider<TKey> 
     {
         //Func<object, TKey> keySelector;
         //static readonly string CLASS_NAME_PREFIX = "_DomainEntityKey_";

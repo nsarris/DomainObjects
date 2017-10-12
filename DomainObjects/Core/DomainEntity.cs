@@ -23,7 +23,7 @@ namespace DomainObjects.Core
         }
     }
 
-    public abstract class DomainEntity : DomainObject
+    public abstract class DomainEntity : DomainObject, IKeyProvider
     {
         #region Key and Equality
         public object GetKey()
@@ -171,5 +171,12 @@ namespace DomainObjects.Core
         #endregion
 
         
+    }
+    public class DomainEntity<TKey> : DomainEntity, IKeyProvider<TKey>
+    {
+        public new TKey GetKey()
+        {
+            return (TKey)base.GetKey();
+        }
     }
 }

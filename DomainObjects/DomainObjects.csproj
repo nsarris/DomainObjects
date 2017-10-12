@@ -55,6 +55,7 @@
     <Compile Include="Core\ObjectCloner.cs" />
     <Compile Include="Core\ObjectComparer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repositories\IQueryRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
