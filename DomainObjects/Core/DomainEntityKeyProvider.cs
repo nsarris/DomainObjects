@@ -18,7 +18,7 @@ namespace DomainObjects.Core
 
     public interface IKeyProvider<TKey> : IKeyProvider
     {
-        TKey GetKey();
+        new TKey GetKey();
     }
 
     public static class DomainEntityKeyProvider
