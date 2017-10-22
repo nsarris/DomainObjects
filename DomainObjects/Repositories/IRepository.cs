@@ -1,4 +1,5 @@
 ﻿using DomainObjects.Patterns;
+using Dynamix.QueryableExtensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,7 @@ namespace DomainObjects.Repositories
         bool SupportsAsync { get; }
         TEntity GetById(object id);
         Task<TEntity> GetByIdAsync(object id);
+        SingleQueryable<TEntity> QueryById(object id);
         bool SupportsQueryable { get; }
         IQueryable<TEntity> ToQueryable();
     }
@@ -28,6 +30,7 @@ namespace DomainObjects.Repositories
     {
         TEntity GetById(TKey id);
         Task<TEntity> GetByIdAsync(TKey id);
+        SingleQueryable<TEntity> QueryById(TKey id);
     }
 
     public interface IEntityCommandHandler<TEntity>
