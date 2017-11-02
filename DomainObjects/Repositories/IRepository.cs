@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace DomainObjects.Repositories
 {
-    public interface IQueryRepository<T>
-    {
-        T GetById(object id);
-        void Insert(T obj);
-    }
+    //public interface IRepository<T>
+    //{
+    //    T GetById(object id);
+    //    void Insert(T obj);
+    //}
 
     public interface IEntityQueryProvider<TEntity>
         where TEntity : Core.DomainEntity
@@ -20,9 +20,9 @@ namespace DomainObjects.Repositories
         bool SupportsAsync { get; }
         TEntity GetById(object id);
         Task<TEntity> GetByIdAsync(object id);
-        SingleQueryable<TEntity> QueryById(object id);
         bool SupportsQueryable { get; }
         IQueryable<TEntity> ToQueryable();
+        SingleQueryable<TEntity> QueryById(object id);
     }
 
     public interface IEntityQueryProvider<TEntity, TKey> : IEntityQueryProvider<TEntity>
