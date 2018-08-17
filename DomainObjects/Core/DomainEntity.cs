@@ -9,6 +9,7 @@ namespace DomainObjects.Core
 {
     public enum DomainObjectState
     {
+        Uninitialized,
         New,
         Existing,
         Deleted
@@ -23,8 +24,12 @@ namespace DomainObjects.Core
         }
     }
 
-    public abstract class DomainEntity : DomainObject, IKeyProvider
+    public abstract class DomainEntity : DomainObject, IKeyProvider, IChangeTracker
     {
+        public DomainEntity()
+        {
+            changeTracker = new ChangeTracker(this);
+        }
         #region Key and Equality
         public object GetKey()
         {
@@ -49,7 +54,9 @@ namespace DomainObjects.Core
 
         public static bool operator ==(DomainEntity x, DomainEntity y)
         {
-            if (object.ReferenceEquals(x, null) || object.ReferenceEquals(y, null))
+            if (x is null && y is null)
+                return true;
+            else if (x is null || y is null)
                 return false;
 
             return x.Equals(y);
@@ -57,8 +64,10 @@ namespace DomainObjects.Core
 
         public static bool operator !=(DomainEntity x, DomainEntity y)
         {
-            if (x == null || y == null)
+            if (x is null && y is null)
                 return false;
+            else if (x is null || y is null)
+                return true;
 
             return !x.Equals(y);
         }
@@ -67,68 +76,79 @@ namespace DomainObjects.Core
 
         #region Change Tracking
 
-        //object initvals;
-        //public bool HasChanges { get; private set; }
-        //List<string> changedProps = new List<string>();
-        //public List<string> ChangedProperties { get { return changedProps.ToList(); } }
-        //public void BeginTrackChanges()
-        //{
-        //    initvals = Activator.CreateInstance(this.GetType());
-        //    this.PropertyChanged += ViewModelBase_PropertyChanged;
-        //    foreach (var prop in this.GetType().GetProperties()
-        //        .Where(x => x.GetSetMethod() != null))
-        //        prop.SetValue(initvals, prop.GetValue(this));
-        //}
+        private DomainObjectState state = DomainObjectState.Uninitialized;
+        private readonly ChangeTracker changeTracker;
 
-        //void ViewModelBase_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        //{
-        //    if (initvals != null)
-        //    {
-        //        var initval = this.GetType().GetProperty(e.PropertyName).GetValue(initvals);
-        //        var currentval = this.GetType().GetProperty(e.PropertyName).GetValue(this);
+        public DomainObjectState GetObjectState()
+        {
+            return state;
+        }
 
-        //        if ((initval == null && currentval != null)
-        //            || (initval == null && currentval != null))
-        //        {
-        //            changedProps.Add(e.PropertyName);
-        //            HasChanges = true;
-        //        }
-        //        else if (initval != null && currentval != null && !initval.Equals(currentval))
-        //        {
-        //            changedProps.Add(e.PropertyName);
-        //            HasChanges = true;
-        //        }
-        //        else
-        //        {
-        //            changedProps.RemoveAll(x => x == e.PropertyName);
-        //        }
+        public void MarkNew()
+        {
+            state = DomainObjectState.New;
+        }
 
-        //        if (changedProps.Count == 0)
-        //            HasChanges = false;
-        //    }
-        //}
+        public void MarkExisting()
+        {
+            state = DomainObjectState.Existing;
+        }
 
+        public void MarkDeleted()
+        {
+            state = DomainObjectState.Deleted;
+        }
 
-        //public void CancelChanges()
-        //{
-        //    if (initvals != null)
-        //    {
-        //        foreach (var prop in this.GetType().GetProperties()
-        //            .Where(x => x.GetSetMethod() != null))
-        //            prop.SetValue(this, prop.GetValue(initvals));
-        //        initvals = null;
-        //        this.PropertyChanged += ViewModelBase_PropertyChanged;
-        //    }
-        //}
+        public void MarkChanged()
+        {
+            //changeTracker.MarkChanged();
+        }
 
-        //public void AcceptChanges()
-        //{
-        //    if (initvals != null)
-        //    {
-        //        initvals = null;
-        //        this.PropertyChanged += ViewModelBase_PropertyChanged;
-        //    }
-        //}
+        public void MarkUnchanged()
+        {
+            //changeTracker.MarkUnchanged();
+        }
+
+        public bool GetIsChanged()
+        {
+            return changeTracker.GetIsChanged();
+        }
+
+        protected void SetObjectState(DomainObjectState state)
+        {
+            this.state = state;
+        }
+
+        public void ResetChanges()
+        {
+            changeTracker.ResetChanges();
+        }
+
+        public void AcceptChanges()
+        {
+            changeTracker.AcceptChanges();
+        }
+
+        public IReadOnlyDictionary<string, object> GetChanges()
+        {
+            return changeTracker.GetChanges();
+        }
+
+        public void BeginTracking()
+        {
+            changeTracker.BeginTracking();
+        }
+
+        public void StopTracking()
+        {
+            changeTracker.StopTracking();
+        }
+
+        protected void OnPropertyChanged(string propertyName, object before, object after)
+        {
+            changeTracker.OnPropertyChanged(propertyName, before, after);
+        }
+
 
         #endregion
 
@@ -170,7 +190,7 @@ namespace DomainObjects.Core
 
         #endregion
 
-        
+
     }
     public class DomainEntity<TKey> : DomainEntity, IKeyProvider<TKey>
     {

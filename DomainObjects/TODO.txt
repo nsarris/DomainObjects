@@ -1,0 +1,5 @@
+﻿1. Set Key (only new entities?)
+2. Are Same (compare values/deep)
+3. GetIsChangedDeep
+4. Validation (Douple dispatch/ValidationContext)
+5. Better construction (New / Init)
