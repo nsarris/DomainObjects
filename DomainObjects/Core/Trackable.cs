@@ -14,9 +14,8 @@ namespace DomainObjects.Core
         void AcceptChanges();
         bool GetIsChanged();
         IReadOnlyDictionary<string, object> GetChanges();
-        //void MarkChanged();
-        //void MarkUnchanged();
-        //Suppress/Resume or Begin/Stop
+        void MarkChanged();
+        void MarkUnchanged();
         void BeginTracking();
         void StopTracking();
     }
@@ -28,6 +27,8 @@ namespace DomainObjects.Core
         Type trackableType;
         bool suppressPropertyChanged;
         bool enabled;
+        bool isChanged;
+        bool? markedChanged;
         Dictionary<string, object> originalValues;
         Dictionary<string, object> changes = new Dictionary<string, object>();
 
@@ -62,6 +63,7 @@ namespace DomainObjects.Core
                 SetOriginalValues();
                 changes = new Dictionary<string, object>();
                 isChanged = false;
+                markedChanged = null;
             }
             finally
             {
@@ -74,13 +76,17 @@ namespace DomainObjects.Core
             originalValues = GetCurrentValues();
             changes = new Dictionary<string, object>();
             isChanged = false;
+            markedChanged = null;
         }
 
-        private bool isChanged;
+        
 
         public bool GetIsChanged()
         {
-            return isChanged;
+            if (markedChanged.HasValue)
+                return markedChanged == true;
+            else
+                return isChanged;
         }
 
         public IReadOnlyDictionary<string, object> GetChanges()
@@ -124,6 +130,16 @@ namespace DomainObjects.Core
         {
             enabled = false;
         }
+
+        public void MarkChanged()
+        {
+            markedChanged = true;
+        }
+
+        public void MarkUnchanged()
+        {
+            markedChanged = false;
+        }
     }
 
 
@@ -143,11 +159,14 @@ namespace DomainObjects.Core
 
         protected virtual void OnPropertyChanged(string propertyName, object before, object after)
         {
-            //TODO: user tracker events to call this in a before/after manner
+            //TODO: use tracker events to call this in a before/after manner
         }
 
         public void BeginTracking() => tracker.BeginTracking();
         public void StopTracking() => tracker.StopTracking();
+
+        public void MarkChanged() => tracker.MarkChanged();
+        public void MarkUnchanged() => tracker.MarkUnchanged();
     }
 
 
