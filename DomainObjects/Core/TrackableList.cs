@@ -36,7 +36,7 @@ namespace DomainObjects.Core
     }
 
 
-    public class TrackableReadOnlyList<T> : IReadOnlyList<T>//, IChangeTracker
+    public class TrackableReadOnlyList<T> : IReadOnlyList<T>, ITrackableCollection<T>
     {
         protected readonly List<T> internalList;
         
@@ -124,6 +124,36 @@ namespace DomainObjects.Core
         {
             
         }
+
+        public virtual IEnumerable<T> GetAdded()
+        {
+            return Enumerable.Empty<T>();
+        }
+
+        public virtual IEnumerable<T> GetRemoved()
+        {
+            return Enumerable.Empty<T>();
+        }
+
+        public virtual void MarkChanged()
+        {
+            
+        }
+
+        public virtual void MarkUnchanged()
+        {
+            
+        }
+
+        public virtual void BeginTracking()
+        {
+            
+        }
+
+        public virtual void StopTracking()
+        {
+            
+        }
     }
 
 
@@ -132,7 +162,9 @@ namespace DomainObjects.Core
     {
         private readonly List<T> addedItems = new List<T>();
         private readonly List<T> removedItems = new List<T>();
-        
+        private bool enabled;
+        private bool? markedChanged;
+
         public delegate void ListChangedEventHandler(TrackableList<T> source, ListChangedEventArgs<T> e);
 
         public event ListChangedEventHandler ListChanged;
@@ -157,6 +189,9 @@ namespace DomainObjects.Core
         
         private void OnListChangedInternal(T item, ListItemChangeEnum change)
         {
+            if (!enabled)
+                return; 
+
             if (change == ListItemChangeEnum.Added)// && !addedItems.Contains(item))
                 addedItems.Add(item);
             else if (change == ListItemChangeEnum.Removed)// && !removedItems.Contains(item))
@@ -170,6 +205,8 @@ namespace DomainObjects.Core
             IEnumerable<T> removed,
             bool cleared = false)
         {
+            if (!enabled)
+                return;
 
             if (added != null)
                 addedItems.AddRange(added);
@@ -179,12 +216,7 @@ namespace DomainObjects.Core
 
             ListChanged?.Invoke(this, new ListChangedEventArgs<T>(added, removed, cleared));
         }
-
-        protected virtual void OnListChanged(ListChangedEventArgs<T> eventArgs)
-        {
-            ListChanged?.Invoke(this, eventArgs);
-        }
-
+        
         public void Insert(int index, T item)
         {
             internalList.Insert(index, item);
@@ -287,7 +319,10 @@ namespace DomainObjects.Core
 
         public override bool GetIsChanged()
         {
-            return addedItems.Any() || removedItems.Any();
+            if (markedChanged.HasValue)
+                return markedChanged == true;
+            else
+                return addedItems.Any() || removedItems.Any();
         }
 
         public override void ResetChanges()
@@ -305,6 +340,36 @@ namespace DomainObjects.Core
         public override bool GetIsChangedDeep()
         {
             return GetIsChanged() || base.GetIsChangedDeep();
+        }
+
+        public override IEnumerable<T> GetAdded()
+        {
+            return addedItems;
+        }
+
+        public override IEnumerable<T> GetRemoved()
+        {
+            return removedItems;
+        }
+
+        public override void BeginTracking()
+        {
+            enabled = true;
+        }
+
+        public override void StopTracking()
+        {
+            enabled = false;
+        }
+
+        public override void MarkChanged()
+        {
+            markedChanged = true;
+        }
+
+        public override void MarkUnchanged()
+        {
+            markedChanged = false;
         }
     }
 }

@@ -27,9 +27,11 @@ namespace DomainObjects.Core
         IReadOnlyDictionary<string, object> GetChanges();
     }
 
-    public interface ITrackableCollection : ITrackable
+    public interface ITrackableCollection<T> : ITrackable
     {
-        //GetChanges / GetAdded / GetDeleted
+        //GetChanges
+        IEnumerable<T> GetAdded();
+        IEnumerable<T> GetRemoved();
     }
 
     public class ChangeTracker : ITrackableObject
