@@ -107,9 +107,9 @@ namespace DomainObjects.Core
 
         protected bool GetIsChangedInner()
         {
-            if (typeof(IChangeTracker).IsAssignableFrom(typeof(T)))
+            if (typeof(ITrackable).IsAssignableFrom(typeof(T)))
                 foreach (var item in internalList)
-                    if ((item as IChangeTracker).GetIsChanged())
+                    if ((item as ITrackable).GetIsChanged())
                         return true;
 
             return false;

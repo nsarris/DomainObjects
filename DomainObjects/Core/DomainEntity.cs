@@ -24,7 +24,7 @@ namespace DomainObjects.Core
         }
     }
 
-    public abstract class DomainEntity : DomainObject, IKeyProvider, IChangeTracker
+    public abstract class DomainEntity : DomainObject, IKeyProvider, ITrackable
     {
         public DomainEntity()
         {

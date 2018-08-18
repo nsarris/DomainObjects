@@ -8,18 +8,31 @@ using Dynamix.Reflection;
 
 namespace DomainObjects.Core
 {
-    public interface IChangeTracker
+    public interface ITrackable
     {
         void ResetChanges();
         void AcceptChanges();
         bool GetIsChanged();
-        IReadOnlyDictionary<string, object> GetChanges();
+        //bool GetIsChangedDeep();
+
         void MarkChanged();
         void MarkUnchanged();
+
         void BeginTracking();
         void StopTracking();
     }
-    public class ChangeTracker : IChangeTracker
+
+    public interface ITrackableObject : ITrackable
+    {
+        IReadOnlyDictionary<string, object> GetChanges();
+    }
+
+    public interface ITrackableCollection : ITrackable
+    {
+        //GetChanges / GetAdded / GetDeleted
+    }
+
+    public class ChangeTracker : ITrackableObject
     {
         //public event PropertyChangedEventHandler PropertyChanged;
 
@@ -143,7 +156,7 @@ namespace DomainObjects.Core
     }
 
 
-    public class TrackableBase : IChangeTracker
+    public class TrackableBase : ITrackableObject
     {
         ChangeTracker tracker;
 
