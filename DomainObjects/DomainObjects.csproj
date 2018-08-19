@@ -55,6 +55,7 @@
     <Compile Include="Core\DomainValue.cs" />
     <Compile Include="Core\EnumerableTypeDescriptor.cs" />
     <Compile Include="Core\Immutable.cs" />
+    <Compile Include="Core\IValidatable.cs" />
     <Compile Include="Core\ObjectCloner.cs" />
     <Compile Include="Core\ObjectComparer.cs" />
     <Compile Include="Core\Trackable.cs" />
