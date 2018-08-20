@@ -26,7 +26,19 @@ namespace DomainObjects.Core
 
     public abstract class DomainEntity : DomainObject, IKeyProvider, ITrackable
     {
-        public DomainEntity()
+        private DomainEntityDescriptor entityDescriptor;
+        protected DomainEntityDescriptor EntityDescriptor
+        {
+            get
+            {
+                if (entityDescriptor == null)
+                    entityDescriptor = DomainModelRegistry.GetEntityDescriptor(this.GetType());
+
+                return entityDescriptor;
+            }
+        }
+
+        protected DomainEntity()
         {
             changeTracker = new ChangeTracker(this);
             changeTracker.BeforePropertyChanged += (object sender, PropertyChangedExtendedEventArgs e) => OnBeforePropertyChanged(e.PropertyName, e.Before, e.After);
@@ -119,12 +131,18 @@ namespace DomainObjects.Core
 
         public bool GetIsChangedDeep()
         {
+            foreach(var prop in entityDescriptor.GetPropertyDescriptors().Where(x => x.DomainPropertyType == DomainPropertyType.AggregateList))
+            {
+                //enumerate list -> GetIsChangedDeep
+
+            }
             return GetIsChanged();
+
             //Get collections ->
             //if collection of ITrackable -> check items internally
-                //if also ITrackableCollection -> getdeleted (ignore added? throw incosistency error)
+            //if also ITrackableCollection -> getdeleted (ignore added? throw incosistency error)
             //if collection if non ITrackable items 
-                //if ITrackableCollection -> added / deleted 
+            //if ITrackableCollection -> added / deleted 
             //else do nothing
         }
 

@@ -5,8 +5,6 @@ VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainObjects", "DomainObjects\DomainObjects.csproj", "{B46A1906-58D6-4559-851C-7F4F42553BB4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestConsoleApp1", "TestConsoleApp1\TestConsoleApp1.csproj", "{6B2FD25B-0367-4EF1-8FE4-AC5D1AE26C83}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dynamix", "..\Dynamix\Dynamix\Dynamix.csproj", "{8CD44B0C-C50D-4328-8EFD-9B0B4DD9BDD2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainObjects.Tests", "DomainObjects.Tests\DomainObjects.Tests.csproj", "{8EDF4429-251A-416D-BB68-93F227191BCF}"
@@ -21,10 +19,6 @@ Global
 		{B46A1906-58D6-4559-851C-7F4F42553BB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B46A1906-58D6-4559-851C-7F4F42553BB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B46A1906-58D6-4559-851C-7F4F42553BB4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6B2FD25B-0367-4EF1-8FE4-AC5D1AE26C83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6B2FD25B-0367-4EF1-8FE4-AC5D1AE26C83}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6B2FD25B-0367-4EF1-8FE4-AC5D1AE26C83}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6B2FD25B-0367-4EF1-8FE4-AC5D1AE26C83}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8CD44B0C-C50D-4328-8EFD-9B0B4DD9BDD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8CD44B0C-C50D-4328-8EFD-9B0B4DD9BDD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CD44B0C-C50D-4328-8EFD-9B0B4DD9BDD2}.Release|Any CPU.ActiveCfg = Release|Any CPU

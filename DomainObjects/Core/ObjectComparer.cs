@@ -10,7 +10,7 @@ namespace DomainObjects.Core
 {
     public class ObjectComparer
     {
-        List<object> objectsChecked = new List<object>();
+        readonly List<object> objectsChecked = new List<object>();
 
         public bool DeepEquals(object left, object right)
         {
@@ -47,7 +47,7 @@ namespace DomainObjects.Core
             //Use IEquitable
             if (IsIEquatable(leftType))
             {
-                var m = leftType.GetInterfaceMap(typeof(IEquatable<>).MakeGenericType(leftType)).TargetMethods.Where(x => x.Name == "Equals").FirstOrDefault();
+                var m = leftType.GetInterfaceMap(typeof(IEquatable<>).MakeGenericType(leftType)).TargetMethods.FirstOrDefault(x => x.Name == "Equals");
                 return ((bool)m.Invoke(left, new object[] { right }));
             }
 

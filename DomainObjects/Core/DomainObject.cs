@@ -43,72 +43,6 @@ namespace DomainObjects.Core
 
     }
 
-    //public struct DomainNumber //: DomainValue
-    //{
-    //    //event
-    //    decimal? number;
-    //    public bool IsSet { get; private set; }
-    //    public bool IsNull => !number.HasValue;
-    //    public bool HasValue => IsSet && !IsNull;
-
-    //    public DomainNumber(decimal number)
-    //        : this()
-    //    {
-    //        this.number = number;
-    //        IsSet = true;
-    //    }
-
-    //    public void UnSet()
-    //    {
-    //        number = default(decimal);
-    //        IsSet = false;
-    //    }
-
-    //    public void SetNull()
-    //    {
-    //        number = null;
-    //        IsSet = true;
-    //    }
-
-    //    public decimal Value
-    //    {
-    //        get
-    //        {
-    //            return number ?? 0;
-    //        }
-    //        set
-    //        {
-    //            number = value;
-    //            IsSet = true;
-    //        }
-    //    }
-
-    //    public override bool Equals(object obj)
-    //    {
-    //        if (obj is null)
-    //            return false;
-
-    //        if (obj is DomainNumber other)
-    //        {
-    //            if (this.HasValue != other.HasValue)
-    //                return false;
-
-    //            return this.Value == other.Value;
-    //        }
-    //        else
-    //            return false;
-    //    }
-
-    //    public override int GetHashCode()
-    //    {
-    //        if (!HasValue)
-    //            return 0;
-    //        else
-    //            return number.GetHashCode();
-    //    }
-    //    //implicit conversions
-    //}
-
     public class DomainEntityPropertyDescriptor
     {
         public PropertyInfoEx Property { get; }
@@ -118,8 +52,8 @@ namespace DomainObjects.Core
         public string Name => Property.Name;
         public bool IsNullableType { get; }
         //public bool IsImmutable { get; }
-        public DomainPropertyTypeEnum DomainPropertyType { get; } = 0;
-        public DomainValueTypeEnum DomainValueType { get; } = 0;
+        public DomainPropertyType DomainPropertyType { get; } = 0;
+        public DomainValueType DomainValueType { get; } = 0;
 
         public DomainEntityPropertyDescriptor(PropertyInfoEx property, int? keyPosition)
         {
@@ -149,7 +83,7 @@ namespace DomainObjects.Core
 
     //}
 
-    public enum DomainValueTypeEnum
+    public enum DomainValueType
     {
         String = 1,
         Boolean,
@@ -159,17 +93,167 @@ namespace DomainObjects.Core
         Complex,
     }
 
-    public enum DomainPropertyTypeEnum
+    public enum DomainPropertyType
     {
         Value = 1,
         Aggregate,
         AggregateList
     }
 
+    internal static class IEnumerableExtensions
+    {
+        public static IEnumerable<T> SelectManyRecursive<T>(this IEnumerable<T> source, Func<T, IEnumerable<T>> selector)
+        {
+            return !source.Any() ? source :
+                source.Concat(
+                    source
+                    .SelectMany(i => selector(i) ?? Enumerable.Empty<T>())
+                    .SelectManyRecursive(selector)
+                );
+        }
+    }
+
+    internal static class DomainModelRegistry
+    {
+        static readonly Dictionary<Type, DomainModelDescriptor> entityModelMap = new Dictionary<Type, DomainModelDescriptor>();
+        static readonly Dictionary<Type, DomainEntityDescriptor> entityDescriptors = new Dictionary<Type, DomainEntityDescriptor>();
+
+        public static void RegisterModel(DomainModelDescriptor domainModel)
+        {
+            foreach(var descriptor in domainModel.GetEntityDescriptors())
+            {
+                if (entityModelMap.TryGetValue(descriptor.EntityType, out var modelMap))
+                {
+                    if (modelMap != domainModel)
+                        throw new InvalidOperationException("Cannot register an entity with two different domain models");
+                }
+                else
+                    entityModelMap.Add(descriptor.EntityType, domainModel);
+
+                if (!entityDescriptors.ContainsKey(descriptor.EntityType))
+                    entityDescriptors.Add(descriptor.EntityType, descriptor);
+            }
+        }
+
+        public static DomainEntityDescriptor GetEntityDescriptor(Type type)
+        {
+            //Assert Entity
+
+            if (entityDescriptors.TryGetValue(type, out var descriptor))
+                return descriptor;
+
+            throw new KeyNotFoundException($"Domain entity type {type.Name} not found in any built models or model has not been built");
+        }
+    }
+
+    public class DomainModelDescriptor
+    {
+        readonly Dictionary<Type, DomainEntityDescriptor> entityDescriptors = new Dictionary<Type, DomainEntityDescriptor>();
+        bool isBuilt;
+
+        public IEnumerable<DomainEntityDescriptor> GetAggregateRootDescriptors()
+        {
+            return entityDescriptors.Values.Where(x => x.IsRoot);
+        }
+
+        public IEnumerable<DomainEntityDescriptor> GetAggregateDescriptors()
+        {
+            return entityDescriptors.Values.Where(x => !x.IsRoot);
+        }
+
+        public IEnumerable<DomainEntityDescriptor> GetEntityDescriptors()
+        {
+            return entityDescriptors.Values;
+        }
+
+        public bool TryGet(Type entityType, out DomainEntityDescriptor domainEntityDescriptor)
+        {
+            return entityDescriptors.TryGetValue(entityType, out domainEntityDescriptor);
+        }
+
+        public bool TryGet<T>(out DomainEntityDescriptor domainEntityDescriptor)
+            where T : DomainEntity
+        {
+            return entityDescriptors.TryGetValue(typeof(T), out domainEntityDescriptor);
+        }
+
+        public DomainEntityDescriptor GetType(Type entityType)
+        {
+            return entityDescriptors[entityType];
+        }
+
+        public DomainEntityDescriptor GetType<T>()
+            where T : DomainEntity
+        {
+            return entityDescriptors[typeof(T)];
+        }
+
+        public void RegisterType(Type entityType)
+        {
+            if (isBuilt)
+                throw new InvalidOperationException("No new entities can be added after the model has been built");
+
+            var descriptor = new DomainEntityDescriptor(entityType);
+
+            if (!descriptor.IsRoot)
+                throw new InvalidOperationException("Only root entities can be registered in mode descriptor");
+
+            entityDescriptors.Add(entityType, descriptor);
+        }
+
+        public void BuildModel()
+        {
+            if (isBuilt)
+                return;
+
+            foreach (var descriptor in entityDescriptors.Values)
+            {
+                descriptor.Build();
+                foreach(var aggregateDescriptor in descriptor.AggregateTypes.Values.SelectManyRecursive(x => x.AggregateTypes.Values))
+                {
+                    aggregateDescriptor.Build();
+                    entityDescriptors.Add(aggregateDescriptor.EntityType, aggregateDescriptor);
+                }
+            }
+
+            DomainModelRegistry.RegisterModel(this);
+
+            isBuilt = true;
+        }
+    }
+
     public class DomainEntityDescriptor
     {
-        private readonly Dictionary<string, DomainEntityPropertyDescriptor> propertyDescriptors
-            = new Dictionary<string, DomainEntityPropertyDescriptor>();
+        private readonly Dictionary<string, DomainEntityPropertyDescriptor> propertyDescriptors;
+        private readonly Dictionary<Type, DomainEntityDescriptor> aggregateTypes;
+
+        public IReadOnlyDictionary<Type, DomainEntityDescriptor> AggregateTypes => aggregateTypes;
+
+        public DomainEntityDescriptor(Type entityType)
+        {
+            propertyDescriptors = new Dictionary<string, DomainEntityPropertyDescriptor>();
+            aggregateTypes = new Dictionary<Type, DomainEntityDescriptor>();
+
+            EntityType = entityType;
+            IsRoot = entityType.IsSubclassOfDeep(typeof(AggregateRoot));
+            //CheckType
+        }
+
+        public void Build()
+        {
+            GetProperties();
+            ValidateModel();
+        }
+
+        public DomainEntityPropertyDescriptor GetPropertyDescriptor(string propertyName)
+        {
+            return propertyDescriptors[propertyName];
+        }
+
+        public IEnumerable<DomainEntityPropertyDescriptor> GetPropertyDescriptors()
+        {
+            return propertyDescriptors.Values;
+        }
 
         public Type EntityType { get; }
         public bool IsRoot { get; }
@@ -178,80 +262,65 @@ namespace DomainObjects.Core
         {
             foreach (var property in EntityType.GetPropertiesEx())
             {
-                //if not marked ignore
+                //if not marked ignore;
+                var propertyType = property.PropertyInfo.PropertyType;
 
-                
-                if (property.PropertyInfo.PropertyType.IsAssignableTo(typeof(DomainKey)))
+
+                if (propertyType.IsSubclassOfDeep(typeof(DomainKey)))
                 {
                     //Key value type
                     //propertyDescriptors.Add(property.Name, new DomainEntityPropertyDescriptor(property));
                 }
-                if (property.PropertyInfo.PropertyType.IsAssignableTo(typeof(DomainValue)))
+                if (propertyType.IsSubclassOfDeep(typeof(DomainValue)))
                 {
+                    var keyAttribute = propertyType.GetAttribute<DomainKeyAttribute>();
                     //ValueTypeProperties
                 }
-                if (property.PropertyInfo.PropertyType.IsAssignableTo(typeof(Aggregate)))
+                if (propertyType.IsSubclassOfDeep(typeof(Aggregate)))
                 {
                     //AggregateProperty
-                    //Visit Type
+                    if (!aggregateTypes.ContainsKey(propertyType))
+                        aggregateTypes.Add(propertyType, new DomainEntityDescriptor(propertyType));
                 }
-                else if (property.PropertyInfo.PropertyType.IsAssignableToGenericType(typeof(AggregateList<>))
-                    || property.PropertyInfo.PropertyType.IsAssignableToGenericType(typeof(AggregateReadOnlyList<>)))
+                else if (propertyType.IsOrSubclassOfGenericDeep(typeof(AggregateList<>), out var aggregateListType)
+                    || propertyType.IsOrSubclassOfGenericDeep(typeof(AggregateReadOnlyList<>), out aggregateListType))
                 {
                     //AggregateListProperty
                     //Visit Type
+                    var elementType = aggregateListType.GetGenericArguments().First();
+                    if (!elementType.IsSubclassOfDeep(typeof(Aggregate)))
+                    {
+                        //Error
+                    }
+                    if (!aggregateTypes.ContainsKey(elementType))
+                        aggregateTypes.Add(elementType, new DomainEntityDescriptor(elementType));
                 }
-                else if (property.PropertyInfo.PropertyType.IsAssignableToGenericType(typeof(ValueList<>))
-                    || property.PropertyInfo.PropertyType.IsAssignableToGenericType(typeof(ValueReadOnlyList<>)))
+                else if (propertyType.IsOrSubclassOfGenericDeep(typeof(ValueList<>), out var valueListType)
+                    || propertyType.IsOrSubclassOfGenericDeep(typeof(ValueReadOnlyList<>), out valueListType))
                 {
                     //check if T is supportedType
                     //if complexType visit inner
+                    var elementType = valueListType.GetGenericArguments().First();
+                    var elementValueType = elementType.GetSupportedValueType();
+                    
                 }
                 //Check supported primitive types
-                else if (TypeHelper.IsSupportedValueType(property.PropertyInfo.PropertyType, out var valueType))
+                else if (TypeHelper.IsSupportedValueType(propertyType, out var valueType))
                 {
-
+                    //Test
                 }
 
                 //else throw not supported / dont throw set error for validation
             }
         }
 
+        
+
         private void ValidateModel() //SanityCheck
         {
             //At least one key member
             //Only one complex key member
             //No unsupported types
-        }
-    }
-
-    class TypeHelper
-    {
-        public static DomainValueTypeEnum? GetSupportedValueType(Type type)
-        {
-            if (type.Is<string>())
-                return DomainValueTypeEnum.String;
-            else if (type.IsOrNullable<bool>())
-                return DomainValueTypeEnum.Boolean;
-            else if (type.IsOrNullable<DateTime>())
-                return DomainValueTypeEnum.DateTime;
-            else if (type.IsOrNullable<TimeSpan>())
-                return DomainValueTypeEnum.TimeSpan;
-            else if (type.IsNumericOrNullable())
-                return DomainValueTypeEnum.Number;
-            else
-                return null;
-        }
-
-        public static bool IsSupportedValueType(Type type)
-        {
-            return GetSupportedValueType(type) != null;
-        }
-
-        public static bool IsSupportedValueType(Type type, out DomainValueTypeEnum? valueType)
-        {
-            valueType = GetSupportedValueType(type);
-            return valueType != null;
         }
     }
 }
