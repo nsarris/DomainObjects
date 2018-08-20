@@ -83,7 +83,10 @@ namespace DomainObjects.Core
 
         public static bool operator ==(DomainKey x, DomainKey y)
         {
-            if (object.ReferenceEquals(x, null) || object.ReferenceEquals(y, null))
+            if (x is null && y is null)
+                return true;
+
+            if (x is null || y is null)
                 return false;
 
             return x.Equals(y);
@@ -91,42 +94,33 @@ namespace DomainObjects.Core
 
         public static bool operator ==(object x, DomainKey y)
         {
-            if (object.ReferenceEquals(x, null) || object.ReferenceEquals(y, null))
+            if (x is DomainKey domainKey)
+                return domainKey == x;
+            else
                 return false;
-
-            return y.Equals(x);
         }
 
-        public static bool operator ==(DomainKey x,object  y)
+        public static bool operator ==(DomainKey x, object y)
         {
-            if (object.ReferenceEquals(x, null) || object.ReferenceEquals(y, null))
+            if (y is DomainKey domainKey)
+                return domainKey == x;
+            else
                 return false;
-
-            return x.Equals(y);
         }
 
         public static bool operator !=(DomainKey x, DomainKey y)
         {
-            if (object.ReferenceEquals(x, null) || object.ReferenceEquals(y, null))
-                return true;
-
-            return !x.Equals(y);
+            return !(x == y);
         }
 
         public static bool operator !=(object x, DomainKey y)
         {
-            if (object.ReferenceEquals(x, null) || object.ReferenceEquals(y, null))
-                return true;
-
-            return !x.Equals(y);
+            return !(x == y);
         }
 
-        public static bool operator !=(DomainKey x,object  y)
+        public static bool operator !=(DomainKey x, object y)
         {
-            if (object.ReferenceEquals(x, null) || object.ReferenceEquals(y, null))
-                return true;
-
-            return !x.Equals(y);
+            return !(x == y);
         }
     }
 }

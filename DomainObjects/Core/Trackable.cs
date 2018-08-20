@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -34,9 +35,25 @@ namespace DomainObjects.Core
         IEnumerable<T> GetRemoved();
     }
 
-    public class ChangeTracker : ITrackableObject
+    public class PropertyChangedExtendedEventArgs : EventArgs
     {
-        //public event PropertyChangedEventHandler PropertyChanged;
+        public PropertyChangedExtendedEventArgs(string propertyName, object before, object after)
+        {
+            PropertyName = propertyName;
+            Before = before;
+            After = after;
+        }
+        public string PropertyName { get; }
+        public object Before { get; }
+        public object After { get; }
+    }
+    public delegate void PropertyChangedExtendedEventHandler(object sender, PropertyChangedExtendedEventArgs e);
+
+    public class ChangeTracker : ITrackableObject, INotifyPropertyChanged
+    {
+        public event PropertyChangedExtendedEventHandler BeforePropertyChanged;
+        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedExtendedEventHandler AfterPropertyChanged;
 
         readonly object trackable;
         Type trackableType;
@@ -109,10 +126,14 @@ namespace DomainObjects.Core
             return new Dictionary<string, object>(changes);
         }
 
+
+
         public void OnPropertyChanged(string propertyName, object before, object after)
         {
             if (suppressPropertyChanged || !enabled)
                 return;
+
+            BeforePropertyChanged?.Invoke(this, new PropertyChangedExtendedEventArgs(propertyName, before, after));
 
             if (!object.Equals(after, originalValues[propertyName]))
             {
@@ -133,7 +154,10 @@ namespace DomainObjects.Core
                     }
                 }
             }
-            //PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+            AfterPropertyChanged?.Invoke(this, new PropertyChangedExtendedEventArgs(propertyName, before, after));
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         public void BeginTracking()
@@ -182,92 +206,6 @@ namespace DomainObjects.Core
 
         public void MarkChanged() => tracker.MarkChanged();
         public void MarkUnchanged() => tracker.MarkUnchanged();
-    }
-
-
-    public class Trackable //: INotifyPropertyChanged
-    {
-        //public event PropertyChangedEventHandler PropertyChanged;
-
-        bool suppressPropertyChanged;
-        Dictionary<string, object> originalValues;
-        Dictionary<string, object> changes = new Dictionary<string, object>();
-        public Trackable()
-        {
-            originalValues = GetCurrentValues();
-        }
-
-        private Dictionary<string, object> GetCurrentValues()
-        {
-            return this.GetType()
-                .GetPropertiesEx(BindingFlagsEx.All)
-                .Where(x => x.CanGet && x.CanSet)
-                .ToDictionary(x => x.Name, x => x.Get(this));
-        }
-
-        private void SetOriginalValues()
-        {
-            foreach (var prop in this.GetType()
-                    .GetPropertiesEx(BindingFlagsEx.All)
-                    .Where(x => x.CanGet && x.CanSet))
-                prop.Set(this, originalValues[prop.Name]);
-        }
-
-        public void ResetChanges()
-        {
-            suppressPropertyChanged = true;
-            try
-            {
-                SetOriginalValues();
-                changes = new Dictionary<string, object>();
-                isChanged = false;
-            }
-            finally
-            {
-                suppressPropertyChanged = false;
-            }
-        }
-
-        public void AcceptChanges()
-        {
-            originalValues = GetCurrentValues();
-            changes = new Dictionary<string, object>();
-            isChanged = false;
-        }
-
-        private bool isChanged;
-
-        public bool GetIsChanged()
-        {
-            return isChanged;
-        }
-
-        protected virtual void OnPropertyChanged(string propertyName, object before, object after)
-        {
-            if (suppressPropertyChanged)
-                return;
-
-            if (!object.Equals(after, originalValues[propertyName]))
-            {
-                isChanged = true;
-                changes[propertyName] = after;
-            }
-            else
-            {
-                isChanged = false;
-                changes = new Dictionary<string, object>();
-                foreach (var prop in this.GetType().GetPropertiesExDic(BindingFlagsEx.All))
-                {
-                    var v = prop.Value.Get(this);
-                    if (!object.Equals(v, originalValues[prop.Key]))
-                    {
-                        isChanged = true;
-                        changes[prop.Key] = v;
-                    }
-                }
-            }
-            //PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
     }
 }
 

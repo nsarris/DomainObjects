@@ -52,9 +52,8 @@ namespace DomainObjects.Core
             }
 
             //If enumerable compare contents (assumes same positions)
-            var leftEnumerable = right as IEnumerable<Object>;
-            var rightEnumerable = left as IEnumerable<Object>;
-            if ((leftEnumerable != null) && (rightEnumerable != null))
+            if ((left is IEnumerable<Object> leftEnumerable) 
+                && (right is IEnumerable<Object> rightEnumerable))
             {
                 // Check size first
                 if (leftEnumerable.Count() != rightEnumerable.Count())

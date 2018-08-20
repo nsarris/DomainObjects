@@ -29,7 +29,10 @@ namespace DomainObjects.Core
         public DomainEntity()
         {
             changeTracker = new ChangeTracker(this);
+            changeTracker.BeforePropertyChanged += (object sender, PropertyChangedExtendedEventArgs e) => OnBeforePropertyChanged(e.PropertyName, e.Before, e.After);
+            changeTracker.AfterPropertyChanged += (object sender, PropertyChangedExtendedEventArgs e) => OnAfterPropertyChanged(e.PropertyName, e.Before, e.After);
         }
+
         #region Key and Equality
         public object GetKey()
         {
@@ -101,17 +104,28 @@ namespace DomainObjects.Core
 
         public void MarkChanged()
         {
-            //changeTracker.MarkChanged();
+            changeTracker.MarkChanged();
         }
 
         public void MarkUnchanged()
         {
-            //changeTracker.MarkUnchanged();
+            changeTracker.MarkUnchanged();
         }
 
         public bool GetIsChanged()
         {
             return changeTracker.GetIsChanged();
+        }
+
+        public bool GetIsChangedDeep()
+        {
+            return GetIsChanged();
+            //Get collections ->
+            //if collection of ITrackable -> check items internally
+                //if also ITrackableCollection -> getdeleted (ignore added? throw incosistency error)
+            //if collection if non ITrackable items 
+                //if ITrackableCollection -> added / deleted 
+            //else do nothing
         }
 
         protected void SetObjectState(DomainObjectState state)
@@ -147,6 +161,16 @@ namespace DomainObjects.Core
         protected void OnPropertyChanged(string propertyName, object before, object after)
         {
             changeTracker.OnPropertyChanged(propertyName, before, after);
+        }
+
+        protected virtual void OnBeforePropertyChanged(string propertyName, object before, object after)
+        {
+
+        }
+
+        protected virtual void OnAfterPropertyChanged(string propertyName, object before, object after)
+        {
+
         }
 
 
@@ -189,9 +213,8 @@ namespace DomainObjects.Core
         //???
 
         #endregion
-
-
     }
+
     public class DomainEntity<TKey> : DomainEntity, IKeyProvider<TKey>
     {
         public new TKey GetKey()

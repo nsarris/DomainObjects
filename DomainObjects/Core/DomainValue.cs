@@ -8,11 +8,17 @@ using Dynamix.Reflection;
 
 namespace DomainObjects.Core
 {
-    public class DomainValue : DomainObject
+    public abstract class DomainValue : DomainObject
     {
         private const int HashMultiplier = 37;
         private ObjectComparer comparer = new ObjectComparer();
+
         public override bool Equals(object obj)
+        {
+            return comparer.DeepEquals(this, obj);
+        }
+
+        public bool Equals(DomainValue obj)
         {
             return comparer.DeepEquals(this, obj);
         }
@@ -40,13 +46,18 @@ namespace DomainObjects.Core
                         hashCode = (hashCode * HashMultiplier) ^ value.GetHashCode();
                 }
 
+                //TODO: Nest enumerables
+
                 return hashCode;
             }
         }
 
         public static bool operator ==(DomainValue x, DomainValue y)
         {
-            if (object.ReferenceEquals(x, null) || object.ReferenceEquals(y, null))
+            if (x is null && y is null)
+                return true;
+
+            if (x is null || y is null)
                 return false;
 
             return x.Equals(y);
@@ -54,42 +65,33 @@ namespace DomainObjects.Core
 
         public static bool operator ==(object x, DomainValue y)
         {
-            if (object.ReferenceEquals(x, null) || object.ReferenceEquals(y, null))
+            if (x is DomainValue domainValue)
+                return domainValue == x;
+            else
                 return false;
-
-            return y.Equals(x);
         }
 
         public static bool operator ==(DomainValue x, object y)
         {
-            if (object.ReferenceEquals(x, null) || object.ReferenceEquals(y, null))
+            if (y is DomainValue domainValue)
+                return domainValue == x;
+            else
                 return false;
-
-            return x.Equals(y);
         }
 
         public static bool operator !=(DomainValue x, DomainValue y)
         {
-            if (object.ReferenceEquals(x, null) || object.ReferenceEquals(y, null))
-                return true;
-
-            return !x.Equals(y);
+            return !(x == y);
         }
 
         public static bool operator !=(object x, DomainValue y)
         {
-            if (object.ReferenceEquals(x, null) || object.ReferenceEquals(y, null))
-                return true;
-
-            return !x.Equals(y);
+            return !(x == y);
         }
 
         public static bool operator !=(DomainValue x, object y)
         {
-            if (object.ReferenceEquals(x, null) || object.ReferenceEquals(y, null))
-                return true;
-
-            return !x.Equals(y);
+            return !(x == y);
         }
     }
 }
