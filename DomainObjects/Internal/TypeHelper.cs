@@ -1,7 +1,8 @@
-﻿using Dynamix.Reflection;
+﻿using DomainObjects.Metadata;
+using Dynamix.Reflection;
 using System;
 
-namespace DomainObjects.Core
+namespace DomainObjects
 {
     static class TypeHelper
     {

@@ -25,6 +25,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -33,6 +34,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -49,7 +51,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\DomainEntity.cs" />
-    <Compile Include="Core\DomainEntityKeyProvider.cs" />
+    <Compile Include="Metadata\DomainKeyAttribute.cs" />
+    <Compile Include="Metadata\DomainEntityKeyProvider.cs" />
     <Compile Include="Core\DomainKey.cs" />
     <Compile Include="Core\DomainNumber.cs" />
     <Compile Include="Core\DomainObject.cs" />
@@ -60,7 +63,25 @@
     <Compile Include="Core\ObjectComparer.cs" />
     <Compile Include="Core\Trackable.cs" />
     <Compile Include="Core\TrackableList.cs" />
-    <Compile Include="Core\TypeHelper.cs" />
+    <Compile Include="Internal\Primes.cs" />
+    <Compile Include="Internal\TypeHelper.cs" />
+    <Compile Include="Metadata\DomainEntityPropertyMetadata.cs" />
+    <Compile Include="Metadata\DomainEntityMetadata.cs" />
+    <Compile Include="Metadata\DomainModelMetadata.cs" />
+    <Compile Include="Metadata\DomainModelMetadataRegistry.cs" />
+    <Compile Include="Internal\EnumerableExtensions.cs" />
+    <Compile Include="ModelBuilder\Configuration\AggregatePropertyModelConfiguration.cs" />
+    <Compile Include="ModelBuilder\Configuration\BooleanPropertyModelConfiguration.cs" />
+    <Compile Include="ModelBuilder\Class1.cs" />
+    <Compile Include="ModelBuilder\Configuration\DateTimePropertyModelConfiguration.cs" />
+    <Compile Include="ModelBuilder\DomainModelBuilder.cs" />
+    <Compile Include="ModelBuilder\EntityModelBuilder.cs" />
+    <Compile Include="ModelBuilder\Configuration\EnumPropertyModelConfiguration.cs" />
+    <Compile Include="ModelBuilder\Configuration\NumericPropertyModelConfiguration.cs" />
+    <Compile Include="ModelBuilder\Configuration\PropertyModelConfiguration.cs" />
+    <Compile Include="ModelBuilder\Configuration\StringPropertyModelConfiguration.cs" />
+    <Compile Include="ModelBuilder\Configuration\UnsupportedTypePropertyModelConfiguration.cs" />
+    <Compile Include="ModelBuilder\Configuration\ValueTypePropertyModelConfiguration.cs" />
     <Compile Include="Patterns\Specification\IBuildSpecification.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\IRepository.cs" />
@@ -78,5 +99,6 @@
   <ItemGroup>
     <Content Include="TODO.txt" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

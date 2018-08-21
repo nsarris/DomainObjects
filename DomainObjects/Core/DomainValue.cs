@@ -10,17 +10,21 @@ namespace DomainObjects.Core
 {
     public abstract class DomainValue : DomainObject
     {
+        //private const int InitialHash = 23;
         private const int HashMultiplier = 37;
+
         private ObjectComparer comparer = new ObjectComparer();
+
+        protected virtual bool GetIsShallow() => false;
 
         public override bool Equals(object obj)
         {
-            return comparer.DeepEquals(this, obj);
+            return GetIsShallow() ? comparer.ShallowEquals(this,obj) : comparer.DeepEquals(this, obj);
         }
 
         public bool Equals(DomainValue obj)
         {
-            return comparer.DeepEquals(this, obj);
+            return GetIsShallow() ? comparer.ShallowEquals(this, obj) : comparer.DeepEquals(this, obj);
         }
 
         public override int GetHashCode()
@@ -30,9 +34,7 @@ namespace DomainObjects.Core
                 var properties = this.GetType().GetPropertiesEx().ToList();
 
                 if (properties.Count == 0)
-                {
-                    return base.GetHashCode();
-                }
+                    return 0;
 
                 // It's possible for two objects to return the same hash code based on 
                 // identically valued properties, even if they're of two different types, 

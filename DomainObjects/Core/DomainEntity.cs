@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DomainObjects.Metadata;
 using Dynamix;
 
 namespace DomainObjects.Core
@@ -15,24 +15,15 @@ namespace DomainObjects.Core
         Deleted
     }
 
-    public class DomainKeyAttribute : Attribute
-    {
-        public int Index { get; private set; }
-        public DomainKeyAttribute(int index)
-        {
-            this.Index = index;
-        }
-    }
-
     public abstract class DomainEntity : DomainObject, IKeyProvider, ITrackable
     {
-        private DomainEntityDescriptor entityDescriptor;
-        protected DomainEntityDescriptor EntityDescriptor
+        private DomainEntityMetadata entityDescriptor;
+        protected DomainEntityMetadata EntityDescriptor
         {
             get
             {
                 if (entityDescriptor == null)
-                    entityDescriptor = DomainModelRegistry.GetEntityDescriptor(this.GetType());
+                    entityDescriptor = DomainModelMetadataRegistry.GetEntityDescriptor(this.GetType());
 
                 return entityDescriptor;
             }
@@ -131,7 +122,7 @@ namespace DomainObjects.Core
 
         public bool GetIsChangedDeep()
         {
-            foreach(var prop in entityDescriptor.GetPropertyDescriptors().Where(x => x.DomainPropertyType == DomainPropertyType.AggregateList))
+            foreach(var prop in entityDescriptor.GetPropertiesMetdata().Where(x => x.DomainPropertyType == DomainPropertyType.AggregateList))
             {
                 //enumerate list -> GetIsChangedDeep
 

@@ -13,7 +13,7 @@ namespace DomainObjects.Tests
 
         public Book CreateNew()
         {
-            var book = new Book(0, null);
+            var book = new Book(0, null, BookType.Digital);
             book.MarkNew();
             book.BeginTracking();
             return book;
@@ -21,20 +21,40 @@ namespace DomainObjects.Tests
 
         public Book GetById(int id)
         {
-            var book = new Book(id, "Title");
+            var book = new Book(id, "Title", BookType.Digital);
             book.MarkExisting();
             book.BeginTracking();
             return book;
         }
     }
 
-    [AddINotifyPropertyChangedInterface]
-    class Book : DomainEntity
+    enum BookType
     {
-        public Book(int isbn, string title)
+        Digital,
+        HarCopy
+    }
+
+    class PublishInfo : DomainValue
+    {
+        public PublishInfo(string publisher, DateTime publishDate)
+        {
+            Publisher = publisher;
+            PublishDate = publishDate;
+        }
+
+        public string Publisher { get; set; }
+        public DateTime PublishDate { get; set; }
+    }
+
+    [AddINotifyPropertyChangedInterface]
+    class Book : Aggregate
+    {
+        public Book(int isbn, string title, BookType bookType = BookType.HarCopy, PublishInfo publishInfo = null)
         {
             Isbn = isbn;
             Title = title;
+            Type = bookType;
+            this.PublishInfo = publishInfo;
             this.MarkExisting();
             this.BeginTracking();
         }
@@ -42,6 +62,8 @@ namespace DomainObjects.Tests
         [DomainKey(1)]
         public int Isbn { get; }
         public string Title { get; set; }
+        public BookType Type { get; set; }
+        public PublishInfo PublishInfo { get; set; }
     }
 
     [AddINotifyPropertyChangedInterface]
@@ -52,7 +74,8 @@ namespace DomainObjects.Tests
         [DomainKey(2)]
         public string LastName { get; set; }
         public DateTime DOB { get; set; }
-        public TrackableList<Book> Books { get; set; }
+        public Book LastPublishedBook { get; set; }
+        public AggregateList<Book> Books { get; set; }
     }
 
     [AddINotifyPropertyChangedInterface]
@@ -86,7 +109,7 @@ namespace DomainObjects.Tests
 
         public string FirstName { get; }
         public string LastName { get; }
-        
+
     }
 
     class Key2 : DomainKey
@@ -102,7 +125,7 @@ namespace DomainObjects.Tests
     class Address //: Immutable
     {
         public Address(string street, int number, IEnumerable<Phone> phones)
-            //: base(new object[] { street, number, phones })
+        //: base(new object[] { street, number, phones })
         {
             this.Street = street;
             this.Number = number;
@@ -117,7 +140,7 @@ namespace DomainObjects.Tests
     class Phone //: Immutable
     {
         public Phone(int areaCode, int number)
-            //: base(new[] { areaCode, number })
+        //: base(new[] { areaCode, number })
         {
             this.AreaCode = areaCode;
             this.Number = number;
