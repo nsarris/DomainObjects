@@ -1,8 +1,10 @@
 ﻿using DomainObjects.Core;
+using DomainObjects.Internal;
 using DomainObjects.Metadata;
 using Dynamix.Reflection;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -11,17 +13,24 @@ namespace DomainObjects.ModelBuilder
     public class EntityModelBuilder
     {
         internal List<string> IgnoredMembers { get; } = new List<string>();
+        internal List<string> KeyMembers { get; } = new List<string>();
         internal List<PropertyModelConfiguration> PropertyModelConfigurations { get; } = new List<PropertyModelConfiguration>();
-        internal Expression<Func<object, object>> keySelector;
     }
 
     public class EntityModelBuilder<T> : EntityModelBuilder where T : DomainEntity
     {
-        
+        public virtual EntityModelBuilder<T> HasKey(params string[] propertyNames)
+        {
+            KeyMembers.Clear();
+            KeyMembers.AddRange(propertyNames);
+            return this;
+        }
+
         public virtual EntityModelBuilder<T> HasKey<TKey>(Expression<Func<T, TKey>> keySelector)
         {
-            //Dynamix.Expressions.InitExpressionParser.ParseNewExpression(keySelector);
-            //this.keySelector = (object x) => keySelector(x);
+            var keyProps = ExpressionHelper.GetSelectedProperties(keySelector);
+            KeyMembers.Clear();
+            KeyMembers.AddRange(keyProps.Select(x => x.Name));
             return this;
         }
 
@@ -209,19 +218,5 @@ namespace DomainObjects.ModelBuilder
         }
     }
 
-    public class EntityModelBuilder<T, TKey> : EntityModelBuilder<T> where T : DomainEntity<TKey>
-    {
-        new Expression<Func<T, TKey>> keySelector;
-        public override EntityModelBuilder<T> HasKey<TKey1>(Expression<Func<T, TKey1>> keySelector)
-        {
-            return base.HasKey(keySelector);
-        }
 
-        public EntityModelBuilder<T> HasKey(Expression<Func<T, TKey>> keySelector)
-        {
-            //Dynamix.Expressions.InitExpressionParser.ParseNewExpression(keySelector);
-            //this.keySelector = (object x) => keySelector(x);
-            return this;
-        }
-    }
 }

@@ -17,6 +17,14 @@ namespace DomainObjects.Core
             {
                 return this.GetType().GetPropertyEx(property).Get(this);
             }
+            set
+            {
+                var prop = this.GetType().GetPropertyEx(property, BindingFlagsEx.AllInstance);
+                if (prop.PublicSet)
+                    prop.Set(value);
+                else
+                    throw new InvalidOperationException($"Property {prop.Name} of {this.GetType().Name} does not have a public set method");
+            }
         }
     }
 

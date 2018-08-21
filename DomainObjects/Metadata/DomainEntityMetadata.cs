@@ -24,6 +24,14 @@ namespace DomainObjects.Metadata
             //CheckType
         }
 
+        public object GetKey(DomainEntity entity)
+        {
+            return null;
+        }
+
+        
+
+
         public void Build(EntityModelBuilder modelBuilder)
         {
             GetProperties(modelBuilder);

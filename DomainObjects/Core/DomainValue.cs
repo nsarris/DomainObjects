@@ -8,23 +8,23 @@ using Dynamix.Reflection;
 
 namespace DomainObjects.Core
 {
-    public abstract class DomainValue : DomainObject
+    public abstract class DomainValue : DomainObject, IEquatable<DomainValue>
     {
-        //private const int InitialHash = 23;
         private const int HashMultiplier = 37;
-
-        private ObjectComparer comparer = new ObjectComparer();
 
         protected virtual bool GetIsShallow() => false;
 
         public override bool Equals(object obj)
         {
-            return GetIsShallow() ? comparer.ShallowEquals(this,obj) : comparer.DeepEquals(this, obj);
+            if (obj is null || obj.GetType() != this.GetType())
+                return false;
+
+            return GetIsShallow() ? ObjectComparer.Default.ShallowEquals(this,obj) : ObjectComparer.Default.DeepEquals(this, obj);
         }
 
-        public bool Equals(DomainValue obj)
+        public virtual bool Equals(DomainValue other)
         {
-            return GetIsShallow() ? comparer.ShallowEquals(this, obj) : comparer.DeepEquals(this, obj);
+            return Equals(other as object);
         }
 
         public override int GetHashCode()

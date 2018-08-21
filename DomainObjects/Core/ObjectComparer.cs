@@ -10,13 +10,11 @@ namespace DomainObjects.Core
 {
     public class ObjectComparer
     {
-        readonly List<object> objectsChecked = new List<object>();
+        public static ObjectComparer Default { get; } = new ObjectComparer();
 
         public bool DeepEquals(object left, object right)
         {
-            objectsChecked.Clear();
-            var r = DeepEqualsInternal(left, right);
-            objectsChecked.Clear();
+            var r = DeepEqualsInternal(left, right, new List<object>());
             return r;
         }
 
@@ -34,14 +32,14 @@ namespace DomainObjects.Core
             if (leftType != rightType)
                 return false;
 
-            if (leftType.GetType().IsValueType)
+            if (leftType.IsValueType)
                 return Equals(left, right);
 
             if (ReferenceEquals(left, right))
                 return true;
 
             foreach (var prop in leftType.GetPropertiesEx().Where(x => x.CanGet && x.PropertyInfo.GetIndexParameters().Length == 0))
-                if (!PropertyEquals(right, left))
+                if (!PropertyEquals(left, right))
                     return false;
             
             return true;
@@ -57,7 +55,7 @@ namespace DomainObjects.Core
                 return left.Equals(right);
         }
 
-        private bool DeepEqualsInternal(object left, object right)
+        private bool DeepEqualsInternal(object left, object right, List<object> objectsChecked)
         {
             //Circular dependency guard
             if (objectsChecked.Contains(left))
@@ -98,7 +96,7 @@ namespace DomainObjects.Core
 
                 // Check items in order, assuming order is the same
                 foreach (var items in leftEnumerable.Zip(rightEnumerable, (Left, Right) => new { Left, Right }))
-                    if (!DeepEqualsInternal(items.Left, items.Right))
+                    if (!DeepEqualsInternal(items.Left, items.Right, objectsChecked))
                         return false;
 
                 return true;
@@ -108,11 +106,15 @@ namespace DomainObjects.Core
             foreach (var prop in leftType.GetPropertiesEx().Where(x => x.CanGet && x.PropertyInfo.GetIndexParameters().Length == 0))
             {
                 if (prop.Type.IsClass)
-                    if (!DeepEqualsInternal(prop.Get(left), prop.Get(right)))
+                {
+                    if (!DeepEqualsInternal(prop.Get(left), prop.Get(right), objectsChecked))
                         return false;
-                    else
+                }
+                else
+                {
                     if (!Equals(right, left))
                         return false;
+                }
             }
 
             return true;

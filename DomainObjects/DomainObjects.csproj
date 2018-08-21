@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\DomainEntity.cs" />
+    <Compile Include="Internal\ExpressionHelper.cs" />
     <Compile Include="Metadata\DomainKeyAttribute.cs" />
     <Compile Include="Metadata\DomainEntityKeyProvider.cs" />
     <Compile Include="Core\DomainKey.cs" />

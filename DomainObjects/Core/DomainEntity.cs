@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -42,52 +43,81 @@ namespace DomainObjects.Core
             return DomainEntityKeyProvider.GetKey(this);
         }
 
-        public override bool Equals(object obj)
+        public bool KeyEquals(DomainEntity other)
         {
-            if (obj == null)
+            if (other == null || other.GetType() != this.GetType())
                 return false;
 
-            if (this.GetType() != obj.GetType())
-                return false;
-
-            return GetKey().Equals(((DomainEntity)obj).GetKey());
+            return GetKey().Equals(other.GetKey());
         }
 
-        public override int GetHashCode()
+        public void SetKey(params object[] values)
         {
-            return GetKey().GetHashCode();
+            if (this.state != DomainObjectState.New)
+                throw new InvalidOperationException("Entity keys can only be set after initialization on entities in New state");
+
+            //If key property is DomainKey/DomainValue (only one allowed) 
+            //    -> if one value of same type -> set
+            //       else create new and try to set in sequence
+            //if key properties are primitive properties -> try set each
         }
 
-        public static bool operator ==(DomainEntity x, DomainEntity y)
-        {
-            if (x is null && y is null)
-                return true;
-            else if (x is null || y is null)
-                return false;
 
-            return x.Equals(y);
-        }
+        //public override bool Equals(object obj)
+        //{
+        //    if (obj == null)
+        //        return false;
 
-        public static bool operator !=(DomainEntity x, DomainEntity y)
-        {
-            if (x is null && y is null)
-                return false;
-            else if (x is null || y is null)
-                return true;
+        //    if (this.GetType() != obj.GetType())
+        //        return false;
 
-            return !x.Equals(y);
-        }
+        //    return GetKey().Equals(((DomainEntity)obj).GetKey());
+        //}
+
+        //public override int GetHashCode()
+        //{
+        //    return GetKey().GetHashCode();
+        //}
+
+        //public static bool operator ==(DomainEntity x, DomainEntity y)
+        //{
+        //    if (x is null && y is null)
+        //        return true;
+        //    else if (x is null || y is null)
+        //        return false;
+
+        //    return x.Equals(y);
+        //}
+
+        //public static bool operator !=(DomainEntity x, DomainEntity y)
+        //{
+        //    if (x is null && y is null)
+        //        return false;
+        //    else if (x is null || y is null)
+        //        return true;
+
+        //    return !x.Equals(y);
+        //}
 
         #endregion
 
-        #region Change Tracking
+        #region ObjectState
 
         private DomainObjectState state = DomainObjectState.Uninitialized;
-        private readonly ChangeTracker changeTracker;
 
         public DomainObjectState GetObjectState()
         {
             return state;
+        }
+
+        public void Init(bool isNew)
+        {
+            if (isNew)
+                MarkNew();
+            else
+                MarkExisting();
+
+            BeginTracking();
         }
 
         public void MarkNew()
@@ -104,6 +134,17 @@ namespace DomainObjects.Core
         {
             state = DomainObjectState.Deleted;
         }
+
+        //protected void SetObjectState(DomainObjectState state)
+        //{
+        //    this.state = state;
+        //}
+
+        #endregion
+
+        #region Change Tracking
+
+        private readonly ChangeTracker changeTracker;
 
         public void MarkChanged()
         {
@@ -137,10 +178,7 @@ namespace DomainObjects.Core
             //else do nothing
         }
 
-        protected void SetObjectState(DomainObjectState state)
-        {
-            this.state = state;
-        }
+        
 
         public void ResetChanges()
         {
@@ -229,6 +267,11 @@ namespace DomainObjects.Core
         public new TKey GetKey()
         {
             return (TKey)base.GetKey();
+        }
+
+        public void SetKey(TKey key)
+        {
+            //Assert New
         }
     }
 }

@@ -134,7 +134,7 @@ namespace DomainObjects.Core
             if (t.IsPrimitive || t.IsEnum || t == typeof(string) 
                 || t == typeof(DateTime) || t == typeof(DateTime?)
                 || t == typeof(TimeSpan) || t == typeof(TimeSpan?)
-                || t == typeof(Decimal) || t == typeof(Decimal?)
+                || t == typeof(decimal) || t == typeof(decimal?)
                 )
                 return true;
             

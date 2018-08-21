@@ -7,6 +7,7 @@ using NUnit.Framework;
 using DomainObjects;
 using DomainObjects.Core;
 using DomainObjects.ModelBuilder;
+using DomainObjects.Internal;
 
 namespace DomainObjects.Tests
 {
@@ -14,15 +15,26 @@ namespace DomainObjects.Tests
     public class ModelBuilderTests
     {
         [Test]
+        public void Test()
+        {
+            var props = ExpressionHelper.GetSelectedProperties((Author x) => new
+            {
+                A = x.FirstName,
+                B = x.LastName,
+                //T = x.FirstName + x.LastName,
+            });
+        }
+
+        [Test]
         public void TestBuilder()
         {
             var builder = new DomainModelBuilder();
             var bookBuilder = builder.ForEntity<Book>();
 
             bookBuilder
-                .HasKey(x => x.Isbn)
-                .HasKey(x => new { x.Isbn })
-                .HasKey(x => new { Id = x.Isbn + x.Title })
+                //.HasKey(x => x.Isbn)
+                //.HasKey(x => new { x.Isbn })
+                //.HasKey(x => new { Id = x.Isbn + x.Title })
                 .IgnoreMember(x => x.PublishInfo);
 
             bookBuilder
@@ -35,7 +47,7 @@ namespace DomainObjects.Tests
 
             var authorBuilder = builder.ForEntity<Author>();
 
-            authorBuilder.HasKey(x => x.DOB);
+            //authorBuilder.HasKey(x => x.DOB);
 
             authorBuilder.Aggregate(x => x.LastPublishedBook).IsRequired();
             authorBuilder.Aggregate(x => x.Books).IsRequired();
