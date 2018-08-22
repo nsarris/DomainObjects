@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace DomainObjects.ModelBuilder
+namespace DomainObjects.ModelBuilder.Configuration
 {
     public class BooleanPropertyModelConfiguration : PropertyModelConfiguration
     {

@@ -8,6 +8,7 @@ using DomainObjects;
 using DomainObjects.Core;
 using DomainObjects.ModelBuilder;
 using DomainObjects.Internal;
+using DomainObjects.Tests.Sales;
 
 namespace DomainObjects.Tests
 {
@@ -15,42 +16,38 @@ namespace DomainObjects.Tests
     public class ModelBuilderTests
     {
         [Test]
-        public void Test()
-        {
-            var props = ExpressionHelper.GetSelectedProperties((Author x) => new
-            {
-                A = x.FirstName,
-                B = x.LastName,
-                //T = x.FirstName + x.LastName,
-            });
-        }
-
-        [Test]
         public void TestBuilder()
         {
-            var builder = new DomainModelBuilder();
-            var bookBuilder = builder.ForEntity<Book>();
+            var modelBuilder = new DomainModelBuilder()
+                .HasModelName("Sales");
 
-            bookBuilder
-                //.HasKey(x => x.Isbn)
-                //.HasKey(x => new { x.Isbn })
-                //.HasKey(x => new { Id = x.Isbn + x.Title })
-                .IgnoreMember(x => x.PublishInfo);
+            var invoiceBuilder = modelBuilder.Entity<Invoice>().HasKey(x => x.Id);
+            var invoiceLineBuilder = modelBuilder.Entity<InvoiceLine>().HasKey(x => x.Id);
+            var productBuilder = modelBuilder.Entity<Product>().HasKey(x => x.Id);
 
-            bookBuilder
-                .Property(x => x.Type).IsRequired()
+            var customerBuilder = modelBuilder
+                .Entity<Customer>()
+                .HasKey(x => new { x.Id })
+                .IgnoreMember(x => x.StringComparer)
                 ;
 
-            bookBuilder
-                .Property(x => x.PublishInfo)
-                ;
+            //customerBuilder.HasKey(x => new { x.Id, x.Name });
+            //customerBuilder.HasKey(x => new { x.Id });
 
-            var authorBuilder = builder.ForEntity<Author>();
+            var model = modelBuilder.Build();
 
-            //authorBuilder.HasKey(x => x.DOB);
+            var customer = new Customer();
 
-            authorBuilder.Aggregate(x => x.LastPublishedBook).IsRequired();
-            authorBuilder.Aggregate(x => x.Books).IsRequired();
+            var metadata = customer.GetEntityMetadata();
+
+            var key1 = customer.GetKey();
+
+            //TODO: Key
+            //customer.SetKey(1, "Nikos");
+
+            var customer2 = new Customer(1, "Nikos");
+
+            var key2 = customer2.GetKey();
         }
     }
 }

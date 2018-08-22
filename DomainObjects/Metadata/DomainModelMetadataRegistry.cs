@@ -5,11 +5,17 @@ namespace DomainObjects.Metadata
 {
     internal static class DomainModelMetadataRegistry
     {
+        static readonly Dictionary<string, DomainModelMetadata> entityModels = new Dictionary<string, DomainModelMetadata>();
         static readonly Dictionary<Type, DomainModelMetadata> entityModelMap = new Dictionary<Type, DomainModelMetadata>();
         static readonly Dictionary<Type, DomainEntityMetadata> entityDescriptors = new Dictionary<Type, DomainEntityMetadata>();
 
         public static void RegisterModel(DomainModelMetadata domainModel)
         {
+            if (entityModels.ContainsKey(domainModel.ModelName))
+                throw new InvalidOperationException($"A model with the name {domainModel.ModelName} has already been registered. Please use a distinct model name for each domain model.");
+
+            entityModels.Add(domainModel.ModelName, domainModel);
+
             foreach (var descriptor in domainModel.GetEntityDescriptors())
             {
                 if (entityModelMap.TryGetValue(descriptor.EntityType, out var modelMap))

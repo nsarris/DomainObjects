@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,17 +19,15 @@ namespace DomainObjects.Core
 
     public abstract class DomainEntity : DomainObject, IKeyProvider, ITrackable
     {
-        private DomainEntityMetadata entityDescriptor;
-        protected DomainEntityMetadata EntityDescriptor
+        private DomainEntityMetadata entityMetadata;
+        public DomainEntityMetadata GetEntityMetadata()
         {
-            get
-            {
-                if (entityDescriptor == null)
-                    entityDescriptor = DomainModelMetadataRegistry.GetEntityDescriptor(this.GetType());
+            if (entityMetadata == null)
+                entityMetadata = DomainModelMetadataRegistry.GetEntityDescriptor(this.GetType());
 
-                return entityDescriptor;
-            }
+            return entityMetadata;
         }
+
 
         protected DomainEntity()
         {
@@ -40,7 +39,8 @@ namespace DomainObjects.Core
         #region Key and Equality
         public object GetKey()
         {
-            return DomainEntityKeyProvider.GetKey(this);
+            return GetEntityMetadata().GetKey(this);
+            //return DomainEntityKeyProvider.GetKey(this);
         }
 
         public bool KeyEquals(DomainEntity other)
@@ -163,12 +163,33 @@ namespace DomainObjects.Core
 
         public bool GetIsChangedDeep()
         {
-            foreach(var prop in entityDescriptor.GetPropertiesMetdata().Where(x => x.DomainPropertyType == DomainPropertyType.AggregateList))
+            if (GetIsChanged())
+                return true;
+
+            foreach (var prop in entityMetadata.GetAggregateListProperties())
             {
                 //enumerate list -> GetIsChangedDeep
 
             }
-            return GetIsChanged();
+
+            foreach (var listProp in entityMetadata.GetValueListProperties())
+            {
+                var list = listProp.Property.Get(this) as ITrackableCollection;
+
+                if (!listProp.IsImmutable && list.GetIsChanged())
+                    return true;
+
+                foreach (var item in list)
+                {
+                    if (item is ITrackable trackable && trackable.GetIsChanged())
+                        return true;
+                    else
+                        break;
+                }
+            }
+
+            return false;
+            
 
             //Get collections ->
             //if collection of ITrackable -> check items internally
@@ -178,7 +199,7 @@ namespace DomainObjects.Core
             //else do nothing
         }
 
-        
+
 
         public void ResetChanges()
         {

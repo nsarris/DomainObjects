@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using DomainObjects.Tests.Books;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;

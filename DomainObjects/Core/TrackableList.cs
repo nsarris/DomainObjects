@@ -154,6 +154,16 @@ namespace DomainObjects.Core
         {
             
         }
+
+        IEnumerable<object> ITrackableCollection.GetAdded()
+        {
+            return GetAdded().Cast<object>();
+        }
+
+        IEnumerable<object> ITrackableCollection.GetRemoved()
+        {
+            return GetRemoved().Cast<object>();
+        }
     }
 
 

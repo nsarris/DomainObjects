@@ -1,222 +1,86 @@
-﻿using DomainObjects.Core;
-using DomainObjects.Internal;
-using DomainObjects.Metadata;
-using Dynamix.Reflection;
+﻿using DomainObjects.Metadata;
+using DomainObjects.ModelBuilder.Descriptors;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 
 namespace DomainObjects.ModelBuilder
 {
-    public class EntityModelBuilder
+    internal class EntityModelBuilder
     {
-        internal List<string> IgnoredMembers { get; } = new List<string>();
-        internal List<string> KeyMembers { get; } = new List<string>();
-        internal List<PropertyModelConfiguration> PropertyModelConfigurations { get; } = new List<PropertyModelConfiguration>();
-    }
-
-    public class EntityModelBuilder<T> : EntityModelBuilder where T : DomainEntity
-    {
-        public virtual EntityModelBuilder<T> HasKey(params string[] propertyNames)
+        public EntityModelBuilder(EntityDescriptor descriptor, EntityModelBuilderConfiguration configuration)
         {
-            KeyMembers.Clear();
-            KeyMembers.AddRange(propertyNames);
-            return this;
+            Descriptor = descriptor;
+            Configuration = configuration;
         }
 
-        public virtual EntityModelBuilder<T> HasKey<TKey>(Expression<Func<T, TKey>> keySelector)
+        public EntityDescriptor Descriptor { get; }
+        public EntityModelBuilderConfiguration Configuration { get; }
+
+        public DomainEntityMetadata Build()
         {
-            var keyProps = ExpressionHelper.GetSelectedProperties(keySelector);
-            KeyMembers.Clear();
-            KeyMembers.AddRange(keyProps.Select(x => x.Name));
-            return this;
-        }
+            var properties = new List<DomainPropertyMetadata>();
 
-        public EntityModelBuilder<T> IgnoreMember<TMember>(Expression<Func<T, TMember>> memberSelector)
-        {
-            IgnoredMembers.Add(ReflectionHelper.GetMemberName(memberSelector));
-            return this;
-        }
+            foreach (var prop in Descriptor.PropertyDescriptors
+                .Where(x => Configuration == null || !Configuration.IgnoredMembers.Contains(x.Property.Name)))
+            {
+                var keyPosition = Configuration?.KeyMembers.IndexOf(prop.Property.Name);
 
-        public EntityModelBuilder<T> IgnoreMember(string memberName)
-        {
-            IgnoredMembers.Add(memberName);
-            return this;
-        }
+                if (keyPosition > 0 && !(prop is ValuePropertyDescriptor))
+                    throw new InvalidOperationException($"Key properties can only be supported value types");
+                
+                DomainPropertyMetadata propertyMetadata = null;
+                var configuration = Configuration?.PropertyModelConfigurations.FirstOrDefault(x => x.Property.Name == prop.Property.Name);
 
-        public StringPropertyModelConfiguration Property(Expression<Func<T, string>> memberSelector)
-        {
-            var configuration = new StringPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
-            PropertyModelConfigurations.Add(configuration);
-            return configuration;
-        }
-
-        public DateTimePropertyModelConfiguration Property(Expression<Func<T, DateTime>> memberSelector)
-        {
-            var configuration = new DateTimePropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
-            PropertyModelConfigurations.Add(configuration);
-            return configuration;
-        }
-
-        //public IPropertyModelConfiguration<TimeSpan> Property(Expression<Func<T, TimeSpan>> memberSelector)
-        //{
-        //    return new StringPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
-        //}
-
-        public BooleanPropertyModelConfiguration Property(Expression<Func<T, bool>> memberSelector)
-        {
-            var configuration = new BooleanPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
-            PropertyModelConfigurations.Add(configuration);
-            return configuration;
-        }
-
-        public NumericPropertyModelConfiguration Property(Expression<Func<T, sbyte>> memberSelector)
-        {
-            var configuration = new NumericPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
-            PropertyModelConfigurations.Add(configuration);
-            return configuration;
-        }
-
-        public NumericPropertyModelConfiguration Property(Expression<Func<T, byte>> memberSelector)
-        {
-            var configuration = new NumericPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
-            PropertyModelConfigurations.Add(configuration);
-            return configuration;
-        }
-
-        public NumericPropertyModelConfiguration Property(Expression<Func<T, short>> memberSelector)
-        {
-            var configuration = new NumericPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
-            PropertyModelConfigurations.Add(configuration);
-            return configuration;
-        }
-
-        public NumericPropertyModelConfiguration Property(Expression<Func<T, ushort>> memberSelector)
-        {
-            var configuration = new NumericPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
-            PropertyModelConfigurations.Add(configuration);
-            return configuration;
-        }
-
-        public NumericPropertyModelConfiguration Property(Expression<Func<T, int>> memberSelector)
-        {
-            var configuration = new NumericPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
-            PropertyModelConfigurations.Add(configuration);
-            return configuration;
-        }
-
-        public NumericPropertyModelConfiguration Property(Expression<Func<T, uint>> memberSelector)
-        {
-            var configuration = new NumericPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
-            PropertyModelConfigurations.Add(configuration);
-            return configuration;
-        }
-
-        public NumericPropertyModelConfiguration Property(Expression<Func<T, long>> memberSelector)
-        {
-            var configuration = new NumericPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
-            PropertyModelConfigurations.Add(configuration);
-            return configuration;
-        }
-
-        public NumericPropertyModelConfiguration Property(Expression<Func<T, ulong>> memberSelector)
-        {
-            var configuration = new NumericPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
-            PropertyModelConfigurations.Add(configuration);
-            return configuration;
-        }
-
-        public NumericPropertyModelConfiguration Property(Expression<Func<T, float>> memberSelector)
-        {
-            var configuration = new NumericPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
-            PropertyModelConfigurations.Add(configuration);
-            return configuration;
-        }
-
-        public NumericPropertyModelConfiguration Property(Expression<Func<T, double>> memberSelector)
-        {
-            var configuration = new NumericPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
-            PropertyModelConfigurations.Add(configuration);
-            return configuration;
-        }
-
-        public NumericPropertyModelConfiguration Property(Expression<Func<T, decimal>> memberSelector)
-        {
-            var configuration = new NumericPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
-            PropertyModelConfigurations.Add(configuration);
-            return configuration;
-        }
-
-        internal PropertyModelConfiguration Property(PropertyInfo property)
-        {
-            if (property.PropertyType.IsEnum)
-                return new EnumPropertyModelConfiguration(property);
-
-            var domainPropertyType = property.PropertyType.GetSupportedValueType();
-
-            if (domainPropertyType.HasValue)
-                switch (domainPropertyType.Value)
+                if (prop is ValuePropertyDescriptor valuePropertyDescriptor)
                 {
-                    case DomainValueType.String:
-                        return new StringPropertyModelConfiguration(property);
-                    case DomainValueType.Boolean:
-                        return new BooleanPropertyModelConfiguration(property);
-                    case DomainValueType.Number:
-                        return new NumericPropertyModelConfiguration(property);
-                    case DomainValueType.DateTime:
-                        return new DateTimePropertyModelConfiguration(property);
-                    case DomainValueType.TimeSpan:
-                        break;
-                    case DomainValueType.Complex:
-                        return new ValueTypePropertyModelConfiguration(property);
-                    default:
-                        break;
+                    propertyMetadata = new DomainValuePropertyMetadata(valuePropertyDescriptor, configuration, keyPosition >= 0 ? keyPosition : null);
+                }
+                else if(prop is ValueListPropertyDescriptor valueListPropertyDescriptor)
+                {
+                    propertyMetadata = new DomainValueListPropertyMetadata(valueListPropertyDescriptor, configuration);
+                }
+                else if (prop is AggregatePropertyDescriptor aggregatePropertyDescriptor)
+                {
+                    propertyMetadata = new DomainAggregatePropertyMetadata(aggregatePropertyDescriptor, configuration);
+                }
+                else if (prop is AggregateListPropertyDescriptor aggregateListPropertyDescriptor)
+                {
+                    propertyMetadata = new DomainAggregateListPropertyMetadata(aggregateListPropertyDescriptor, configuration);
+                }
+                else if(prop is UnsupportedPropertyDescriptor unsupportedPropertyDescriptor)
+                {
+                    throw new InvalidOperationException($"Unsupported property {prop.Property.Name} of Type {prop.Property.Type.Name} in Entity {Descriptor.Type.Name}");
                 }
 
-            return new UnsupportedTypePropertyModelConfiguration(property);
+                properties.Add(propertyMetadata);
+            }
+
+            //TODO: Get Aggregates
+            var keyProperties = properties.OfType<DomainValuePropertyMetadata>().Where(x => x.IsKeyMember).ToList();
+
+            //Validate Key
+            if (!keyProperties.Any())
+                throw new InvalidOperationException($"Entity {Descriptor.Type.Name} has no key defined");
+            else if(keyProperties.Count > 1 && keyProperties.Any(x => x.DomainValueType == DomainValueType.Complex) 
+                    || keyProperties.Count(x => x.DomainValueType == DomainValueType.Complex) > 1)
+                throw new InvalidOperationException($"Entity {Descriptor.Type.Name} has a complex type and at least one more property in its key configuration. This is not supported"); 
+
+            var metadata = new DomainEntityMetadata(Descriptor.Type, properties);
+
+            return metadata;
         }
 
-        public PropertyModelConfiguration Property<TMember>(Expression<Func<T, TMember>> memberSelector)
+        private void ValidateModel() //SanityCheck
         {
-            return Property(ReflectionHelper.GetProperty(memberSelector));
+            //At least one key member
+            //Only one complex key member
+            //No unsupported types
         }
 
-        public PropertyModelConfiguration Property<TMember>(Expression<Func<T, ValueList<TMember>>> memberSelector)
+        private void ValidateKey()
         {
-            if (typeof(TMember).IsEnum)
-                return new EnumPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
-            else if (typeof(TMember).IsSubclassOfDeep(typeof(DomainValue)))
-                return new ValueTypePropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
-            else
-                return new UnsupportedTypePropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
-        }
 
-
-        public PropertyModelConfiguration Aggregate<TAggregate>(Expression<Func<T, TAggregate>> memberSelector)
-            where TAggregate : Aggregate
-        {
-            return null;
-        }
-
-        public PropertyModelConfiguration Aggregate<TAggregate>(Expression<Func<T, AggregateList<TAggregate>>> memberSelector)
-            where TAggregate : Aggregate
-        {
-            return null;
-        }
-
-        public PropertyModelConfiguration Aggregate<TAggregate>(Expression<Func<T, AggregateReadOnlyList<TAggregate>>> memberSelector)
-            where TAggregate : Aggregate
-        {
-            return null;
-        }
-
-        internal DomainEntityMetadata Build()
-        {
-            return null;
         }
     }
-
-
 }

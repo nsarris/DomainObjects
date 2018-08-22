@@ -47,6 +47,7 @@
     <Compile Include="Model.cs" />
     <Compile Include="EqualityTests.cs" />
     <Compile Include="ModelBuilderTests.cs" />
+    <Compile Include="SalesDomainModel.cs" />
     <Compile Include="TrackableTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

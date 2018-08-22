@@ -9,106 +9,94 @@ namespace DomainObjects.Metadata
 {
     public class DomainEntityMetadata
     {
-        private readonly Dictionary<string, DomainEntityPropertyMetadata> propertyMetadata;
-        private readonly Dictionary<Type, DomainEntityMetadata> aggregateTypes;
+        private readonly Dictionary<string, DomainPropertyMetadata> propertyMetadata;
+        private readonly List<DomainValuePropertyMetadata> keyProperties;
+        private readonly Func<DomainEntity, object> keySelector;
+        //private readonly Dictionary<Type, DomainEntityMetadata> aggregateTypes;
 
-        public IReadOnlyDictionary<Type, DomainEntityMetadata> AggregateTypes => aggregateTypes;
+        //public IReadOnlyDictionary<Type, DomainEntityMetadata> AggregateTypes => aggregateTypes;
 
-        public DomainEntityMetadata(Type entityType)
+        public DomainEntityMetadata(Type entityType, IEnumerable<DomainPropertyMetadata> propertyMetadata)
+            //, IEnumerable<DomainEntityMetadata> aggregateTypes)
         {
-            propertyMetadata = new Dictionary<string, DomainEntityPropertyMetadata>();
-            aggregateTypes = new Dictionary<Type, DomainEntityMetadata>();
+            this.propertyMetadata = propertyMetadata.ToDictionary(x => x.Property.Name);
+            keyProperties = this.propertyMetadata.Values.OfType<DomainValuePropertyMetadata>().Where(x => x.IsKeyMember).ToList();
+            keySelector = DomainKeySelectorBuilder.BuildSelector(entityType, keyProperties.Select(x => x.Property.PropertyInfo).ToList());
+            //this.aggregateTypes = aggregateTypes.ToDictionary(x => x.EntityType);
 
             EntityType = entityType;
             IsRoot = entityType.IsSubclassOfDeep(typeof(AggregateRoot));
-            //CheckType
         }
 
         public object GetKey(DomainEntity entity)
         {
-            return null;
+            return keySelector(entity);
         }
 
-        
 
-
-        public void Build(EntityModelBuilder modelBuilder)
-        {
-            GetProperties(modelBuilder);
-            ValidateModel();
-        }
-
-        public DomainEntityPropertyMetadata GetPropertyMetadata(string propertyName)
+        public DomainPropertyMetadata GetProperty(string propertyName)
         {
             return propertyMetadata[propertyName];
         }
 
-        public IEnumerable<DomainEntityPropertyMetadata> GetPropertiesMetdata()
+        public IEnumerable<DomainPropertyMetadata> GetProperties()
         {
             return propertyMetadata.Values;
         }
 
+        public DomainValuePropertyMetadata GetValueProperty(string propertyName)
+        {
+            var p = propertyMetadata[propertyName] as DomainValuePropertyMetadata;
+            if (p is null)
+                throw new KeyNotFoundException($"Property {propertyName} is not a value property");
+            return p;
+        }
+
+        public IEnumerable<DomainValuePropertyMetadata> GetValueProperties()
+        {
+            return propertyMetadata.Values.OfType<DomainValuePropertyMetadata>();
+        }
+
+        public DomainValueListPropertyMetadata GetValueListProperty(string propertyName)
+        {
+            var p = propertyMetadata[propertyName] as DomainValueListPropertyMetadata;
+            if (p is null)
+                throw new KeyNotFoundException($"Property {propertyName} is not a value list");
+            return p;
+        }
+
+        public IEnumerable<DomainValueListPropertyMetadata> GetValueListProperties()
+        {
+            return propertyMetadata.Values.OfType<DomainValueListPropertyMetadata>();
+        }
+
+        public DomainAggregatePropertyMetadata GetAggregateProperty(string propertyName)
+        {
+            var p = propertyMetadata[propertyName] as DomainAggregatePropertyMetadata;
+            if (p is null)
+                throw new KeyNotFoundException($"Property {propertyName} is not an aggregate property");
+            return p;
+        }
+
+        public IEnumerable<DomainAggregatePropertyMetadata> GetAggregateProperties()
+        {
+            return propertyMetadata.Values.OfType<DomainAggregatePropertyMetadata>();
+        }
+
+        public DomainAggregateListPropertyMetadata GetAggregateListProperty(string propertyName)
+        {
+            var p = propertyMetadata[propertyName] as DomainAggregateListPropertyMetadata;
+            if (p is null)
+                throw new KeyNotFoundException($"Property {propertyName} is not a value list");
+            return p;
+        }
+
+        public IEnumerable<DomainAggregateListPropertyMetadata> GetAggregateListProperties()
+        {
+            return propertyMetadata.Values.OfType<DomainAggregateListPropertyMetadata>();
+        }
+
         public Type EntityType { get; }
         public bool IsRoot { get; }
-
-        private void GetProperties(EntityModelBuilder modelBuilder)
-        {
-            foreach (var property in EntityType.GetPropertiesEx()
-                .Where(x => x.PropertyInfo.GetIndexParameters().Length == 0)
-                .Where(x => !modelBuilder.IgnoredMembers.Contains(x.Name)))
-            {
-                var propertyType = property.PropertyInfo.PropertyType;
-
-                if (propertyType.IsSubclassOfDeep(typeof(DomainValue)))
-                {
-                    //var keyAttribute = propertyType.GetAttribute<DomainKeyAttribute>();
-                    //ValueTypeProperties
-                }
-                if (propertyType.IsSubclassOfDeep(typeof(Aggregate)))
-                {
-                    //AggregateProperty
-                    if (!aggregateTypes.ContainsKey(propertyType))
-                        aggregateTypes.Add(propertyType, new DomainEntityMetadata(propertyType));
-                }
-                else if (propertyType.IsOrSubclassOfGenericDeep(typeof(AggregateList<>), out var aggregateListType)
-                    || propertyType.IsOrSubclassOfGenericDeep(typeof(AggregateReadOnlyList<>), out aggregateListType))
-                {
-                    //AggregateListProperty
-                    //Visit Type
-                    var elementType = aggregateListType.GetGenericArguments().First();
-                    if (!elementType.IsSubclassOfDeep(typeof(Aggregate)))
-                    {
-                        //Error
-                    }
-                    if (!aggregateTypes.ContainsKey(elementType))
-                        aggregateTypes.Add(elementType, new DomainEntityMetadata(elementType));
-                }
-                else if (propertyType.IsOrSubclassOfGenericDeep(typeof(ValueList<>), out var valueListType)
-                    || propertyType.IsOrSubclassOfGenericDeep(typeof(ValueReadOnlyList<>), out valueListType))
-                {
-                    //check if T is supportedType
-                    //if complexType visit inner
-                    var elementType = valueListType.GetGenericArguments().First();
-                    var elementValueType = elementType.GetSupportedValueType();
-
-                }
-                //Check supported primitive types
-                else if (TypeHelper.IsSupportedValueType(propertyType, out var valueType))
-                {
-                    //Test
-                }
-
-                //else throw not supported / dont throw set error for validation
-            }
-        }
-
-
-
-        private void ValidateModel() //SanityCheck
-        {
-            //At least one key member
-            //Only one complex key member
-            //No unsupported types
-        }
     }
 }

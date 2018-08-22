@@ -1,4 +1,5 @@
-﻿using DomainObjects.Metadata;
+﻿using DomainObjects.Core;
+using DomainObjects.Metadata;
 using Dynamix.Reflection;
 using System;
 
@@ -8,16 +9,32 @@ namespace DomainObjects
     {
         public static DomainValueType? GetSupportedValueType(this Type type)
         {
-            if (type.Is<string>())
+            return GetSupportedValueType(type, out var _);
+        }
+
+        public static DomainValueType? GetSupportedValueType(this Type type, out Type effectiveType)
+        {
+            effectiveType = type;
+
+            effectiveType = Nullable.GetUnderlyingType(effectiveType) ?? effectiveType;
+
+            if (effectiveType.IsEnum)
+            {
+                effectiveType = Enum.GetUnderlyingType(effectiveType);
+                return DomainValueType.Enum;
+            }
+            else if (effectiveType.Is<string>())
                 return DomainValueType.String;
-            else if (type.IsOrNullable<bool>())
+            else if (effectiveType.Is<bool>())
                 return DomainValueType.Boolean;
-            else if (type.IsOrNullable<DateTime>())
+            else if (effectiveType.Is<DateTime>())
                 return DomainValueType.DateTime;
-            else if (type.IsOrNullable<TimeSpan>())
+            else if (effectiveType.Is<TimeSpan>())
                 return DomainValueType.TimeSpan;
-            else if (type.IsNumericOrNullable())
+            else if (effectiveType.IsNumeric())
                 return DomainValueType.Number;
+            else if (effectiveType.IsSubclassOfDeep(typeof(DomainValue)))
+                return DomainValueType.Complex;
             else
                 return null;
         }
@@ -38,7 +55,7 @@ namespace DomainObjects
             actualType = null;
             while (type != typeof(object))
             {
-                if (type.IsGenericTypeDefinition && type.GetGenericTypeDefinition() == openGenericType)
+                if (type.IsGenericType && type.GetGenericTypeDefinition() == openGenericType)
                 {
                     actualType = type;
                     return true;

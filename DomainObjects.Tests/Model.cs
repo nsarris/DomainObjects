@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using PropertyChanged;
 
-namespace DomainObjects.Tests
+namespace DomainObjects.Tests.Books
 {
     class BookRepository
     {

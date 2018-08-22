@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -28,11 +29,17 @@ namespace DomainObjects.Core
         IReadOnlyDictionary<string, object> GetChanges();
     }
 
-    public interface ITrackableCollection<T> : ITrackable
+    public interface ITrackableCollection : ITrackable, IEnumerable
+    {
+        IEnumerable<object> GetAdded();
+        IEnumerable<object> GetRemoved();
+    }
+
+    public interface ITrackableCollection<T> : ITrackableCollection
     {
         //GetChanges
-        IEnumerable<T> GetAdded();
-        IEnumerable<T> GetRemoved();
+        new IEnumerable<T> GetAdded();
+        new IEnumerable<T> GetRemoved();
     }
 
     public class PropertyChangedExtendedEventArgs : EventArgs
@@ -71,19 +78,22 @@ namespace DomainObjects.Core
             originalValues = GetCurrentValues();
         }
 
-        private Dictionary<string, object> GetCurrentValues()
+        private IEnumerable<PropertyInfoEx> GetProperties()
         {
             return trackableType
-                .GetPropertiesEx(BindingFlagsEx.All)
-                .Where(x => x.CanGet && x.CanSet)
+                .GetPropertiesEx(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public)
+                .Where(x => x.CanGet && x.CanSet && x.PropertyInfo.GetIndexParameters().Length == 0);
+        }
+
+        private Dictionary<string, object> GetCurrentValues()
+        {
+            return GetProperties()
                 .ToDictionary(x => x.Name, x => x.Get(trackable));
         }
 
         private void SetOriginalValues()
         {
-            foreach (var prop in trackableType
-                    .GetPropertiesEx(BindingFlagsEx.All)
-                    .Where(x => x.CanGet && x.CanSet))
+            foreach (var prop in GetProperties())
                 prop.Set(trackable, originalValues[prop.Name]);
         }
 
@@ -144,13 +154,13 @@ namespace DomainObjects.Core
             {
                 isChanged = false;
                 changes = new Dictionary<string, object>();
-                foreach (var prop in trackableType.GetPropertiesExDic(BindingFlagsEx.All))
+                foreach (var prop in GetProperties())
                 {
-                    var v = prop.Value.Get(trackable);
-                    if (!object.Equals(v, originalValues[prop.Key]))
+                    var v = prop.Get(trackable);
+                    if (!object.Equals(v, originalValues[prop.Name]))
                     {
                         isChanged = true;
-                        changes[prop.Key] = v;
+                        changes[prop.Name] = v;
                     }
                 }
             }
