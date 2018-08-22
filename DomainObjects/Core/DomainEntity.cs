@@ -40,7 +40,6 @@ namespace DomainObjects.Core
         public object GetKey()
         {
             return GetEntityMetadata().GetKey(this);
-            //return DomainEntityKeyProvider.GetKey(this);
         }
 
         public bool KeyEquals(DomainEntity other)
@@ -53,51 +52,23 @@ namespace DomainObjects.Core
 
         public void SetKey(params object[] values)
         {
-            if (this.state != DomainObjectState.New)
-                throw new InvalidOperationException("Entity keys can only be set after initialization on entities in New state");
+            AssertSetKey();
 
-            //If key property is DomainKey/DomainValue (only one allowed) 
-            //    -> if one value of same type -> set
-            //       else create new and try to set in sequence
-            //if key properties are primitive properties -> try set each
+            GetEntityMetadata().SetKey(this, values);
         }
 
+        public void SetKey(object value)
+        {
+            AssertSetKey();
 
-        //public override bool Equals(object obj)
-        //{
-        //    if (obj == null)
-        //        return false;
+            GetEntityMetadata().SetKey(this, value);
+        }
 
-        //    if (this.GetType() != obj.GetType())
-        //        return false;
-
-        //    return GetKey().Equals(((DomainEntity)obj).GetKey());
-        //}
-
-        //public override int GetHashCode()
-        //{
-        //    return GetKey().GetHashCode();
-        //}
-
-        //public static bool operator ==(DomainEntity x, DomainEntity y)
-        //{
-        //    if (x is null && y is null)
-        //        return true;
-        //    else if (x is null || y is null)
-        //        return false;
-
-        //    return x.Equals(y);
-        //}
-
-        //public static bool operator !=(DomainEntity x, DomainEntity y)
-        //{
-        //    if (x is null && y is null)
-        //        return false;
-        //    else if (x is null || y is null)
-        //        return true;
-
-        //    return !x.Equals(y);
-        //}
+        protected void AssertSetKey()
+        {
+            if (this.state != DomainObjectState.New)
+                throw new InvalidOperationException("Entity keys can only be set after initialization on entities in New state");
+        }
 
         #endregion
 
@@ -292,7 +263,7 @@ namespace DomainObjects.Core
 
         public void SetKey(TKey key)
         {
-            //Assert New
+            base.SetKey(key);
         }
     }
 }

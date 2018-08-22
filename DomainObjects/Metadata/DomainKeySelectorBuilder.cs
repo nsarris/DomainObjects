@@ -32,7 +32,7 @@ namespace DomainObjects.Metadata
         {
             var parameter = Expression.Parameter(typeof(DomainEntity));
 
-            if (keyProperties.Count() == 0)
+            if (!keyProperties.Any())
                 keyProperties = type.GetProperties();
 
             Func<DomainEntity, object> d = null;

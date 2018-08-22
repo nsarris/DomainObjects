@@ -35,7 +35,7 @@ namespace DomainObjects.Core
         IEnumerable<object> GetRemoved();
     }
 
-    public interface ITrackableCollection<T> : ITrackableCollection
+    public interface ITrackableCollection<out T> : ITrackableCollection
     {
         //GetChanges
         new IEnumerable<T> GetAdded();
@@ -63,7 +63,7 @@ namespace DomainObjects.Core
         public event PropertyChangedExtendedEventHandler AfterPropertyChanged;
 
         readonly object trackable;
-        Type trackableType;
+        readonly Type trackableType;
         bool suppressPropertyChanged;
         bool enabled;
         bool isChanged;
@@ -192,13 +192,15 @@ namespace DomainObjects.Core
     }
 
 
-    public class TrackableBase : ITrackableObject
+    public abstract class TrackableBase : ITrackableObject
     {
-        ChangeTracker tracker;
+        readonly ChangeTracker tracker;
 
-        public TrackableBase()
+        protected TrackableBase()
         {
             tracker = new ChangeTracker(this);
+            tracker.BeforePropertyChanged += (object sender, PropertyChangedExtendedEventArgs e) => OnBeforePropertyChanged(e.PropertyName, e.Before, e.After);
+            tracker.AfterPropertyChanged += (object sender, PropertyChangedExtendedEventArgs e) => OnAfterPropertyChanged(e.PropertyName, e.Before, e.After);
         }
 
         public void ResetChanges() => tracker.ResetChanges();
@@ -206,9 +208,19 @@ namespace DomainObjects.Core
         public bool GetIsChanged() => tracker.GetIsChanged();
         public IReadOnlyDictionary<string, object> GetChanges() => tracker.GetChanges();
 
-        protected virtual void OnPropertyChanged(string propertyName, object before, object after)
+        protected virtual void OnBeforePropertyChanged(string propertyName, object before, object after)
         {
-            //TODO: use tracker events to call this in a before/after manner
+            
+        }
+
+        protected virtual void OnAfterPropertyChanged(string propertyName, object before, object after)
+        {
+            
+        }
+
+        protected void OnPropertyChanged(string propertyName, object before, object after)
+        {
+            tracker.OnPropertyChanged(propertyName, before, after);
         }
 
         public void BeginTracking() => tracker.BeginTracking();

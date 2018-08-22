@@ -140,8 +140,8 @@ namespace DomainObjects.ModelBuilder
                     propertyDescriptors.Add(new AggregatePropertyDescriptor(property));
                     aggregateDescriptors.AddIfNotNull(ScanTypeRecursive(propertyType, visitedTypes));
                 }
-                else if ((propertyType.IsOrSubclassOfGenericDeep(typeof(AggregateList<>), out var aggregateListType)
-                    || (readOnly = propertyType.IsOrSubclassOfGenericDeep(typeof(AggregateReadOnlyList<>), out aggregateListType))))
+                else if (propertyType.IsOrSubclassOfGenericDeep(typeof(AggregateList<>), out var aggregateListType)
+                    || (readOnly = propertyType.IsOrSubclassOfGenericDeep(typeof(AggregateReadOnlyList<>), out aggregateListType)))
                 {
                     var elementType = aggregateListType.GetGenericArguments().Single();
                     if (!elementType.IsSubclassOfDeep(typeof(Aggregate)))

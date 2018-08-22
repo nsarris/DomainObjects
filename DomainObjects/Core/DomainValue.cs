@@ -12,6 +12,9 @@ namespace DomainObjects.Core
     {
         private const int HashMultiplier = 37;
 
+        //TODO: Implement an activator (mutator like) to set initial properties selectively?
+        
+        //TODO: infer this from model metadata
         protected virtual bool GetIsShallow() => false;
 
         public override bool Equals(object obj)

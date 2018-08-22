@@ -33,6 +33,38 @@ namespace DomainObjects.Metadata
             return keySelector(entity);
         }
 
+        public void SetKey(DomainEntity entity, object value)
+        {
+            if (keyProperties.Count > 1)
+                throw new InvalidOperationException($"Values given dont match the number of key properties in Entity {EntityType.Name}");
+
+            keyProperties.First().Property.Set(entity, value);
+        }
+
+        public void SetKey(DomainEntity entity, params object[] values)
+        {
+            //Primitives
+            if (!keyProperties.Any(x => x.DomainValueType == DomainValueType.Complex))
+            {
+                if (values.Length != keyProperties.Count)
+                    throw new InvalidOperationException($"Values given dont match the number of key properties in Entity {EntityType.Name}");
+
+                foreach(var keyValue in keyProperties.Zip(values, (key, value) => new { key, value }))
+                    keyValue.key.Property.Set(entity, keyValue.value);
+            }
+            //DomainValue
+            else
+            {
+                var keyProperty = keyProperties.First();
+                if (values.Length == 1 && values[0]?.GetType() == keyProperty.Type)
+                    keyProperty.Property.Set(entity, values[0]);
+                else
+                {
+                    var key = Activator.CreateInstance(keyProperty.Type, values);
+                    keyProperty.Property.Set(entity, key);
+                }
+            }
+        }
 
         public DomainPropertyMetadata GetProperty(string propertyName)
         {

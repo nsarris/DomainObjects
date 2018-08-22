@@ -20,5 +20,9 @@ namespace DomainObjects.ModelBuilder
 
             return metadata;
         }
+
+        //TODO:Validate
+        //Validate all properties are supported
+        //Validate constructor has all properties in sequence
     }
 }

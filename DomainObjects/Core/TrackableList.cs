@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DomainObjects.Core
 {
-    internal enum ListItemChangeEnum
+    internal enum ListItemChange
     {
         Added,
         Removed
@@ -24,13 +24,13 @@ namespace DomainObjects.Core
             this.RemovedItems = removedItems ?? Enumerable.Empty<T>();
         }
 
-        internal ListChangedEventArgs(T item, ListItemChangeEnum change)
+        internal ListChangedEventArgs(T item, ListItemChange change)
         {
             var value = item == null ? Enumerable.Empty<T>() : new[] { item };
 
-            if (change == ListItemChangeEnum.Added)
+            if (change == ListItemChange.Added)
                 this.AddedItems = value;
-            else if (change == ListItemChangeEnum.Removed)
+            else if (change == ListItemChange.Removed)
                 this.RemovedItems = value;
         }
     }
@@ -52,7 +52,7 @@ namespace DomainObjects.Core
 
         public TrackableReadOnlyList(IEnumerable<T> collection)
         {
-            internalList = new List<T>(collection);
+            internalList = new List<T>(collection ?? Enumerable.Empty<T>());
         }
 
         public int IndexOf(T item)
@@ -197,14 +197,14 @@ namespace DomainObjects.Core
             
         }
         
-        private void OnListChangedInternal(T item, ListItemChangeEnum change)
+        private void OnListChangedInternal(T item, ListItemChange change)
         {
             if (!enabled)
                 return; 
 
-            if (change == ListItemChangeEnum.Added)// && !addedItems.Contains(item))
+            if (change == ListItemChange.Added)// && !addedItems.Contains(item))
                 addedItems.Add(item);
-            else if (change == ListItemChangeEnum.Removed)// && !removedItems.Contains(item))
+            else if (change == ListItemChange.Removed)// && !removedItems.Contains(item))
                 removedItems.Add(item);
 
             ListChanged?.Invoke(this, new ListChangedEventArgs<T>(item, change));
@@ -231,7 +231,7 @@ namespace DomainObjects.Core
         {
             internalList.Insert(index, item);
 
-            OnListChangedInternal(item, ListItemChangeEnum.Added);
+            OnListChangedInternal(item, ListItemChange.Added);
         }
 
         public void RemoveAt(int index)
@@ -239,7 +239,7 @@ namespace DomainObjects.Core
             var item = internalList[index];
             internalList.RemoveAt(index);
 
-            OnListChangedInternal(item, ListItemChangeEnum.Removed);
+            OnListChangedInternal(item, ListItemChange.Removed);
         }
 
         public void Remove(Func<T, bool> predicate)
@@ -274,7 +274,7 @@ namespace DomainObjects.Core
         public void Add(T item)
         {
             internalList.Add(item);
-            OnListChangedInternal(item, ListItemChangeEnum.Added);
+            OnListChangedInternal(item, ListItemChange.Added);
         }
 
         public void AddRange(IEnumerable<T> items)
@@ -310,7 +310,7 @@ namespace DomainObjects.Core
         {
             if (internalList.Remove(item))
             {
-                OnListChangedInternal(item, ListItemChangeEnum.Removed);
+                OnListChangedInternal(item, ListItemChange.Removed);
                 return true;
             }
             else

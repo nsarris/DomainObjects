@@ -59,7 +59,7 @@ namespace DomainObjects.Core
                     }
                 }
 
-                prop.Set(this, v, true);
+                prop.Set(this, v);
             }
         }
 
