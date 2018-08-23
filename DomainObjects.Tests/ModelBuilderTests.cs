@@ -27,8 +27,8 @@ namespace DomainObjects.Tests
 
             var customerBuilder = modelBuilder
                 .Entity<Customer>()
-                //.HasKey(x => new { x.Id, x.Name })
-                .HasKey(x => new { x.MainAddress })
+                .HasKey(x => new { x.Id, x.Name })
+                //.HasKey(x => new { x.MainAddress })
                 .IgnoreMember(x => x.StringComparer)
                 ;
 
@@ -43,20 +43,24 @@ namespace DomainObjects.Tests
 
             var key1 = customer.GetKey();
 
-            //TODO: Key
-            //customer.SetKey(1, "Nikos");
 
-            var customer2 = new Customer(1, "Nikos");
+            var customer2 = new Customer(0, "No");
 
             customer2.MainAddress = new Address("1", "1", null, null, null, null);
+            customer2.InitNew(false);
+            customer2.SetKey(1, "Nikos");
 
             var key2 = customer2.GetKey();
 
-            customer2.MarkNew();
-            //customer2.SetKey(2, "Test");
-            customer2.SetKey("1", "1", null, null, null, null);
+            var customer3 = new Customer(1, "Nikos");
 
-            var key3 = customer2.GetKey();
+            customer3.MainAddress = new Address("1", "1", null, null, null, null);
+            customer3.InitExisting();
+
+            
+            //customer2.SetKey("1", "1", null, null, null, null);
+
+            var key3 = customer3.GetKey();
 
             Assert.AreEqual(key2, key3);
         }

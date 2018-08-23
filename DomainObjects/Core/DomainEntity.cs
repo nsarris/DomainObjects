@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DomainObjects.ChangeTracking;
 using DomainObjects.Metadata;
 using Dynamix;
 
@@ -37,9 +38,16 @@ namespace DomainObjects.Core
         }
 
         #region Key and Equality
-        public object GetKey()
+
+        private readonly UnsetKey unsetKey = new UnsetKey();
+        private bool keyIsSet;
+
+        public bool GetKeyIsSet() => keyIsSet;
+        internal UnsetKey GetUnSetKey() => unsetKey;
+
+        public IDomainKey GetKey()
         {
-            return GetEntityMetadata().GetKey(this);
+            return (IDomainKey)GetEntityMetadata().GetKey(this);
         }
 
         public bool KeyEquals(DomainEntity other)
@@ -55,6 +63,8 @@ namespace DomainObjects.Core
             AssertSetKey();
 
             GetEntityMetadata().SetKey(this, values);
+
+            keyIsSet = true;
         }
 
         public void SetKey(object value)
@@ -62,12 +72,14 @@ namespace DomainObjects.Core
             AssertSetKey();
 
             GetEntityMetadata().SetKey(this, value);
+
+            keyIsSet = true;
         }
 
         protected void AssertSetKey()
         {
-            if (this.state != DomainObjectState.New)
-                throw new InvalidOperationException("Entity keys can only be set after initialization on entities in New state");
+            if (keyIsSet)
+                throw new InvalidOperationException($"Key has already been marked as set for entity {this.GetType().Name}");
         }
 
         #endregion
@@ -81,18 +93,24 @@ namespace DomainObjects.Core
             return state;
         }
 
-        public void Init(bool isNew)
+        private void Init(bool isNew, bool keyIsSet)
         {
             if (isNew)
+            {
                 MarkNew();
+                this.keyIsSet = keyIsSet;
+            }
             else
+            {
                 MarkExisting();
+                this.keyIsSet = true;
+            }
 
             BeginTrackingDeep();
         }
 
-        public void InitNew() => Init(true);
-        public void InitExisting() => Init(false);
+        public void InitNew(bool keyIsSet) => Init(true, keyIsSet);
+        public void InitExisting() => Init(false, true);
 
         public void MarkNew()
         {
@@ -255,9 +273,9 @@ namespace DomainObjects.Core
 
     public class DomainEntity<TKey> : DomainEntity, IKeyProvider<TKey>
     {
-        public new TKey GetKey()
+        public new DomainKeyWrapper<TKey> GetKey()
         {
-            return (TKey)base.GetKey();
+            return (DomainKeyWrapper<TKey>)base.GetKey();
         }
 
         public void SetKey(TKey key)

@@ -5,7 +5,7 @@ using System;
 
 namespace DomainObjects
 {
-    static class TypeHelper
+    internal static class TypeHelper
     {
         public static DomainValueType? GetSupportedValueType(this Type type)
         {

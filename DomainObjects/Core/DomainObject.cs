@@ -1,6 +1,5 @@
 ﻿using Dynamix.Reflection;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -27,81 +26,4 @@ namespace DomainObjects.Core
             }
         }
     }
-
-    public abstract class AggregateRoot : DomainEntity
-    {
-
-    }
-
-    public abstract class Aggregate : DomainEntity
-    {
-        
-    }
-
-    public class AggregateReadOnlyList<T> : TrackableReadOnlyList<T>
-        where T : Aggregate
-    {
-        public AggregateReadOnlyList()
-        {
-        }
-
-        public AggregateReadOnlyList(IList<T> list) : base(list)
-        {
-        }
-
-        public AggregateReadOnlyList(IEnumerable<T> collection) : base(collection)
-        {
-        }
-    }
-
-    public class AggregateList<T> : TrackableList<T>
-        where T : Aggregate
-    {
-        public AggregateList()
-        {
-        }
-
-        public AggregateList(IList<T> list) : base(list)
-        {
-        }
-
-        public AggregateList(IEnumerable<T> collection) : base(collection)
-        {
-        }
-    }
-
-    public class ValueReadOnlyList<T> : TrackableReadOnlyList<T>
-    {
-        public ValueReadOnlyList()
-        {
-        }
-
-        public ValueReadOnlyList(IList<T> list) : base(list)
-        {
-        }
-
-        public ValueReadOnlyList(IEnumerable<T> collection) : base(collection)
-        {
-        }
-    }
-
-    public class ValueList<T> : TrackableList<T>
-    {
-        public ValueList()
-        {
-        }
-
-        public ValueList(IList<T> list) : base(list)
-        {
-        }
-
-        public ValueList(IEnumerable<T> collection) : base(collection)
-        {
-        }
-    }
-
-
-
-
-
 }

@@ -1,67 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Dynamix.Reflection;
 
-namespace DomainObjects.Core
+namespace DomainObjects.ChangeTracking
 {
-    public interface ITrackable
-    {
-        void ResetChanges();
-        void AcceptChanges();
-        bool GetIsChanged();
-        void MarkChanged();
-        void MarkUnchanged();
-        void BeginTracking();
-        void StopTracking();
-
-        void ResetChangesDeep();
-        void AcceptChangesDeep();
-        bool GetIsChangedDeep();
-        void MarkChangedDeep();
-        void MarkUnchangedDeep();
-        void BeginTrackingDeep();
-        void StopTrackingDeep();
-    }
-
-    public interface ITrackableObject : ITrackable
-    {
-        IReadOnlyDictionary<string, object> GetChanges();
-    }
-
-    public interface ITrackableCollection : ITrackable, IEnumerable
-    {
-        Type ElementType { get; }
-        IEnumerable<object> GetAdded();
-        IEnumerable<object> GetRemoved();
-    }
-
-    public interface ITrackableCollection<out T> : ITrackableCollection
-    {
-        //GetChanges
-        new IEnumerable<T> GetAdded();
-        new IEnumerable<T> GetRemoved();
-    }
-
-    public class PropertyChangedExtendedEventArgs : EventArgs
-    {
-        public PropertyChangedExtendedEventArgs(string propertyName, object before, object after)
-        {
-            PropertyName = propertyName;
-            Before = before;
-            After = after;
-        }
-        public string PropertyName { get; }
-        public object Before { get; }
-        public object After { get; }
-    }
-    public delegate void PropertyChangedExtendedEventHandler(object sender, PropertyChangedExtendedEventArgs e);
-
     public class ChangeTracker : ITrackableObject, INotifyPropertyChanged
     {
         public event PropertyChangedExtendedEventHandler BeforePropertyChanged;
@@ -230,53 +174,6 @@ namespace DomainObjects.Core
         {
             TrackableVisitor.Instance.Visit(this, x => x.MarkUnchanged());
         }
-    }
-
-
-    public abstract class TrackableBase : ITrackableObject
-    {
-        readonly ChangeTracker tracker;
-
-        protected TrackableBase()
-        {
-            tracker = new ChangeTracker(this);
-            tracker.BeforePropertyChanged += (object sender, PropertyChangedExtendedEventArgs e) => OnBeforePropertyChanged(e.PropertyName, e.Before, e.After);
-            tracker.AfterPropertyChanged += (object sender, PropertyChangedExtendedEventArgs e) => OnAfterPropertyChanged(e.PropertyName, e.Before, e.After);
-        }
-
-        protected virtual void OnBeforePropertyChanged(string propertyName, object before, object after)
-        {
-
-        }
-
-        protected virtual void OnAfterPropertyChanged(string propertyName, object before, object after)
-        {
-
-        }
-
-        protected void OnPropertyChanged(string propertyName, object before, object after)
-        {
-            tracker.OnPropertyChanged(propertyName, before, after);
-        }
-
-        public IReadOnlyDictionary<string, object> GetChanges() => tracker.GetChanges();
-
-        public void ResetChanges() => tracker.ResetChanges();
-        public void AcceptChanges() => tracker.AcceptChanges();
-        public bool GetIsChanged() => tracker.GetIsChanged();
-        public void BeginTracking() => tracker.BeginTracking();
-        public void StopTracking() => tracker.StopTracking();
-        public void MarkChanged() => tracker.MarkChanged();
-        public void MarkUnchanged() => tracker.MarkUnchanged();
-
-        
-        public void ResetChangesDeep() => tracker.ResetChangesDeep();
-        public void AcceptChangesDeep() => tracker.AcceptChangesDeep();
-        public bool GetIsChangedDeep() => tracker.GetIsChangedDeep();
-        public void BeginTrackingDeep() => tracker.BeginTrackingDeep();
-        public void StopTrackingDeep() => tracker.StopTrackingDeep();
-        public void MarkChangedDeep() => tracker.MarkChangedDeep();
-        public void MarkUnchangedDeep() => tracker.MarkUnchangedDeep();
     }
 }
 

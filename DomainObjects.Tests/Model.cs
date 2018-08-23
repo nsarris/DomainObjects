@@ -96,7 +96,7 @@ namespace DomainObjects.Tests.Books
         public AuthorKey Key { get; set; }
 
         public DateTime DOB { get; set; }
-        public TrackableList<Book> Books { get; set; }
+        public AggregateList<Book> Books { get; set; }
     }
 
     class Key1 : DomainKey
@@ -129,7 +129,7 @@ namespace DomainObjects.Tests.Books
         {
             this.Street = street;
             this.Number = number;
-            this.Phones = new TrackableReadOnlyList<Phone>(phones);
+            this.Phones = new ValueList<Phone>(phones);
         }
 
         public string Street { get; private set; }

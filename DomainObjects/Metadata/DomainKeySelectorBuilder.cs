@@ -1,5 +1,6 @@
 ﻿using DomainObjects.Core;
 using Dynamix;
+using Dynamix.Expressions;
 using Dynamix.Reflection;
 using System;
 using System.Collections.Concurrent;
@@ -13,65 +14,84 @@ using System.Threading.Tasks;
 namespace DomainObjects.Metadata
 {
 
-    //TODO: Move these interfaces
-    public interface IKeyProvider
-    {
-        object GetKey();
-    }
-
-    public interface IKeyProvider<TKey> : IKeyProvider
-    {
-        new TKey GetKey();
-    }
-
     internal static class DomainKeySelectorBuilder
     {
-        static readonly string CLASS_NAME_PREFIX = "_DomainEntityKey_";
+        static readonly string CLASS_NAME_POSTFIX = "_DomainEntityKey_";
 
-        public static Func<DomainEntity, object> BuildSelector(Type type, IEnumerable<PropertyInfo> keyProperties)
+        public static Func<DomainEntity, object> BuildSelector(Type type, IEnumerable<PropertyInfo> keyPropertiesEnumerable)
         {
+            var keyProperties = keyPropertiesEnumerable is List<PropertyInfo> keyPropertiesList ? keyPropertiesList : keyPropertiesEnumerable.ToList();
+
             var parameter = Expression.Parameter(typeof(DomainEntity));
 
             if (!keyProperties.Any())
-                keyProperties = type.GetProperties();
+                keyProperties = type.GetProperties().ToList();
 
-            Func<DomainEntity, object> d = null;
+            Func<DomainEntity, object> selectorFunction = null;
 
-            if (keyProperties.Count() == 1)
+            //if (keyProperties.Count == 1)
+            //{
+            //    selectorFunction = Expression.Lambda<Func<DomainEntity, object>>(Expression.Convert(
+            //        Expression.Property(Expression.Convert(parameter, type), keyProperties.Single()), typeof(object))
+            //        , new[] { parameter }).Compile();
+            //}
+            //else
             {
-                d = Expression.Lambda<Func<DomainEntity, object>>(Expression.Convert(
-                    Expression.Property(Expression.Convert(parameter, type), keyProperties.Single()), typeof(object))
-                    , new[] { parameter }).Compile();
-            }
-            else
-            {
-                //TODO: Readonly properties / Immutable
-                var dprops = keyProperties
-                    .Select(x => new DynamicTypeProperty()
+                var dynamicTypeBuilderDescriptor =
+                    new DynamicTypeDescriptorBuilder("_" + type.FullName + CLASS_NAME_POSTFIX)
+                    //TODO: This can be removed when the type knows when to go shallow
+                    .HasBaseType<DomainKey>();
+
+                keyProperties
+                    .ForEach(x =>
                     {
-                        Name = x.Name,
-                        Type = x.PropertyType
-                    }).ToList();
+                        dynamicTypeBuilderDescriptor.AddProperty(
+                            x.Name,
+                            x.PropertyType,
+                            config => config
+                                .HasSetter(GetSetAccessModifier.None)
+                                .IsInitializedInConstructor()
+                       );
+                    });
 
-                var t = DynamicTypeBuilder.Instance.CreateAndRegisterType(CLASS_NAME_PREFIX + type.FullName, dprops, false, typeof(DomainKey));
+                var keyValueType = DynamicTypeBuilder.Instance.CreateType(dynamicTypeBuilderDescriptor);
 
-                var ctor = Expression.New(t);
+                var keyValueTypeCtor = keyValueType.GetConstructors().First(x => x.GetParameters().Length > 0);
 
-                var convertedItem = Expression.Convert(parameter, type);
-                var memberAssignments = new List<MemberAssignment>();
+                var valueCtorExpression = Expression.New(
+                    constructor: keyValueTypeCtor,
+                    arguments: keyProperties
+                        .Select(x => Expression.Property(
+                                Expression.Convert(parameter, type), x))
+                        .ToArray()
+                    );
 
-                foreach (var key in keyProperties)
-                {
-                    var targetProperty = t.GetProperty(key.Name);
-                    memberAssignments.Add(Expression.Bind(targetProperty, Expression.Property(convertedItem, key)));
-                }
+                var keyType = typeof(DomainKeyWrapper<>).MakeGenericTypeCached(keyValueType);
+                var keyCtorSet = keyType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { keyValueType }, null);
+                var keyCtorUnSet = keyType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(UnsetKey) }, null);
 
-                var initExp = Expression.MemberInit(ctor, memberAssignments);
+                var keySetCtorExpression = Expression.New(
+                    constructor: keyCtorSet,
+                    arguments: valueCtorExpression);
 
-                d = Expression.Lambda<Func<DomainEntity, object>>(initExp, parameter).Compile();
+                var keyUnSetCtorExpression = Expression.New(
+                    constructor: keyCtorUnSet,
+                    arguments: Expression.Call(
+                                Expression.Convert(parameter, type), nameof(DomainEntity.GetUnSetKey), new Type[0], new Expression[0]));
+
+                var isKeySetExpresion = Expression.Call(
+                                Expression.Convert(parameter, type), nameof(DomainEntity.GetKeyIsSet), new Type[0], new Expression[0]);
+
+                var body = Expression.Condition(
+                        test: Expression.Equal(isKeySetExpresion, ExpressionEx.Constants.True),
+                        ifTrue: keySetCtorExpression,
+                        ifFalse: keyUnSetCtorExpression
+                    );
+
+                selectorFunction = Expression.Lambda<Func<DomainEntity, object>>(body, parameter).Compile();
             }
 
-            return d;
+            return selectorFunction;
         }
     }
 }

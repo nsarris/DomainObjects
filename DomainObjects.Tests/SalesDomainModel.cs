@@ -14,7 +14,7 @@ namespace DomainObjects.Tests.Sales
         public Customer CreateNew()
         {
             var customer = new Customer();
-            customer.InitNew();
+            customer.InitNew(false);
             return customer;
         }
 
@@ -31,7 +31,7 @@ namespace DomainObjects.Tests.Sales
         public Invoice CreateNew()
         {
             var invoice = new Invoice();
-            invoice.InitNew();
+            invoice.InitNew(false);
             return invoice;
         }
 

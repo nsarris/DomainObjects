@@ -39,7 +39,7 @@ namespace DomainObjects.Core
                 return true;
 
             foreach (var prop in leftType.GetPropertiesEx().Where(x => x.CanGet && x.PropertyInfo.GetIndexParameters().Length == 0))
-                if (!PropertyEquals(left, right))
+                if (!PropertyEquals(prop.Get(left), prop.Get(right)))
                     return false;
             
             return true;

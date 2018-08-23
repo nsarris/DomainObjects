@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DomainObjects.Core
+namespace DomainObjects.ChangeTracking
 {
     internal enum ListItemChange
     {
