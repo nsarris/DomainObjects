@@ -9,6 +9,40 @@ using System.Threading.Tasks;
 namespace DomainObjects.Tests.Sales
 {
 
+    public class CustomerRepository
+    {
+        public Customer CreateNew()
+        {
+            var customer = new Customer();
+            customer.InitNew();
+            return customer;
+        }
+
+        public Customer GetById(int id)
+        {
+            var customer = new Customer(id, "Test" + id);
+            customer.InitExisting();
+            return customer;
+        }
+    }
+
+    public class InvoiceRepository
+    {
+        public Invoice CreateNew()
+        {
+            var invoice = new Invoice();
+            invoice.InitNew();
+            return invoice;
+        }
+
+        public Invoice GetById(int id)
+        {
+            var invoice = new Invoice(id);
+            invoice.InitExisting();
+            return invoice;
+        }
+    }
+
     [AddINotifyPropertyChangedInterface]
     public class Customer : AggregateRoot
     {
@@ -63,6 +97,16 @@ namespace DomainObjects.Tests.Sales
     [AddINotifyPropertyChangedInterface]
     public class Invoice : AggregateRoot
     {
+        public Invoice()
+        {
+
+        }
+
+        public Invoice(int id)
+        {
+            Id = id;
+        }
+
         public int Id { get; private set; }
         public int CustomerId { get; set; }
         public DateTime DateTime { get; set; }

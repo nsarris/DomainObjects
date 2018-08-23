@@ -15,6 +15,8 @@ namespace DomainObjects.Metadata
         //private readonly Dictionary<Type, DomainEntityMetadata> aggregateTypes;
 
         //public IReadOnlyDictionary<Type, DomainEntityMetadata> AggregateTypes => aggregateTypes;
+        public Type EntityType { get; }
+        public bool IsRoot { get; }
 
         public DomainEntityMetadata(Type entityType, IEnumerable<DomainPropertyMetadata> propertyMetadata)
             //, IEnumerable<DomainEntityMetadata> aggregateTypes)
@@ -128,7 +130,6 @@ namespace DomainObjects.Metadata
             return propertyMetadata.Values.OfType<DomainAggregateListPropertyMetadata>();
         }
 
-        public Type EntityType { get; }
-        public bool IsRoot { get; }
+
     }
 }

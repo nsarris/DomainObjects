@@ -30,7 +30,7 @@ namespace DomainObjects.Core
 
     public abstract class AggregateRoot : DomainEntity
     {
-       
+
     }
 
     public abstract class Aggregate : DomainEntity

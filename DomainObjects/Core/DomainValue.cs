@@ -51,11 +51,13 @@ namespace DomainObjects.Core
                         hashCode = (hashCode * HashMultiplier) ^ value.GetHashCode();
                 }
 
-                //TODO: Nest enumerables
+                //TODO: Nest enumerables (immutable only)
 
                 return hashCode;
             }
         }
+
+        //TODO: Type sanity check (supported properties - all private setters to support mutator)
 
         public static bool operator ==(DomainValue x, DomainValue y)
         {

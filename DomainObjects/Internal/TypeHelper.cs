@@ -65,6 +65,19 @@ namespace DomainObjects
             return false;
         }
 
+        //public static bool HasGenericDefinition(this Type type, Type openGenericType, out Type actualType)
+        //{
+        //    actualType = null;
+
+        //    if (type.IsGenericType && type.GetGenericTypeDefinition() == openGenericType)
+        //    {
+        //        actualType = type;
+        //        return true;
+        //    }
+
+        //    return false;
+        //}
+
         public static bool IsOrSubclassOfDeep(this Type type, Type typeToCompare)
         {
             if (typeToCompare == typeof(object))

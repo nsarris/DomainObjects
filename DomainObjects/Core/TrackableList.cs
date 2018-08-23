@@ -75,6 +75,8 @@ namespace DomainObjects.Core
             get { return internalList.Count; }
         }
 
+        public Type ElementType => typeof(T);
+
         public IEnumerator<T> GetEnumerator()
         {
             return internalList.GetEnumerator();
@@ -100,21 +102,20 @@ namespace DomainObjects.Core
             return false;
         }
 
-        public virtual bool GetIsChangedDeep()
+        public bool GetIsChangedDeep()
         {
-            return GetIsChangedInner();
-        }
+            if (GetIsChanged())
+                return true;
 
-        protected bool GetIsChangedInner()
-        {
             if (typeof(ITrackable).IsAssignableFrom(typeof(T)))
                 foreach (var item in internalList)
-                    if ((item as ITrackable).GetIsChanged())
+                    if ((item as ITrackable).GetIsChangedDeep())
                         return true;
 
             return false;
         }
 
+  
         public virtual void ResetChanges()
         {
             
@@ -153,6 +154,49 @@ namespace DomainObjects.Core
         public virtual void StopTracking()
         {
             
+        }
+
+        private void ForEachTrackable(Action<ITrackable> action)
+        {
+            foreach (var item in this)
+                if (item is ITrackableObject trackable)
+                    action(trackable);
+        }
+
+        public void ResetChangesDeep()
+        {
+            ResetChanges();
+            ForEachTrackable(x => x.ResetChangesDeep());
+        }
+
+        public void AcceptChangesDeep()
+        {
+            AcceptChanges();
+            ForEachTrackable(x => x.AcceptChangesDeep());
+        }
+
+        public void BeginTrackingDeep()
+        {
+            BeginTracking();
+            ForEachTrackable(x => x.BeginTrackingDeep());
+        }
+
+        public void StopTrackingDeep()
+        {
+            StopTracking();
+            ForEachTrackable(x => x.StopTrackingDeep());
+        }
+
+        public void MarkChangedDeep()
+        {
+            MarkChanged();
+            ForEachTrackable(x => x.MarkChangedDeep());
+        }
+
+        public void MarkUnchangedDeep()
+        {
+            MarkUnchanged();
+            ForEachTrackable(x => x.MarkUnchangedDeep());
         }
 
         IEnumerable<object> ITrackableCollection.GetAdded()
@@ -338,7 +382,7 @@ namespace DomainObjects.Core
         public override void ResetChanges()
         {
             addedItems.ForEach(x => internalList.Remove(x));
-            addedItems.ForEach(x => internalList.Add(x));
+            removedItems.ForEach(x => internalList.Add(x));
         }
 
         public override void AcceptChanges()
@@ -347,10 +391,6 @@ namespace DomainObjects.Core
             removedItems.Clear();
         }
 
-        public override bool GetIsChangedDeep()
-        {
-            return GetIsChanged() || base.GetIsChangedDeep();
-        }
 
         public override IEnumerable<T> GetAdded()
         {
@@ -381,6 +421,9 @@ namespace DomainObjects.Core
         {
             markedChanged = false;
         }
+
+
+
     }
 }
 

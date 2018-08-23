@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\DomainEntity.cs" />
+    <Compile Include="Core\TrackableVisitor.cs" />
     <Compile Include="Internal\ExpressionHelper.cs" />
     <Compile Include="Metadata\DomainAggregateListPropertyMetadata.cs" />
     <Compile Include="Metadata\DomainAggregatePropertyMetadata.cs" />

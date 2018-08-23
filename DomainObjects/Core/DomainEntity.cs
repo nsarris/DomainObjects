@@ -88,8 +88,11 @@ namespace DomainObjects.Core
             else
                 MarkExisting();
 
-            BeginTracking();
+            BeginTrackingDeep();
         }
+
+        public void InitNew() => Init(true);
+        public void InitExisting() => Init(false);
 
         public void MarkNew()
         {
@@ -134,42 +137,8 @@ namespace DomainObjects.Core
 
         public bool GetIsChangedDeep()
         {
-            if (GetIsChanged())
-                return true;
-
-            foreach (var prop in entityMetadata.GetAggregateListProperties())
-            {
-                //enumerate list -> GetIsChangedDeep
-
-            }
-
-            foreach (var listProp in entityMetadata.GetValueListProperties())
-            {
-                var list = listProp.Property.Get(this) as ITrackableCollection;
-
-                if (!listProp.IsImmutable && list.GetIsChanged())
-                    return true;
-
-                foreach (var item in list)
-                {
-                    if (item is ITrackable trackable && trackable.GetIsChanged())
-                        return true;
-                    else
-                        break;
-                }
-            }
-
-            return false;
-            
-
-            //Get collections ->
-            //if collection of ITrackable -> check items internally
-            //if also ITrackableCollection -> getdeleted (ignore added? throw incosistency error)
-            //if collection if non ITrackable items 
-            //if ITrackableCollection -> added / deleted 
-            //else do nothing
+            return changeTracker.GetIsChangedDeep();
         }
-
 
 
         public void ResetChanges()
@@ -210,6 +179,36 @@ namespace DomainObjects.Core
         protected virtual void OnAfterPropertyChanged(string propertyName, object before, object after)
         {
 
+        }
+
+        public void ResetChangesDeep()
+        {
+            changeTracker.ResetChangesDeep();
+        }
+
+        public void AcceptChangesDeep()
+        {
+            changeTracker.AcceptChangesDeep();
+        }
+
+        public void MarkChangedDeep()
+        {
+            changeTracker.MarkChangedDeep();
+        }
+
+        public void MarkUnchangedDeep()
+        {
+            changeTracker.MarkUnchangedDeep();
+        }
+
+        public void BeginTrackingDeep()
+        {
+            changeTracker.BeginTrackingDeep();
+        }
+
+        public void StopTrackingDeep()
+        {
+            changeTracker.StopTrackingDeep();
         }
 
 

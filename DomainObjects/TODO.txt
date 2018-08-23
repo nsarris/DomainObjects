@@ -1,6 +1,4 @@
-﻿1. Set Key (only new entities?)
+﻿1. Improve Key (DomainKey wraps property/ValueType/Dynamic ValueType)
 2. Are Same (compare values/deep)
-3. GetIsChangedDeep (use visitor)
-4. Validation (Douple dispatch/ValidationContext)
-5. Better construction (New / Init)
-6. ModelValidator / Builder / Registry
+3. Validation (Douple dispatch/ValidationContext)
+5. ModelValidator / Builder / Registry

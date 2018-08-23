@@ -37,7 +37,7 @@ namespace DomainObjects.ModelBuilder
 
             var rootDescriptors = entityModelBuilderConfigurations.Values
                 .Where(x => x.IsRoot)
-                .Select(x => ScanTypeRecursive(x.EntityType, scannedTypes))
+                .Select(x => ScanEntityTypeRecursive(x.EntityType, scannedTypes))
                 .ToList();
 
             var entityModelBuilders = rootDescriptors
@@ -92,9 +92,9 @@ namespace DomainObjects.ModelBuilder
                         valueTypeDescriptors.AddIfNotNull(ScanValueTypeRecursive(propertyType, visitedTypes));
 
                 }
-                else if (propertyType.IsOrSubclassOfGenericDeep(typeof(ValueReadOnlyList<>), out var valueListType))
+                else if (propertyType.HasGenericDefinition(typeof(ValueReadOnlyList<>)))
                 {
-                    var elementType = valueListType.GetGenericArguments().First();
+                    var elementType = propertyType.GetGenericArguments().First();
                     var elementValueType = elementType.GetSupportedValueType();
 
                     if (!elementValueType.HasValue)
@@ -113,7 +113,7 @@ namespace DomainObjects.ModelBuilder
             return new ValueTypeDescriptor(type, propertyDescriptors, valueTypeDescriptors);
         }
 
-        private EntityDescriptor ScanTypeRecursive(Type type, HashSet<Type> visitedTypes)
+        private EntityDescriptor ScanEntityTypeRecursive(Type type, HashSet<Type> visitedTypes)
         {
             if (visitedTypes.Contains(type))
                 return null;
@@ -138,7 +138,7 @@ namespace DomainObjects.ModelBuilder
                 else if (propertyType.IsSubclassOfDeep(typeof(Aggregate)))
                 {
                     propertyDescriptors.Add(new AggregatePropertyDescriptor(property));
-                    aggregateDescriptors.AddIfNotNull(ScanTypeRecursive(propertyType, visitedTypes));
+                    aggregateDescriptors.AddIfNotNull(ScanEntityTypeRecursive(propertyType, visitedTypes));
                 }
                 else if (propertyType.IsOrSubclassOfGenericDeep(typeof(AggregateList<>), out var aggregateListType)
                     || (readOnly = propertyType.IsOrSubclassOfGenericDeep(typeof(AggregateReadOnlyList<>), out aggregateListType)))
@@ -149,7 +149,7 @@ namespace DomainObjects.ModelBuilder
                     else
                     {
                         propertyDescriptors.Add(new AggregateListPropertyDescriptor(property, elementType, readOnly));
-                        aggregateDescriptors.AddIfNotNull(ScanTypeRecursive(elementType, visitedTypes));
+                        aggregateDescriptors.AddIfNotNull(ScanEntityTypeRecursive(elementType, visitedTypes));
                     }
                 }
                 else if (propertyType.IsOrSubclassOfGenericDeep(typeof(ValueList<>), out var valueListType)

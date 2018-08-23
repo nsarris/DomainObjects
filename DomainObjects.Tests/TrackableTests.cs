@@ -1,4 +1,5 @@
-﻿using DomainObjects.Tests.Books;
+﻿using DomainObjects.ModelBuilder;
+using DomainObjects.Tests.Sales;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -12,34 +13,78 @@ namespace DomainObjects.Tests
     public class TrackableTests
     {
 
+        [OneTimeSetUp]
+        public void Setup()
+        {
+            var modelBuilder = new DomainModelBuilder()
+                .HasModelName("Sales");
+
+            var invoiceBuilder = modelBuilder.Entity<Invoice>().HasKey(x => x.Id);
+            var invoiceLineBuilder = modelBuilder.Entity<InvoiceLine>().HasKey(x => x.Id);
+            var productBuilder = modelBuilder.Entity<Product>().HasKey(x => x.Id);
+
+            var customerBuilder = modelBuilder.Entity<Customer>().HasKey(x => x.Id)
+                .IgnoreMember(x => x.StringComparer)
+                ;
+
+            var model = modelBuilder.Build();
+        }
+        
+
         [Test]
         public void TestNewEntity()
         {
-            var repo = new BookRepository();
-            var book = repo.CreateNew();
+            var repo = new CustomerRepository();
+            var customer = repo.CreateNew();
 
-            Assert.IsTrue(book.GetObjectState() == Core.DomainObjectState.New);
-            Assert.IsFalse(book.GetIsChanged());
+            Assert.IsTrue(customer.GetObjectState() == Core.DomainObjectState.New);
+            Assert.IsFalse(customer.GetIsChanged());
             
-            book.Title = "New Title";
+            customer.Name = "New Name";
 
-            Assert.IsTrue(book.GetIsChanged());
-            //Assert.IsTrue(book.get)
+            Assert.IsTrue(customer.GetIsChanged());
         }
 
         [Test]
-        public void TestPropertyChanges()
+        public void TestPropertyChange()
         {
-            var repo = new BookRepository();
-            var book = repo.GetById(1);
+            var repo = new CustomerRepository();
+            var customer = repo.GetById(1);
 
-            Assert.IsTrue(book.GetObjectState() == Core.DomainObjectState.Existing);
-            Assert.IsFalse(book.GetIsChanged());
+            Assert.IsTrue(customer.GetObjectState() == Core.DomainObjectState.Existing);
+            Assert.IsFalse(customer.GetIsChanged());
 
-            book.Title = "New Title";
+            customer.Name = "New Name";
 
-            Assert.IsTrue(book.GetIsChanged());
-            //Assert.IsTrue(book.get)
+            Assert.IsTrue(customer.GetIsChanged());
+        }
+
+        [Test]
+        public void TestAggregateChange()
+        {
+            var repo = new InvoiceRepository();
+            var invoice = repo.GetById(1);
+
+            Assert.IsTrue(invoice.GetObjectState() == Core.DomainObjectState.Existing);
+            Assert.IsFalse(invoice.GetIsChanged());
+
+            invoice.InvoiceLines.Add(new InvoiceLine
+            {
+                ProductId = 1,
+                Quantity = 1
+            });
+
+            Assert.IsFalse(invoice.GetIsChangedDeep());
+            Assert.IsTrue(invoice.GetIsChangedDeep());
+
+            invoice.AcceptChangesDeep();
+            Assert.IsFalse(invoice.GetIsChangedDeep());
+
+            invoice.InvoiceLines.First().Quantity = 3;
+            Assert.IsTrue(invoice.GetIsChangedDeep());
+
+            invoice.AcceptChangesDeep();
+            Assert.IsFalse(invoice.GetIsChangedDeep());
         }
     }
 }

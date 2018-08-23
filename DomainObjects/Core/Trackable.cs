@@ -15,13 +15,18 @@ namespace DomainObjects.Core
         void ResetChanges();
         void AcceptChanges();
         bool GetIsChanged();
-        //bool GetIsChangedDeep();
-
         void MarkChanged();
         void MarkUnchanged();
-
         void BeginTracking();
         void StopTracking();
+
+        void ResetChangesDeep();
+        void AcceptChangesDeep();
+        bool GetIsChangedDeep();
+        void MarkChangedDeep();
+        void MarkUnchangedDeep();
+        void BeginTrackingDeep();
+        void StopTrackingDeep();
     }
 
     public interface ITrackableObject : ITrackable
@@ -31,6 +36,7 @@ namespace DomainObjects.Core
 
     public interface ITrackableCollection : ITrackable, IEnumerable
     {
+        Type ElementType { get; }
         IEnumerable<object> GetAdded();
         IEnumerable<object> GetRemoved();
     }
@@ -70,6 +76,8 @@ namespace DomainObjects.Core
         bool? markedChanged;
         Dictionary<string, object> originalValues;
         Dictionary<string, object> changes = new Dictionary<string, object>();
+
+        public object GetTrackedObject() => trackable;
 
         public ChangeTracker(object trackable)
         {
@@ -131,12 +139,15 @@ namespace DomainObjects.Core
                 return isChanged;
         }
 
+        public bool GetIsChangedDeep()
+        {
+            return TrackableVisitor.Instance.GetIsChangedDeep(this);
+        }
+
         public IReadOnlyDictionary<string, object> GetChanges()
         {
             return new Dictionary<string, object>(changes);
         }
-
-
 
         public void OnPropertyChanged(string propertyName, object before, object after)
         {
@@ -180,6 +191,16 @@ namespace DomainObjects.Core
             enabled = false;
         }
 
+        public void BeginTrackingDeep()
+        {
+            TrackableVisitor.Instance.Visit(this, x => x.BeginTracking());
+        }
+
+        public void StopTrackingDeep()
+        {
+            TrackableVisitor.Instance.Visit(this, x => x.StopTracking());
+        }
+
         public void MarkChanged()
         {
             markedChanged = true;
@@ -188,6 +209,26 @@ namespace DomainObjects.Core
         public void MarkUnchanged()
         {
             markedChanged = false;
+        }
+
+        public void ResetChangesDeep()
+        {
+            TrackableVisitor.Instance.Visit(this, x => x.ResetChanges());
+        }
+
+        public void AcceptChangesDeep()
+        {
+            TrackableVisitor.Instance.Visit(this, x => x.AcceptChanges());
+        }
+
+        public void MarkChangedDeep()
+        {
+            TrackableVisitor.Instance.Visit(this, x => x.MarkChanged());
+        }
+
+        public void MarkUnchangedDeep()
+        {
+            TrackableVisitor.Instance.Visit(this, x => x.MarkUnchanged());
         }
     }
 
@@ -203,19 +244,14 @@ namespace DomainObjects.Core
             tracker.AfterPropertyChanged += (object sender, PropertyChangedExtendedEventArgs e) => OnAfterPropertyChanged(e.PropertyName, e.Before, e.After);
         }
 
-        public void ResetChanges() => tracker.ResetChanges();
-        public void AcceptChanges() => tracker.AcceptChanges();
-        public bool GetIsChanged() => tracker.GetIsChanged();
-        public IReadOnlyDictionary<string, object> GetChanges() => tracker.GetChanges();
-
         protected virtual void OnBeforePropertyChanged(string propertyName, object before, object after)
         {
-            
+
         }
 
         protected virtual void OnAfterPropertyChanged(string propertyName, object before, object after)
         {
-            
+
         }
 
         protected void OnPropertyChanged(string propertyName, object before, object after)
@@ -223,11 +259,24 @@ namespace DomainObjects.Core
             tracker.OnPropertyChanged(propertyName, before, after);
         }
 
+        public IReadOnlyDictionary<string, object> GetChanges() => tracker.GetChanges();
+
+        public void ResetChanges() => tracker.ResetChanges();
+        public void AcceptChanges() => tracker.AcceptChanges();
+        public bool GetIsChanged() => tracker.GetIsChanged();
         public void BeginTracking() => tracker.BeginTracking();
         public void StopTracking() => tracker.StopTracking();
-
         public void MarkChanged() => tracker.MarkChanged();
         public void MarkUnchanged() => tracker.MarkUnchanged();
+
+        
+        public void ResetChangesDeep() => tracker.ResetChangesDeep();
+        public void AcceptChangesDeep() => tracker.AcceptChangesDeep();
+        public bool GetIsChangedDeep() => tracker.GetIsChangedDeep();
+        public void BeginTrackingDeep() => tracker.BeginTrackingDeep();
+        public void StopTrackingDeep() => tracker.StopTrackingDeep();
+        public void MarkChangedDeep() => tracker.MarkChangedDeep();
+        public void MarkUnchangedDeep() => tracker.MarkUnchangedDeep();
     }
 }
 

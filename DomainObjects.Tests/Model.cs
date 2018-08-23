@@ -59,7 +59,7 @@ namespace DomainObjects.Tests.Books
             this.BeginTracking();
         }
 
-        [DomainKey(1)]
+        //[DomainKey(1)]
         public int Isbn { get; }
         public string Title { get; set; }
         public BookType Type { get; set; }
@@ -69,9 +69,9 @@ namespace DomainObjects.Tests.Books
     [AddINotifyPropertyChangedInterface]
     class Author : DomainEntity
     {
-        [DomainKey(1)]
+        //[DomainKey(1)]
         public string FirstName { get; set; }
-        [DomainKey(2)]
+        //[DomainKey(2)]
         public string LastName { get; set; }
         public DateTime DOB { get; set; }
         public Book LastPublishedBook { get; set; }
@@ -92,7 +92,7 @@ namespace DomainObjects.Tests.Books
             public string FirstName { get; }
             public string LastName { get; }
         }
-        [DomainKey(1)]
+        //[DomainKey(1)]
         public AuthorKey Key { get; set; }
 
         public DateTime DOB { get; set; }
