@@ -81,7 +81,7 @@ namespace DomainObjects.Tests.Books
     [AddINotifyPropertyChangedInterface]
     class Author2 : DomainEntity
     {
-        public class AuthorKey : DomainKey
+        public class AuthorKey : DomainKeyValue
         {
             public AuthorKey(string firstName, string lastName)
             {
@@ -99,7 +99,7 @@ namespace DomainObjects.Tests.Books
         public AggregateList<Book> Books { get; set; }
     }
 
-    class Key1 : DomainKey
+    class Key1 : DomainKeyValue
     {
         public Key1(string firstName, string lastName)
         {
@@ -112,7 +112,7 @@ namespace DomainObjects.Tests.Books
 
     }
 
-    class Key2 : DomainKey
+    class Key2 : DomainKeyValue
     {
         public Key2(int id)
         {

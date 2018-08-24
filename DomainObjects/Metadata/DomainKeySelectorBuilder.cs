@@ -18,80 +18,106 @@ namespace DomainObjects.Metadata
     {
         static readonly string CLASS_NAME_POSTFIX = "_DomainEntityKey_";
 
-        public static Func<DomainEntity, object> BuildSelector(Type type, IEnumerable<PropertyInfo> keyPropertiesEnumerable)
+        private static Expression BuildKeyValueSelectorExpression(Type entityType, List<PropertyInfo> keyProperties, out ParameterExpression entityParameterExpression, out Type keyValueType)
         {
-            var keyProperties = keyPropertiesEnumerable is List<PropertyInfo> keyPropertiesList ? keyPropertiesList : keyPropertiesEnumerable.ToList();
-
-            var parameter = Expression.Parameter(typeof(DomainEntity));
+            entityParameterExpression = Expression.Parameter(typeof(DomainEntity));
+            var convertedEntityTypeExpression = ExpressionEx.ConvertIfNeeded(entityParameterExpression, entityType);
 
             if (!keyProperties.Any())
-                keyProperties = type.GetProperties().ToList();
+                keyProperties = entityType.GetProperties().ToList();
 
-            Func<DomainEntity, object> selectorFunction = null;
-
-            //if (keyProperties.Count == 1)
-            //{
-            //    selectorFunction = Expression.Lambda<Func<DomainEntity, object>>(Expression.Convert(
-            //        Expression.Property(Expression.Convert(parameter, type), keyProperties.Single()), typeof(object))
-            //        , new[] { parameter }).Compile();
-            //}
-            //else
+            if (keyProperties.Count == 1)
             {
-                var dynamicTypeBuilderDescriptor =
-                    new DynamicTypeDescriptorBuilder("_" + type.FullName + CLASS_NAME_POSTFIX)
-                    //TODO: This can be removed when the type knows when to go shallow
-                    .HasBaseType<DomainKey>();
-
-                keyProperties
-                    .ForEach(x =>
-                    {
-                        dynamicTypeBuilderDescriptor.AddProperty(
-                            x.Name,
-                            x.PropertyType,
-                            config => config
-                                .HasSetter(GetSetAccessModifier.None)
-                                .IsInitializedInConstructor()
-                       );
-                    });
-
-                var keyValueType = DynamicTypeBuilder.Instance.CreateType(dynamicTypeBuilderDescriptor);
+                var property = keyProperties.Single();
+                keyValueType = property.PropertyType;
+                return Expression.Property(convertedEntityTypeExpression, property);
+            }
+            else
+            {
+                keyValueType = BuildKeyValueType(entityType, keyProperties);
 
                 var keyValueTypeCtor = keyValueType.GetConstructors().First(x => x.GetParameters().Length > 0);
 
-                var valueCtorExpression = Expression.New(
+                return Expression.New(
                     constructor: keyValueTypeCtor,
                     arguments: keyProperties
-                        .Select(x => Expression.Property(
-                                Expression.Convert(parameter, type), x))
+                        .Select(x => Expression.Property(convertedEntityTypeExpression, x))
                         .ToArray()
                     );
-
-                var keyType = typeof(DomainKeyWrapper<>).MakeGenericTypeCached(keyValueType);
-                var keyCtorSet = keyType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { keyValueType }, null);
-                var keyCtorUnSet = keyType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(UnsetKey) }, null);
-
-                var keySetCtorExpression = Expression.New(
-                    constructor: keyCtorSet,
-                    arguments: valueCtorExpression);
-
-                var keyUnSetCtorExpression = Expression.New(
-                    constructor: keyCtorUnSet,
-                    arguments: Expression.Call(
-                                Expression.Convert(parameter, type), nameof(DomainEntity.GetUnSetKey), new Type[0], new Expression[0]));
-
-                var isKeySetExpresion = Expression.Call(
-                                Expression.Convert(parameter, type), nameof(DomainEntity.GetKeyIsSet), new Type[0], new Expression[0]);
-
-                var body = Expression.Condition(
-                        test: Expression.Equal(isKeySetExpresion, ExpressionEx.Constants.True),
-                        ifTrue: keySetCtorExpression,
-                        ifFalse: keyUnSetCtorExpression
-                    );
-
-                selectorFunction = Expression.Lambda<Func<DomainEntity, object>>(body, parameter).Compile();
             }
+        }
 
-            return selectorFunction;
+        public static Func<DomainEntity, object> BuildKeyValueSelector(Type type, IEnumerable<PropertyInfo> keyPropertiesEnumerable)
+        {
+            var keyProperties = keyPropertiesEnumerable is List<PropertyInfo> keyPropertiesList ? keyPropertiesList : keyPropertiesEnumerable.ToList();
+
+            var selector = BuildKeyValueSelectorExpression(type, keyProperties, out var parameter, out var _);
+            var body = ExpressionEx.ConvertIfNeeded(selector, typeof(object));
+
+            return Expression.Lambda<Func<DomainEntity, object>>(body, parameter).Compile();
+        }
+
+        private static Type BuildKeyValueType(Type entityType, List<PropertyInfo> keyProperties)
+        {
+            var dynamicTypeBuilderDescriptor =
+                new DynamicTypeDescriptorBuilder("_" + entityType.FullName + CLASS_NAME_POSTFIX)
+                //TODO: This can be removed when the type knows when to go shallow
+                .HasBaseType<DomainKeyValue>();
+
+            keyProperties
+                .ForEach(x =>
+                {
+                    dynamicTypeBuilderDescriptor.AddProperty(
+                        x.Name,
+                        x.PropertyType,
+                        config => config
+                            .HasSetter(GetSetAccessModifier.None)
+                            .IsInitializedInConstructor()
+                   );
+                });
+
+            var keyValueType = DynamicTypeBuilder.Instance.CreateType(dynamicTypeBuilderDescriptor);
+            return keyValueType;
+        }
+
+        private static Expression BuildSetKeyConstructorExpression(Type keyType, Type keyValueType, Expression keyValueSelectorExpression)
+        {
+            var keyCtorSet = keyType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { keyValueType }, null);
+
+            return Expression.New(
+                constructor: keyCtorSet,
+                arguments: ExpressionEx.ConvertIfNeeded(keyValueSelectorExpression, keyValueType));
+        }
+
+        private static Expression BuildUnSetKeyConstructorExpression(Type keyType, Expression entityExpression)
+        {
+            var keyCtorUnSet = keyType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(UnsetKey) }, null);
+
+            return Expression.New(
+                    constructor: keyCtorUnSet,
+                    arguments: Expression.Call(entityExpression, nameof(DomainEntity.GetUnSetKey), new Type[0], new Expression[0]));
+        }
+
+        public static Func<DomainEntity, object> BuildKeySelector(Type entityType, IEnumerable<PropertyInfo> keyPropertiesEnumerable)
+        {
+            var keyProperties = keyPropertiesEnumerable is List<PropertyInfo> keyPropertiesList ? keyPropertiesList : keyPropertiesEnumerable.ToList();
+            var valueSelectorExpression = BuildKeyValueSelectorExpression(entityType, keyProperties, out var entityParameterExpression, out var keyValueType);
+
+            var keyType = typeof(DomainKey<>).MakeGenericTypeCached(keyValueType);
+            var entityExpression = ExpressionEx.ConvertIfNeeded(entityParameterExpression, entityType);
+
+            var keySetCtorExpression = BuildSetKeyConstructorExpression(keyType, keyValueType, valueSelectorExpression);
+            var keyUnSetCtorExpression = BuildUnSetKeyConstructorExpression(keyType, entityExpression);
+
+            var isKeySetExpresion = Expression.Call(entityExpression, nameof(DomainEntity.GetKeyIsSet), new Type[0], new Expression[0]);
+
+            var body = Expression.Condition(
+                    test: Expression.Equal(isKeySetExpresion, ExpressionEx.Constants.True),
+                    ifTrue: keySetCtorExpression,
+                    ifFalse: keyUnSetCtorExpression
+                );
+
+            return Expression.Lambda<Func<DomainEntity, object>>(ExpressionEx.ConvertIfNeeded(body, typeof(object)), entityParameterExpression).Compile();
         }
     }
 }

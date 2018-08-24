@@ -11,7 +11,7 @@ namespace DomainObjects.Metadata
 
     public interface IKeyProvider<TKey> : IKeyProvider
     {
-        new DomainKeyWrapper<TKey> GetKey();
+        new DomainKey<TKey> GetKey();
         //new TKey GetKeyValue();
     }
 }

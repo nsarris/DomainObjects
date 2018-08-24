@@ -12,6 +12,7 @@ namespace DomainObjects.Metadata
         private readonly Dictionary<string, DomainPropertyMetadata> propertyMetadata;
         private readonly List<DomainValuePropertyMetadata> keyProperties;
         private readonly Func<DomainEntity, object> keySelector;
+        private readonly Func<DomainEntity, object> keyValueSelector;
         //private readonly Dictionary<Type, DomainEntityMetadata> aggregateTypes;
 
         //public IReadOnlyDictionary<Type, DomainEntityMetadata> AggregateTypes => aggregateTypes;
@@ -23,7 +24,8 @@ namespace DomainObjects.Metadata
         {
             this.propertyMetadata = propertyMetadata.ToDictionary(x => x.Property.Name);
             keyProperties = this.propertyMetadata.Values.OfType<DomainValuePropertyMetadata>().Where(x => x.IsKeyMember).ToList();
-            keySelector = DomainKeySelectorBuilder.BuildSelector(entityType, keyProperties.Select(x => x.Property.PropertyInfo).ToList());
+            keySelector = DomainKeySelectorBuilder.BuildKeySelector(entityType, keyProperties.Select(x => x.Property.PropertyInfo).ToList());
+            keyValueSelector = DomainKeySelectorBuilder.BuildKeyValueSelector(entityType, keyProperties.Select(x => x.Property.PropertyInfo).ToList());
             //this.aggregateTypes = aggregateTypes.ToDictionary(x => x.EntityType);
 
             EntityType = entityType;
@@ -33,6 +35,11 @@ namespace DomainObjects.Metadata
         public object GetKey(DomainEntity entity)
         {
             return keySelector(entity);
+        }
+
+        public object GetKeyValue(DomainEntity entity)
+        {
+            return keyValueSelector(entity);
         }
 
         public void SetKey(DomainEntity entity, object value)

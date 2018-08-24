@@ -50,6 +50,11 @@ namespace DomainObjects.Core
             return (IDomainKey)GetEntityMetadata().GetKey(this);
         }
 
+        public object GetKeyValue()
+        {
+            return GetEntityMetadata().GetKeyValue(this);
+        }
+
         public bool KeyEquals(DomainEntity other)
         {
             if (other == null || other.GetType() != this.GetType())
@@ -273,14 +278,19 @@ namespace DomainObjects.Core
 
     public class DomainEntity<TKey> : DomainEntity, IKeyProvider<TKey>
     {
-        public new DomainKeyWrapper<TKey> GetKey()
+        public new DomainKey<TKey> GetKey()
         {
-            return (DomainKeyWrapper<TKey>)base.GetKey();
+            return (DomainKey<TKey>)base.GetKey();
         }
 
         public void SetKey(TKey key)
         {
             base.SetKey(key);
+        }
+
+        public new TKey GetKeyValue()
+        {
+            return (TKey)base.GetKeyValue();
         }
     }
 }
