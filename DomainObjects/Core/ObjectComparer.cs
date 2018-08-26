@@ -79,13 +79,6 @@ namespace DomainObjects.Core
             if (leftType.IsValueType)
                 return Equals(left, right);
 
-            //Use IEquitable
-            //if (IsIEquatable(leftType))
-            //{
-            //    var m = leftType.GetInterfaceMap(typeof(IEquatable<>).MakeGenericType(leftType)).TargetMethods.FirstOrDefault(x => x.Name == "Equals");
-            //    return ((bool)m.Invoke(left, new object[] { right }));
-            //}
-
             //If enumerable compare contents (assumes same positions)
             if ((left is IEnumerable<Object> leftEnumerable)
                 && (right is IEnumerable<Object> rightEnumerable))
@@ -119,10 +112,5 @@ namespace DomainObjects.Core
 
             return true;
         }
-
-        //private static Boolean IsIEquatable(Type type)
-        //{
-        //    return type.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEquatable<>) && x.GenericTypeArguments[0] == type);
-        //}
     }
 }

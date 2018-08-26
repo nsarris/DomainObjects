@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DomainObjects.ChangeTracking;
 using DomainObjects.Metadata;
+using DomainObjects.Validation;
 using Dynamix;
 
 namespace DomainObjects.Core
@@ -39,11 +40,11 @@ namespace DomainObjects.Core
 
         #region Key and Equality
 
-        private readonly UnsetKey unsetKey = new UnsetKey();
-        private bool keyIsSet;
+        private readonly UnassignedKey unassignedKey = new UnassignedKey();
+        private bool keyIsAssigned;
 
-        public bool GetKeyIsSet() => keyIsSet;
-        internal UnsetKey GetUnSetKey() => unsetKey;
+        public bool GetKeyIsAssigned() => keyIsAssigned;
+        internal UnassignedKey GetUnAssignedKey() => unassignedKey;
 
         public IDomainKey GetKey()
         {
@@ -69,7 +70,7 @@ namespace DomainObjects.Core
 
             GetEntityMetadata().SetKey(this, values);
 
-            keyIsSet = true;
+            keyIsAssigned = true;
         }
 
         public void SetKey(object value)
@@ -78,12 +79,12 @@ namespace DomainObjects.Core
 
             GetEntityMetadata().SetKey(this, value);
 
-            keyIsSet = true;
+            keyIsAssigned = true;
         }
 
         protected void AssertSetKey()
         {
-            if (keyIsSet)
+            if (keyIsAssigned)
                 throw new InvalidOperationException($"Key has already been marked as set for entity {this.GetType().Name}");
         }
 
@@ -103,12 +104,12 @@ namespace DomainObjects.Core
             if (isNew)
             {
                 MarkNew();
-                this.keyIsSet = keyIsSet;
+                this.keyIsAssigned = keyIsSet;
             }
             else
             {
                 MarkExisting();
-                this.keyIsSet = true;
+                this.keyIsAssigned = true;
             }
 
             BeginTrackingDeep();
@@ -238,6 +239,18 @@ namespace DomainObjects.Core
         #endregion
 
         #region Validation
+
+        //public virtual IValidationResult Validate()
+        //{
+        //    Validate(null);
+        //    return null;
+        //}
+
+        //public virtual IValidationResult Validate(IValidationContext validationContext)
+        //{
+        //    //AssertRequireValidationResult
+        //    return null;
+        //}
 
         //public IEnumerable<ValidationResult> Validate()
         //{

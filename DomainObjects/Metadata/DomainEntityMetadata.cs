@@ -69,7 +69,7 @@ namespace DomainObjects.Metadata
                     keyProperty.Property.Set(entity, values[0]);
                 else
                 {
-                    var key = Activator.CreateInstance(keyProperty.Type, values);
+                    var key = keyProperty.Type.GetConstructorsEx().Last().Invoke(values);
                     keyProperty.Property.Set(entity, key);
                 }
             }

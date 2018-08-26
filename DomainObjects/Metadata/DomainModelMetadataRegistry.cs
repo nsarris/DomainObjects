@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DomainObjects.Core;
+using System;
 using System.Collections.Generic;
 
 namespace DomainObjects.Metadata
@@ -40,5 +41,8 @@ namespace DomainObjects.Metadata
 
             throw new KeyNotFoundException($"Domain entity type {type.Name} not found in any built models or model has not been built");
         }
+
+        public static DomainEntityMetadata GetEntityDescriptor<T>() where T : DomainObject 
+            => GetEntityDescriptor(typeof(T));
     }
 }

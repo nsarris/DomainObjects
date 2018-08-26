@@ -1,10 +1,11 @@
-﻿using System;
+﻿using DomainObjects.Core;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DomainObjects.Core
+namespace DomainObjects.Validation
 {
     //PropertyValidator (value / collection / entity? / valueType / complex)
     //EntityValidator
@@ -15,9 +16,19 @@ namespace DomainObjects.Core
         //ValidationContext
     }
 
-    public class ValidationResult
+    public interface IValidationContext<T>
     {
-        public bool Valid { get; private set; }
+        T Target { get; }
+    }
+
+    public interface IValidator<T> where T: DomainObject
+    {
+        IValidationResult Validate(IValidationContext<T> validationContext);
+    }
+
+    public interface IValidationResult
+    {
+        bool IsValid { get; }
         //List<ValidatorError> Errors
     }
 

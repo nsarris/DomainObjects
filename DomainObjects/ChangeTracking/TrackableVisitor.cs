@@ -9,7 +9,7 @@ namespace DomainObjects.ChangeTracking
 {
     internal class TrackableVisitor 
     {
-        public static TrackableVisitor Instance = new TrackableVisitor();
+        public readonly static TrackableVisitor Instance = new TrackableVisitor();
 
         public bool GetIsChangedDeep(ITrackable trackable)
         {
@@ -41,8 +41,8 @@ namespace DomainObjects.ChangeTracking
 
             foreach(var prop in trackedObject.GetType().GetPropertiesEx().Where(x => x.CanGet && x.PropertyInfo.GetIndexParameters().Length == 0))
             {
-                if (prop.Type.IsAssignableTo(typeof(ITrackableObject)))
-                    if (GetIsChangedDeep(prop.Get(trackedObject) as ITrackableObject, visited))
+                if (prop.Type.IsAssignableTo(typeof(ITrackableObject))
+                    && GetIsChangedDeep(prop.Get(trackedObject) as ITrackableObject, visited))
                         return true;
                 
                 if (prop.Type.IsAssignableTo(typeof(ITrackableCollection)))

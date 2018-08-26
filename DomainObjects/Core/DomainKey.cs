@@ -8,26 +8,26 @@ using Dynamix.Reflection;
 
 namespace DomainObjects.Core
 {
-    internal class UnsetKey { }
+    internal class UnassignedKey { }
 
     public interface IDomainKey
     {
         object Value { get; }
-        bool IsSet { get; }
+        bool IsAssigned { get; }
     }
 
 
     public sealed class DomainKey<T> : IDomainKey, IEquatable<DomainKey<T>>, IEquatable<T>
     {
         public T Value { get; }
-        public bool IsSet => UnsetKey == null;
-        private UnsetKey UnsetKey { get; }
+        public bool IsAssigned => UnassignedKey == null;
+        private UnassignedKey UnassignedKey { get; }
 
         object IDomainKey.Value => Value;
 
-        internal DomainKey(UnsetKey unsetKey)
+        internal DomainKey(UnassignedKey unassignedKey)
         {
-            this.UnsetKey = unsetKey;
+            this.UnassignedKey = unassignedKey;
         }
 
         internal DomainKey(T value)
@@ -48,7 +48,7 @@ namespace DomainObjects.Core
             if (other is null)
                 return false;
 
-            if (IsSet && other.IsSet)
+            if (IsAssigned && other.IsAssigned)
             {
                 if (Value == null && other.Value == null)
                     return true;
@@ -57,8 +57,8 @@ namespace DomainObjects.Core
 
                 return Value.Equals(other.Value);
             }
-            else if (!IsSet && !other.IsSet)
-                return other.UnsetKey == UnsetKey;
+            else if (!IsAssigned && !other.IsAssigned)
+                return other.UnassignedKey == UnassignedKey;
             else
                 return false;
         }
@@ -70,7 +70,7 @@ namespace DomainObjects.Core
 
         public override int GetHashCode()
         {
-            return IsSet ? Value.GetHashCode() : UnsetKey.GetHashCode();
+            return IsAssigned ? Value.GetHashCode() : UnassignedKey.GetHashCode();
         }
 
         public static bool operator ==(DomainKey<T> x, DomainKey<T> y)
@@ -122,7 +122,7 @@ namespace DomainObjects.Core
             else if (y == null)
                 return false;
 
-            if (y.IsSet)
+            if (y.IsAssigned)
                 return y.Value.Equals(x);
             else
                 return false;

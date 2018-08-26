@@ -17,9 +17,4 @@ namespace DomainObjects.Core
         {
         }
     }
-
-
-
-
-
 }
