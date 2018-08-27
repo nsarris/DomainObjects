@@ -9,9 +9,31 @@ using System.Threading.Tasks;
 using FluentValidation;
 using FluentValidation.Internal;
 using FluentValidation.Results;
+using FluentValidation.Validators;
+using DomainObjects.Validation;
 
 namespace DomainObjects.Tests.Sales
 {
+    public class TestService
+    {
+        public bool IsNegative(int i) => i < 0;
+    }
+
+    public class TestService2
+    {
+        public bool IsPositive(int i) => i > 0;
+    }
+
+    public class CityExistanceService
+    {
+        public bool Exists(string cityName)
+        {
+            if (string.IsNullOrEmpty(cityName))
+                return false;
+
+            return cityName.Length > 3;
+        }
+    }
 
     public class CustomerRepository
     {
@@ -67,117 +89,57 @@ namespace DomainObjects.Tests.Sales
             Name = name;
         }
 
-        public class TestService
-        {
-            public bool IsNegative(int i) => i < 0;
-        }
 
-        public class Validator : DomainValidator<Customer>
+
+        public class Validator : DomainObjectFluentValidator<Customer>
         {
-            public Validator(TestService someDependency)
-                :base(FluentValidator.Instance.Value)
+            public Address.Validator AddressValidator { get; }
+            public Validator(TestService someDependency, Address.Validator addressValidator)
+                : base(ValidatorImpl.Instance.Value)
             {
+                AddressValidator = addressValidator;
                 SomeDependency = someDependency;
 
-                RegisterDependency(SomeDependency ?? new TestService());
+                AutoRegisterChildValidators();
             }
 
-            public new FluentValidator FluentValidator => (FluentValidator)base.FluentValidator;
             public TestService SomeDependency { get; }
-        }
-        
-        public class FluentValidator : AbstractValidator<Customer>
-        {
-            public static Lazy<FluentValidator> Instance = new Lazy<FluentValidator>(() => new FluentValidator());
 
-            //protected override bool PreValidate(ValidationContext<Customer> context, ValidationResult result)
-            //{
-            //    var parentContext = (CustomValidationContext<Customer>)context;
-            //    var validatorResolver = parentContext.ValidatorResolver;
-            //    var validator = validatorResolver.ResolveValidator<Customer.Validator>();
-            //    //Get and inject dependencies
-            //    parentContext.RootContextData.Add("Test", validator.SomeDependency);
 
-            //    return base.PreValidate(context, result);
-            //}
-
-            public FluentValidator()
+            private class ValidatorImpl : AbstractValidator<Customer>
             {
-                
+                public static Lazy<ValidatorImpl> Instance = new Lazy<ValidatorImpl>(() => new ValidatorImpl());
 
-                RuleFor(x => x).Custom((x, context) =>
+                public ValidatorImpl()
                 {
-                    //x.Validate() //From Domain
-                    
-                    
-                    
-                    //var parentContext = (CustomValidationContext<Customer>)context.ParentContext;
-                    //var validatorResolver = parentContext.ValidatorResolver;
-                    //var validator = validatorResolver.ResolveValidator<Customer.Validator>();
-                    ////Get and inject dependencies
-                    //parentContext.RootContextData.Add("Test", validator.SomeDependency);
-                    
-                    //var result = addressValidator.Validate(clonedChildContext);
-                    //foreach (var failure in result.Errors)
-                    //    context.AddFailure(failure);
-                });
+                    //TODO: ApplyFrom (EF/Linq2db/Dalia) -> using mapper (get straight properties)
 
-                RuleFor(x => x.Id).GreaterThan(0).Must((customer, x, context) =>
-                {
-                    var parentContext = (CustomValidationContext<Customer>)context.ParentContext;
-                    var validatorResolver = parentContext.ValidatorResolver;
-                    var validator = validatorResolver.ResolveValidator<Customer.Validator>();
 
-                    var dependency = validator.GetDependency<TestService>();
-                    return !dependency.IsNegative(x);
-                });
+                    //RuleFor(x => x).Custom((x, context) =>
+                    //{
 
-                RuleFor(x => x.Name).NotEmpty();
-                //RuleFor(x => x.testInnerField).NotEmpty();
-                //RuleFor(x => x.MainAddress).SetValidator(new Address.Validator());
+                    //});
 
-                RuleFor(x => x.MainAddress).Custom((x, context) =>
-                {
-                    var parentContext = (CustomValidationContext<Customer>)context.ParentContext;
-                    //parentContext.RootContextData.Add("dsd", 0);
-                    //var clonedChildContext1 = parentContext.CloneForChildValidator(x, true, context.ParentContext.Selector);
-                    var clonedChildContext = parentContext.CloneForChildValidator<Address>(x);
-                    //var childContext = new CustomValidationContext<Address>(x, parentContext.PropertyChain, parentContext.Selector,);
-                    
+                    //RuleFor(x => x.Id).GreaterThan(0).Must((customer, x, context) =>
+                    //{
+                    //    var parentContext = (DomainValidationContext<Customer>)context.ParentContext;
+                    ////var validatorResolver = parentContext.ValidatorResolver;
+                    ////var validator = validatorResolver.ResolveValidator<Customer.Validator>();
+                    //var validator = (Customer.Validator)parentContext.Validator;
 
-                    var validatorResolver = parentContext.ValidatorResolver;
-                    //var addressValidator = validatorResolver.ResolveValidator<Address.Validator>();
 
-                    //var result = addressValidator.Validate(clonedChildContext);
-                    //foreach (var failure in result.Errors)
-                    //    context.AddFailure(failure);
-                });
+                    //    //var dependency = validator.GetDependency<TestService>();
+                    //    return !validator.SomeDependency.IsNegative(x);
+                    //});
 
-                RuleForEach(x => x.OtherAddresses).SetValidator(new Address.Validator());
+                    //RuleFor(x => x.Name).NotEmpty();
+
+                    RuleFor(x => x.MainAddress).NotNull().AsDomainChild().ValidateUsing<Address.Validator>();
+                    //RuleForEach(x => x.OtherAddresses).SetValidator(new Address.Validator());
+                }
             }
         }
     }
-
-    public class Phone : DomainValue
-    {
-        public Phone(string number, int kind)
-        {
-            Number = number;
-            Kind = kind;
-        }
-
-        public string Number { get; }
-        public int Kind { get; }
-
-        public class Validator : DomainObjectFluentValidator<Phone>
-        {
-            public Validator()
-            {
-                RuleFor(x => x.Number).NotEmpty();
-            }
-        }
-    }
-
     public class Address : DomainValue
     {
         public Address(string street, string number, string city, string postCode, Phone primaryPhone, IEnumerable<Phone> otherPhones)
@@ -197,19 +159,85 @@ namespace DomainObjects.Tests.Sales
         public Phone PrimaryPhone { get; }
         public ValueReadOnlyList<Phone> OtherPhones { get; }
 
-        public class Validator : AbstractValidator<Address>
+
+        public class Validator : DomainObjectFluentValidator<Address>
         {
-            public Validator()
+            public Phone.Validator PhoneValidator { get; }
+            public CityValidator CityValidator { get; }
+            public Validator(Phone.Validator phoneValidator, CityValidator cityValidator) : base(ValidatorImpl.Instance.Value)
             {
-                RuleFor(x => x.Street).NotEmpty();
-                RuleFor(x => x.Number).NotEmpty();
-                RuleFor(x => x.City).NotEmpty();
-                RuleFor(x => x.PrimaryPhone).SetValidator(new Phone.Validator());
-                RuleForEach(x => x.OtherPhones).SetValidator(new Phone.Validator());
+                PhoneValidator = phoneValidator;
+                CityValidator = cityValidator;
+
+                AutoRegisterChildValidators();
+            }
+
+            private class ValidatorImpl : AbstractValidator<Address>
+            {
+                public static Lazy<ValidatorImpl> Instance = new Lazy<ValidatorImpl>(() => new ValidatorImpl());
+                public ValidatorImpl()
+                {
+                    RuleFor(x => x.Street).NotEmpty();
+                    RuleFor(x => x.Number).NotEmpty();
+                    RuleFor(x => x.City).AsDomainProperty().ValidateUsingCustom<CityValidator>();
+                    //RuleFor(x => x.PrimaryPhone).SetValidator(new Phone.Validator());
+                    //RuleForEach(x => x.OtherPhones).SetValidator(new Phone.Validator());
+
+                    RuleFor(x => x.PrimaryPhone).NotNull().AsDomainChild().ValidateUsing<Phone.Validator>();
+                    RuleForEach(x => x.OtherPhones).AsDomainChild().ValidateUsing<Phone.Validator>();
+                }
             }
         }
-
     }
+    public class Phone : DomainValue
+    {
+        public Phone(string number, int kind)
+        {
+            Number = number;
+            Kind = kind;
+        }
+
+        public string Number { get; }
+        public int Kind { get; }
+
+        public class Validator : DomainObjectFluentValidator<Phone>
+        {
+            public Validator() : base(ValidatorImpl.Instance.Value)
+            {
+                AutoRegisterChildValidators();
+            }
+
+            private class ValidatorImpl : AbstractValidator<Phone>
+            {
+                public static Lazy<ValidatorImpl> Instance = new Lazy<ValidatorImpl>(() => new ValidatorImpl());
+                public ValidatorImpl()
+                {
+                    RuleFor(x => x.Number).NotEmpty().Length(5,10);
+                }
+            }
+        }
+    }
+
+    public class CityValidator : IDomainPrimitiveValidator<string>
+    {
+        CityExistanceService cityExistanceService;
+
+        public CityValidator(CityExistanceService cityExistanceService)
+        {
+            this.cityExistanceService = cityExistanceService;
+        }
+
+        public DomainValidationResult Validate(string instance)
+        {
+            var r = new DomainValidationResult();
+            if (!cityExistanceService.Exists(instance))
+                r.AddFailure(new DomainValidationError("City",$"City '{instance}' does not exist", instance));
+            return r;
+        }
+    }
+
+
+
 
     [AddINotifyPropertyChangedInterface]
     public class Invoice : AggregateRoot

@@ -1,4 +1,4 @@
-﻿1. Improve Key (DomainKey wraps property/ValueType/Dynamic ValueType)
-2. Are Same (compare values/deep)
-3. Validation (Douple dispatch/ValidationContext)
-5. ModelValidator / Builder / Registry
+﻿1. Are Same (compare values/deep)
+2. ModelValidator / Builder / Registry -> Use attributes
+3. BuildValidators from datamodel metadata (linq2db / ef / dalia)
+

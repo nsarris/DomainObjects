@@ -55,9 +55,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
-    <Compile Include="DomainObjectValidator.cs" />
+    <Compile Include="ChildContextType.cs" />
+    <Compile Include="DomainChildRuleBuilder.cs" />
+    <Compile Include="DomainObjectFluentValidator.cs" />
+    <Compile Include="DomainPrimitiveFluentValidator.cs" />
+    <Compile Include="DomainPropertyRuleBuilder.cs" />
     <Compile Include="DomainValidationContext.cs" />
+    <Compile Include="FluentValidationDomainExtensions.cs" />
+    <Compile Include="IDomainFluentValidator.cs" />
+    <Compile Include="IDomainObjectFluentValidator.cs" />
+    <Compile Include="IDomainPrimitiveFluentValidator.cs" />
+    <Compile Include="IDomainValidationContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

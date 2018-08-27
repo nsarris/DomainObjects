@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DomainObjects.ModelBuilder;
 using DomainObjects.Tests.Sales;
 using NUnit.Framework;
+using Unity;
 
 namespace DomainObjects.Tests
 {
@@ -15,6 +16,10 @@ namespace DomainObjects.Tests
         [Test]
         public void BasicValidationTest()
         {
+            var container = new UnityContainer();
+            //container.RegisterInstance(new TestService());
+            //container.RegisterInstance(new TestService2());
+
             var modelBuilder = new DomainModelBuilder()
                 .HasModelName("Sales");
 
@@ -32,9 +37,16 @@ namespace DomainObjects.Tests
             var repo = new CustomerRepository();
 
             var customer = repo.CreateNew();
-            customer.MainAddress = new Address("Street", "Number", null, null, null, null);
+            customer.MainAddress = new Address("Street", "Number", null, null, new Phone("1234", 0),
+                new List<Phone>()
+                {
+                    new Phone("123", 0),
+                    new Phone("456", 0),
+                    new Phone("", 0),
+                });
 
-            var validationResult = new Customer.Validator(new Customer.TestService()).Validate(customer);
+            var customerValidator = container.Resolve<Customer.Validator>();
+            var validationResult = customerValidator.Validate(customer);
         }
     }
 }

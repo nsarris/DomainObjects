@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using Dynamix;
 using Dynamix.Reflection;
 
-namespace DomainObjects.Core
+namespace DomainObjects.Internal
 {
-    public class ObjectComparer
+    internal class ObjectComparer
     {
         public static ObjectComparer Default { get; } = new ObjectComparer();
 
@@ -98,7 +98,7 @@ namespace DomainObjects.Core
             // Compare object properties
             foreach (var prop in leftType.GetPropertiesEx().Where(x => x.CanGet && x.PropertyInfo.GetIndexParameters().Length == 0))
             {
-                if (prop.Type.IsClass)
+                if (prop.Type.IsClass || prop.Type.IsInterface)
                 {
                     if (!DeepEqualsInternal(prop.Get(left), prop.Get(right), objectsChecked))
                         return false;
