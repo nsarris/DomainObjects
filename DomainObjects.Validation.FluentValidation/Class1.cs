@@ -10,53 +10,9 @@ using System.Threading.Tasks;
 
 namespace DomainObjects.Validation.FluentValidation
 {
-    //public interface ICustomValidationContext : IValidationContext
-    //{
-    //    IValidationContext Parent { get; }
-    //    TData GetRootData<TData>();
-    //}
-
-    //public interface IRootValidationContext<out TData>
-    //{
-    //    TData Data { get; }
-    //}
-
-    //public class CustomValidationContext : ValidationContext//, ICustomValidationContext
-    //{
-    //    public CustomValidationContext(object instanceToValidate) : base(instanceToValidate)
-    //    {
-    //    }
-
-    //    public CustomValidationContext(object instanceToValidate, PropertyChain propertyChain, IValidatorSelector validatorSelector) : base(instanceToValidate, propertyChain, validatorSelector)
-    //    {
-    //    }
-
-    //    //public IValidationContext Parent { get; set; }
-
-    //    //public virtual IRootValidationContext<TData> GetRootContext<TData>()
-    //    //{
-    //    //    var parent = Parent as ICustomValidationContext;
-    //    //    while (parent != null)
-    //    //    {
-    //    //        if (parent is IRootValidationContext<TData> root)
-    //    //        {
-    //    //            return root;
-    //    //        }
-    //    //        parent = parent.Parent as ICustomValidationContext;
-    //    //    }
-    //    //    return null;
-    //    //}
-
-    //    //public virtual TData GetRootData<TData>()
-    //    //{
-    //    //    return GetRootContext<TData>().Data;
-    //    //}
-    //}
-
     public interface IDomainValidator
     {
         global::FluentValidation.IValidator FluentValidator { get; }
-        //Dictionary<(Type, string), object> Dependencies { get; }
 
         TDependency GetDependency<TDependency>();
         object GetDependency(Type dependencyType);
@@ -91,7 +47,8 @@ namespace DomainObjects.Validation.FluentValidation
         {
             var context = new RootValidationContext<T>(instance, new TestValidatorResolver());
 
-            //TODO: Use attribute to insert with name
+            //TODO: Use attribute to insert in root context data with name
+            //Note: FluentValidation specific
             //foreach (var item in Dependencies)
               //  context.RootContextData.Add(item.Key.Name, item.Value);
             return FluentValidator.Validate(context);
@@ -172,6 +129,8 @@ namespace DomainObjects.Validation.FluentValidation
     {
         public ICustomValidationContext RootContext { get; }
         public ICustomValidationContext ParentContext { get; }
+
+        //Make this private or protected
         public IValidatorResolver ValidatorResolver { get; }
         //Hide Resolver and expose a Function to intercept resolution. 
         //Register each resolved validator/dependencies in resolvedValidator
@@ -218,6 +177,18 @@ namespace DomainObjects.Validation.FluentValidation
                 clone.RootContextData.Add(data);
             return clone;
         }
+
+        public TValidator ResolveChildValidator<TValidator>() where TValidator : IDomainValidator
+        {
+            if (resolvedValidators.TryGetValue(typeof(TValidator), out var validator))
+                return (TValidator)validator;
+
+            var resolvedValidator = ValidatorResolver.ResolveValidator<TValidator>();
+            resolvedValidators[typeof(TValidator)] = resolvedValidator;
+            return resolvedValidator;
+        }
+
+        //ResolveForChild
 
         public override bool IsChildContext => childContextType == ChildContextType.Child;
         public override bool IsChildCollectionContext => childContextType == ChildContextType.ChildCollection;

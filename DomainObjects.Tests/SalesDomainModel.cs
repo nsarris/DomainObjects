@@ -90,16 +90,16 @@ namespace DomainObjects.Tests.Sales
         {
             public static Lazy<FluentValidator> Instance = new Lazy<FluentValidator>(() => new FluentValidator());
 
-            protected override bool PreValidate(ValidationContext<Customer> context, ValidationResult result)
-            {
-                var parentContext = (CustomValidationContext<Customer>)context;
-                var validatorResolver = parentContext.ValidatorResolver;
-                var validator = validatorResolver.ResolveValidator<Customer.Validator>();
-                //Get and inject dependencies
-                parentContext.RootContextData.Add("Test", validator.SomeDependency);
+            //protected override bool PreValidate(ValidationContext<Customer> context, ValidationResult result)
+            //{
+            //    var parentContext = (CustomValidationContext<Customer>)context;
+            //    var validatorResolver = parentContext.ValidatorResolver;
+            //    var validator = validatorResolver.ResolveValidator<Customer.Validator>();
+            //    //Get and inject dependencies
+            //    parentContext.RootContextData.Add("Test", validator.SomeDependency);
 
-                return base.PreValidate(context, result);
-            }
+            //    return base.PreValidate(context, result);
+            //}
 
             public FluentValidator()
             {
