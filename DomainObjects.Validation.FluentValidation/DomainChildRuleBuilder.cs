@@ -10,21 +10,20 @@ using System.Linq.Expressions;
 
 namespace DomainObjects.Validation.FluentValidation
 {
-    public class DomainObjectRuleBuilder<T, TChild>
-        where T : DomainObject
-        where TChild : DomainObject
+    public class DomainChildRuleBuilder<T, TChild>
     {
         readonly IRuleBuilder<T, TChild> ruleBuilder;
         readonly RuleBuilder<T, TChild> internalRuleBuilder;
         readonly Func<T, bool> propertyNotNullPredicate;
 
-        public DomainObjectRuleBuilder(IRuleBuilder<T, TChild> ruleBuilder)
+        public DomainChildRuleBuilder(IRuleBuilder<T, TChild> ruleBuilder)
         {
             this.ruleBuilder = ruleBuilder;
-            if (ruleBuilder is RuleBuilder<T, TChild>)
-            {
-                internalRuleBuilder = (RuleBuilder<T, TChild>)ruleBuilder;
 
+            internalRuleBuilder = ruleBuilder as RuleBuilder<T, TChild>;
+
+            if (internalRuleBuilder != null)
+            { 
                 if (internalRuleBuilder.Rule is CollectionPropertyRule<TChild> collectionRule)
                 {
                     propertyNotNullPredicate = x => x != null;
@@ -41,13 +40,13 @@ namespace DomainObjects.Validation.FluentValidation
         }
 
         private void PrepareExecution<TValidator>(CustomContext context, TChild instance, bool buildChildContext, out DomainValidationContext<T> parentContext, out TValidator childValidator, out DomainValidationContext<TChild> clonedChildContext)
-            where TValidator : IDomainObjectFluentValidator<TChild>
+            where TValidator : IDomainFluentValidator<TChild>
         {
-            if (context.ParentContext.IsChildCollectionContext && context.ParentContext is ValidationContext validationContext)
+            if (context.ParentContext.IsChildCollectionContext)
             {
-                parentContext = (DomainValidationContext<T>)((IValidationContext)validationContext).ParentContext;
+                parentContext = (DomainValidationContext<T>)((IValidationContext)context.ParentContext).ParentContext;
                 childValidator = parentContext.ResolveChildValidator<TValidator>();
-                clonedChildContext = buildChildContext ? new DomainValidationContext<TChild>(instance, validationContext.PropertyChain, validationContext.Selector, ChildContextType.ChildCollection, childValidator, parentContext) : null;
+                clonedChildContext = buildChildContext ? new DomainValidationContext<TChild>(instance, context.ParentContext.PropertyChain, context.ParentContext.Selector, ChildContextType.ChildCollection, childValidator) : null;
             }
             else
             {
@@ -58,7 +57,7 @@ namespace DomainObjects.Validation.FluentValidation
         }
 
         public IRuleBuilderOptions<T, TChild> ValidateUsing<TValidator>()
-            where TValidator : IDomainObjectFluentValidator<TChild>
+            where TValidator : IDomainFluentValidator<TChild>
         {
             return ((IRuleBuilderOptions<T, TChild>)ruleBuilder.Custom((x, context) =>
             {
@@ -70,7 +69,7 @@ namespace DomainObjects.Validation.FluentValidation
         }
 
         public IRuleBuilderOptions<T, TChild> ValidateUsing<TValidator>(Action<T, TChild, TValidator, DomainValidationContext<TChild>> customValidator)
-            where TValidator : IDomainObjectFluentValidator<TChild>
+            where TValidator : IDomainFluentValidator<TChild>
         {
             return ((IRuleBuilderOptions<T, TChild>)ruleBuilder.Custom((x, context) =>
             {
@@ -81,7 +80,7 @@ namespace DomainObjects.Validation.FluentValidation
         }
 
         public IRuleBuilderOptions<T, TChild> ValidateUsing<TValidator>(Func<T, TChild, TValidator, ValidationResult> customValidator)
-            where TValidator : IDomainObjectFluentValidator<TChild>
+            where TValidator : IDomainFluentValidator<TChild>
         {
             return ((IRuleBuilderOptions<T, TChild>)ruleBuilder.Custom((x, context) =>
             {
@@ -93,7 +92,7 @@ namespace DomainObjects.Validation.FluentValidation
         }
 
         public IRuleBuilderOptions<T, TChild> ValidateUsing<TValidator>(Func<T, TChild, TValidator, ValidationFailure> customValidator)
-            where TValidator : IDomainObjectFluentValidator<TChild>
+            where TValidator : IDomainFluentValidator<TChild>
         {
             return ((IRuleBuilderOptions<T, TChild>)ruleBuilder.Custom((x, context) =>
             {
@@ -105,7 +104,7 @@ namespace DomainObjects.Validation.FluentValidation
         }
 
         public IRuleBuilderOptions<T, TChild> ValidateUsing<TValidator>(Func<T, TChild, TValidator, bool> customValidator)
-            where TValidator : IDomainObjectFluentValidator<TChild>
+            where TValidator : IDomainFluentValidator<TChild>
         {
             return ((IRuleBuilderOptions<T, TChild>)ruleBuilder.Custom((instance, context) =>
             {
@@ -113,7 +112,6 @@ namespace DomainObjects.Validation.FluentValidation
 
                 var result = customValidator(parentContext.InstanceToValidate, instance, childValidator);
                 var errorMessageSource = context.Rule.Validators.Select(x => x?.Options?.ErrorMessageSource).FirstOrDefault(x => x != null);
-                //var errorMessageCode = context.Rule.Validators.Select(x => x?.Options?.ErrorCodeSource).FirstOrDefault(x => x != null);
                 if (!result)
                 {
                     var message = (errorMessageSource != null ?
@@ -122,6 +120,32 @@ namespace DomainObjects.Validation.FluentValidation
                     context.AddFailure(new ValidationFailure(context.PropertyName, message, instance));
                 }
             })).WhenNotNull(propertyNotNullPredicate);
+        }
+
+        public IRuleBuilderOptions<T, TChild> ValidateUsingCustom<TValidator>(Func<T, TChild, TValidator, DomainValidationResult> customValidator)
+            where TValidator : IDomainValidator<TChild>
+        {
+            return (IRuleBuilderOptions<T, TChild>)ruleBuilder.Custom((x, context) =>
+            {
+                var parentContext = (DomainValidationContext<T>)context.ParentContext;
+                var childValidator = parentContext.ResolveChildValidator<TValidator>();
+
+                var result = customValidator(parentContext.InstanceToValidate, x, childValidator);
+                context.Append(result);
+            });
+        }
+
+        public IRuleBuilderOptions<T, TChild> ValidateUsingCustom<TValidator>()
+            where TValidator : IDomainValidator<TChild>
+        {
+            return (IRuleBuilderOptions<T, TChild>)ruleBuilder.Custom((x, context) =>
+            {
+                var parentContext = (DomainValidationContext<T>)context.ParentContext;
+                var childValidator = parentContext.ResolveChildValidator<TValidator>();
+
+                var result = childValidator.Validate(x);
+                context.Append(result);
+            });
         }
     }
 }

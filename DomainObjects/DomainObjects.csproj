@@ -70,8 +70,6 @@
     <Compile Include="Metadata\DomainKeySelectorBuilder.cs" />
     <Compile Include="Core\DomainKey.cs" />
     <Compile Include="Metadata\IKeyProvider.cs" />
-    <Compile Include="Validation\DomainObjectValidatorBase.cs" />
-    <Compile Include="Validation\DomainPrimitiveValidatorBase.cs" />
     <Compile Include="Validation\DomainValidationError.cs" />
     <Compile Include="Validation\DomainValidationResult.cs" />
     <Compile Include="Validation\DomainValidatorBase.cs" />

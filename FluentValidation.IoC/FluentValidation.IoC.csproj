@@ -4,15 +4,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E77CBFBF-C997-4C8B-8231-899F354AF4B9}</ProjectGuid>
+    <ProjectGuid>{682D02C5-4056-433D-8B7F-4940C09C2F53}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DomainObjects.Validation.FluentValidation</RootNamespace>
-    <AssemblyName>DomainObjects.Validation.FluentValidation</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <RootNamespace>FluentValidation.IoC</RootNamespace>
+    <AssemblyName>FluentValidation.IoC</AssemblyName>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -42,10 +41,12 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.ComponentModel.Primitives, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.ComponentModel.Primitives.4.3.0\lib\net45\System.ComponentModel.Primitives.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System.Core" />
     <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -55,28 +56,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChildContextType.cs" />
-    <Compile Include="DomainChildRuleBuilder.cs" />
-    <Compile Include="DomainFluentValidator.cs" />
-    <Compile Include="DomainValidationContext.cs" />
-    <Compile Include="FluentValidationDomainExtensions.cs" />
+    <Compile Include="Constants.cs" />
     <Compile Include="FluentValidationExtensions.cs" />
-    <Compile Include="IDomainFluentValidator.cs" />
-    <Compile Include="IDomainValidationContext.cs" />
+    <Compile Include="IDependencyResolver.cs" />
+    <Compile Include="IValidatorFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ResolverRuleBuilder.cs" />
+    <Compile Include="IoCValidationContext.cs" />
+    <Compile Include="IoCValidationContext_T_TValidator.cs" />
+    <Compile Include="IoCValidationInstanceContext.cs" />
+    <Compile Include="IoCValidationContext_T.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Dynamix\Dynamix\Dynamix.csproj">
-      <Project>{8cd44b0c-c50d-4328-8efd-9b0b4dd9bdd2}</Project>
-      <Name>Dynamix</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DomainObjects\DomainObjects.csproj">
-      <Project>{b46a1906-58d6-4559-851c-7f4f42553bb4}</Project>
-      <Name>DomainObjects</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

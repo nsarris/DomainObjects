@@ -3,7 +3,7 @@ using FluentValidation;
 using FluentValidation.Results;
 using FluentValidation.Validators;
 using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,18 +13,10 @@ namespace DomainObjects.Validation.FluentValidation
 
     public static class FluentValidationDomainExtensions
     {
-        public static DomainObjectRuleBuilder<T, TChild> AsDomainChild<T, TChild>(this IRuleBuilder<T, TChild> ruleBuilder)
-            where T : DomainObject
-            where TChild : DomainObject
-        {
-            return new DomainObjectRuleBuilder<T, TChild>(ruleBuilder);
-        }
-
-        public static DomainPrimitiveRuleBuilder<T, TProperty> AsDomainProperty<T, TProperty>(this IRuleBuilder<T, TProperty> ruleBuilder)
+        public static DomainChildRuleBuilder<T, TChild> AsDomainChild<T, TChild>(this IRuleBuilder<T, TChild> ruleBuilder)
             where T : DomainObject
         {
-            //Assert supported type
-            return new DomainPrimitiveRuleBuilder<T, TProperty>(ruleBuilder);
+            return new DomainChildRuleBuilder<T, TChild>(ruleBuilder);
         }
 
         public static CustomContext Append(this CustomContext validationContext, ValidationResult result)
@@ -63,7 +55,7 @@ namespace DomainObjects.Validation.FluentValidation
             return r;
         }
 
-        internal static IRuleBuilderOptions<T, TProperty> WhenNotNull<T,TProperty>(this IRuleBuilderOptions<T, TProperty> ruleBuilderOptions, Func<T,bool> predicate)
+        internal static IRuleBuilderOptions<T, TProperty> WhenNotNull<T, TProperty>(this IRuleBuilderOptions<T, TProperty> ruleBuilderOptions, Func<T, bool> predicate)
         {
             if (ruleBuilderOptions == null)
                 return ruleBuilderOptions;

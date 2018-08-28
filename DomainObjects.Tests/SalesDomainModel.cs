@@ -91,7 +91,7 @@ namespace DomainObjects.Tests.Sales
 
 
 
-        public class Validator : DomainObjectFluentValidator<Customer>
+        public class Validator : DomainFluentValidator<Customer>
         {
             public Address.Validator AddressValidator { get; }
             public Validator(TestService someDependency, Address.Validator addressValidator)
@@ -159,11 +159,11 @@ namespace DomainObjects.Tests.Sales
         public Phone PrimaryPhone { get; }
         public ValueReadOnlyList<Phone> OtherPhones { get; }
 
-
-        public class Validator : DomainObjectFluentValidator<Address>
+        public class Validator : DomainFluentValidator<Address>
         {
             public Phone.Validator PhoneValidator { get; }
             public CityValidator CityValidator { get; }
+            
             public Validator(Phone.Validator phoneValidator, CityValidator cityValidator) : base(ValidatorImpl.Instance.Value)
             {
                 PhoneValidator = phoneValidator;
@@ -179,7 +179,7 @@ namespace DomainObjects.Tests.Sales
                 {
                     RuleFor(x => x.Street).NotEmpty();
                     RuleFor(x => x.Number).NotEmpty();
-                    RuleFor(x => x.City).AsDomainProperty().ValidateUsingCustom<CityValidator>();
+                    RuleFor(x => x.City).AsDomainChild().ValidateUsingCustom<CityValidator>();
                     //RuleFor(x => x.PrimaryPhone).SetValidator(new Phone.Validator());
                     //RuleForEach(x => x.OtherPhones).SetValidator(new Phone.Validator());
 
@@ -200,7 +200,7 @@ namespace DomainObjects.Tests.Sales
         public string Number { get; }
         public int Kind { get; }
 
-        public class Validator : DomainObjectFluentValidator<Phone>
+        public class Validator : DomainFluentValidator<Phone>
         {
             public Validator() : base(ValidatorImpl.Instance.Value)
             {
@@ -218,13 +218,18 @@ namespace DomainObjects.Tests.Sales
         }
     }
 
-    public class CityValidator : IDomainPrimitiveValidator<string>
+    public class CityValidator : IDomainValidator<string>
     {
         CityExistanceService cityExistanceService;
 
         public CityValidator(CityExistanceService cityExistanceService)
         {
             this.cityExistanceService = cityExistanceService;
+        }
+
+        public TChildValidator ResolveChildValidator<TChildValidator>() where TChildValidator : IDomainValidator
+        {
+            throw new NotSupportedException("CityValidator does not have any child validators");
         }
 
         public DomainValidationResult Validate(string instance)

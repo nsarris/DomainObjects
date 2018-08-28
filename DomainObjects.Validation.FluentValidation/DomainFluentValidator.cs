@@ -3,9 +3,9 @@ using FluentValidation;
 
 namespace DomainObjects.Validation.FluentValidation
 {
-    public class DomainObjectFluentValidator<T> : DomainObjectValidatorBase<T>, IDomainObjectFluentValidator<T> where T : DomainObjects.Core.DomainObject
+    public class DomainFluentValidator<T> : DomainValidatorBase<T>, IDomainFluentValidator<T>
     {
-        public DomainObjectFluentValidator(AbstractValidator<T> fluentValidator)
+        public DomainFluentValidator(AbstractValidator<T> fluentValidator)
         {
             FluentValidator = fluentValidator;
         }
@@ -30,18 +30,10 @@ namespace DomainObjects.Validation.FluentValidation
         }
 
         public DomainValidationResult ValidateChild<TChild, TChildValidator>(TChild childInstance, DomainValidationContext<T> context)
-            where TChild : DomainObject
-            where TChildValidator : IDomainObjectFluentValidator<TChild>
+            where TChildValidator : IDomainFluentValidator<TChild>
         {
             var childValidator = context.ResolveChildValidator<TChildValidator>();
             return childValidator.Validate(childInstance, context);
-        }
-
-        public DomainValidationResult ValidatePrimitive<TProperty, TChildValidator>(TProperty value, DomainValidationContext<T> context) 
-            where TChildValidator : IDomainPrimitiveFluentValidator<TProperty>
-        {
-            var childValidator = context.ResolveChildValidator<TChildValidator>();
-            return childValidator.Validate(value, context);
         }
     }
 }

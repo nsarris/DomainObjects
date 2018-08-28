@@ -17,7 +17,6 @@ namespace DomainObjects.Validation
             Code = code;
         }
 
-        //TODO: Code
         //Entity?
         public string ExpressionName { get; }
 
@@ -29,5 +28,10 @@ namespace DomainObjects.Validation
         public string UserMessage { get; }
 
         public object FailedValue { get; }
+
+        public override string ToString()
+        {
+            return Message;
+        }
     }
 }

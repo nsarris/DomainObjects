@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using DomainObjects.Core;
+using FluentValidation;
 
 namespace DomainObjects.Validation.FluentValidation
 {
@@ -6,5 +7,8 @@ namespace DomainObjects.Validation.FluentValidation
     {
         AbstractValidator<T> FluentValidator { get; }
         DomainValidationResult Validate(T instance, IDomainValidationContext parentContext);
+
+        DomainValidationResult ValidateChild<TChild, TChildValidator>(TChild childInstance, DomainValidationContext<T> context)
+            where TChildValidator : IDomainFluentValidator<TChild>;
     }
 }
