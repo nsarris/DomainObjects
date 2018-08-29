@@ -39,6 +39,7 @@ namespace DomainObjects.Tests
                     new Phone("", 0),
                 });
 
+            ServiceLocator.LiteralService = new LiteralService();
 
             using (var validationContext = container.Resolve<IoCValidationContext>())
             {

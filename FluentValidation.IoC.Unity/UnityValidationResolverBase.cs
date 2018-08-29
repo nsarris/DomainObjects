@@ -46,6 +46,14 @@ namespace FluentValidation.IoC.Unity
             return Resolve<TValidator>();
         }
 
+        public IValidator<T> GetValidator<T>(Type validatorType)
+        {
+            if (!typeof(IValidator<T>).IsAssignableFrom(validatorType))
+                throw new InvalidOperationException($"Type {validatorType.Name} does not implement IValidator<{typeof(T).Name}>");
+
+            return (IValidator<T>)Resolve(validatorType);
+        }
+
         public T Resolve<T>()
         {
             return container.Resolve<T>();

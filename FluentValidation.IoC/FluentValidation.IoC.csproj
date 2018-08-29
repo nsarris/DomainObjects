@@ -58,7 +58,14 @@
   <ItemGroup>
     <Compile Include="Constants.cs" />
     <Compile Include="FluentValidationExtensions.cs" />
+    <Compile Include="PropertyAccessor.cs" />
+    <Compile Include="RuleBuilderDependencyContext_1.cs" />
+    <Compile Include="RuleBuilderDependencyContext_4.cs" />
+    <Compile Include="RuleBuilderDependencyContext_3.cs" />
+    <Compile Include="RuleBuilderDependencyContext_2.cs" />
+    <Compile Include="ServiceLocator.cs" />
     <Compile Include="IDependencyResolver.cs" />
+    <Compile Include="ILiteralService.cs" />
     <Compile Include="IValidatorFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResolverRuleBuilder.cs" />

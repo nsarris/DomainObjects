@@ -3,6 +3,7 @@ using FluentValidation.Internal;
 using FluentValidation.IoC;
 using FluentValidation.Results;
 using FluentValidation.Validators;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,23 +11,32 @@ using System.Threading.Tasks;
 
 namespace DomainObjects.Tests.FluentValidationDI
 {
-
     public class CustomerValidator : AbstractValidator<Sales.Customer>
     {
         public CustomerValidator()
         {
+
             RuleFor(x => x.MainAddress)
                 .NotNull()
-                .WithIoC()
-                    .CustomUsing<AddressValidatorDependency>((parent, x, dependency) =>
-                    {
-                        return true;
-                    })
-                    .SetValidator<AddressValidator>()
+                    .ResolveName((Sales.Address x) => x.City)
+                    .WithErrorCode("test")
+                    .ResolveMessage()
                     .Custom((parent, x, resolver) =>
                     {
                         return true;
-                    });
+                    })
+                .WithIoC()
+                    .Using<Sales.TestService>()
+                    .Using<Sales.TestService2>()
+                    .Custom((parent, x, dependency, dependency2) =>
+                    {
+                        return true;
+                    })
+                    .SetResolvedValidator()
+                .WithIoC()
+                    .SetValidator<AddressValidator>()
+                ;
+                    
         }
     }
 
@@ -45,11 +55,10 @@ namespace DomainObjects.Tests.FluentValidationDI
         public AddressValidator()
         {
             RuleFor(x => x.City)
-                .WithIoC()
-                    .Custom((parent, x, resolver) =>
-                    {
-                        return true;
-                    });
+                .Custom((parent, x, resolver) =>
+                {
+                    return true;
+                });
 
             RuleFor(x => x.PrimaryPhone)
                 .WithIoC()
@@ -72,11 +81,10 @@ namespace DomainObjects.Tests.FluentValidationDI
             RuleFor(x => x.Number)
                 .NotEmpty()
                 .Length(5, 10)
-                .WithIoC()
-                    .Custom((parent, x, resolver) =>
-                    {
-                        return x.Length > 2;
-                    });
+                .Custom((parent, x, resolver) =>
+                {
+                    return x.Length > 2;
+                });
         }
     }
 }
