@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DomainObjects.Core
 {
-    public abstract class DomainObject
+    public abstract class DomainObject//<T> where T : DomainObject<T>
     {
         public object this[string property]
         {

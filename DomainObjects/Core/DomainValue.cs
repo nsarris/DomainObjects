@@ -9,7 +9,8 @@ using Dynamix.Reflection;
 
 namespace DomainObjects.Core
 {
-    public abstract class DomainValue : DomainObject, IEquatable<DomainValue>
+    public abstract class DomainValue<T> : DomainObject, IEquatable<T>
+        where T : DomainValue<T>
     {
         private const int HashMultiplier = 37;
 
@@ -26,7 +27,7 @@ namespace DomainObjects.Core
             return GetIsShallow() ? ObjectComparer.Default.ShallowEquals(this,obj) : ObjectComparer.Default.DeepEquals(this, obj);
         }
 
-        public virtual bool Equals(DomainValue other)
+        public virtual bool Equals(T other)
         {
             return Equals(other as object);
         }
@@ -41,7 +42,7 @@ namespace DomainObjects.Core
                     return 0;
 
                 // It's possible for two objects to return the same hash code based on 
-                // identically valued properties, even if they're of two different types, 
+                // identically valued properties, even if they are of two different types, 
                 // so we include the object's type in the hash calculation
                 int hashCode = this.GetType().GetHashCode();
 
@@ -60,7 +61,7 @@ namespace DomainObjects.Core
 
         //TODO: Type sanity check (supported properties - all private setters to support mutator)
 
-        public static bool operator ==(DomainValue x, DomainValue y)
+        public static bool operator ==(DomainValue<T> x, DomainValue<T> y)
         {
             if (x is null && y is null)
                 return true;
@@ -71,33 +72,33 @@ namespace DomainObjects.Core
             return x.Equals(y);
         }
 
-        public static bool operator ==(object x, DomainValue y)
+        public static bool operator ==(T x, DomainValue<T> y)
         {
-            if (x is DomainValue domainValue)
-                return domainValue == x;
-            else
+            if (x is null && y is null)
+                return true;
+
+            if (x is null || y is null)
                 return false;
+
+            return y.Equals(x);
         }
 
-        public static bool operator ==(DomainValue x, object y)
+        public static bool operator ==(DomainValue<T> x, T y)
         {
-            if (y is DomainValue domainValue)
-                return domainValue == x;
-            else
-                return false;
+            return y == x;
         }
 
-        public static bool operator !=(DomainValue x, DomainValue y)
+        public static bool operator !=(DomainValue<T> x, DomainValue<T> y)
         {
             return !(x == y);
         }
 
-        public static bool operator !=(object x, DomainValue y)
+        public static bool operator !=(T x, DomainValue<T> y)
         {
             return !(x == y);
         }
 
-        public static bool operator !=(DomainValue x, object y)
+        public static bool operator !=(DomainValue<T> x, T y)
         {
             return !(x == y);
         }

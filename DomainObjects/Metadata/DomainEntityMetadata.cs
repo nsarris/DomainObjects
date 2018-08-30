@@ -11,8 +11,8 @@ namespace DomainObjects.Metadata
     {
         private readonly Dictionary<string, DomainPropertyMetadata> propertyMetadata;
         private readonly List<DomainValuePropertyMetadata> keyProperties;
-        private readonly Func<DomainEntity, object> keySelector;
-        private readonly Func<DomainEntity, object> keyValueSelector;
+        private readonly Func<object, object> keySelector;
+        private readonly Func<object, object> keyValueSelector;
         //private readonly Dictionary<Type, DomainEntityMetadata> aggregateTypes;
 
         //public IReadOnlyDictionary<Type, DomainEntityMetadata> AggregateTypes => aggregateTypes;
@@ -29,20 +29,20 @@ namespace DomainObjects.Metadata
             //this.aggregateTypes = aggregateTypes.ToDictionary(x => x.EntityType);
 
             EntityType = entityType;
-            IsRoot = entityType.IsSubclassOfDeep(typeof(AggregateRoot));
+            IsRoot = entityType.IsOrSubclassOfGenericDeep(typeof(AggregateRoot<,>));
         }
 
-        public object GetKey(DomainEntity entity)
+        public object GetKey(object entity)
         {
             return keySelector(entity);
         }
 
-        public object GetKeyValue(DomainEntity entity)
+        public object GetKeyValue(object entity)
         {
             return keyValueSelector(entity);
         }
 
-        public void SetKey(DomainEntity entity, object value)
+        public void SetKey(object entity, object value)
         {
             if (keyProperties.Count > 1)
                 throw new InvalidOperationException($"Values given dont match the number of key properties in Entity {EntityType.Name}");
@@ -50,7 +50,7 @@ namespace DomainObjects.Metadata
             keyProperties.First().Property.Set(entity, value);
         }
 
-        public void SetKey(DomainEntity entity, params object[] values)
+        public void SetKey(object entity, params object[] values)
         {
             //Primitives
             if (!keyProperties.Any(x => x.DomainValueType == DomainValueType.Complex))

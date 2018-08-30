@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace DomainObjects.Core
 {
     public class AggregateReadOnlyList<T> : TrackableReadOnlyList<T>
-        where T : Aggregate
+        where T : Aggregate<T>
     {
         public AggregateReadOnlyList()
         {

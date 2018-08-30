@@ -8,7 +8,6 @@ using DomainObjects.Tests.Sales;
 using FluentValidation;
 using FluentValidation.Resources;
 using NUnit.Framework;
-using Unity;
 
 namespace DomainObjects.Tests
 {

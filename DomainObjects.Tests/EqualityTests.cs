@@ -1,5 +1,4 @@
-﻿using DomainObjects.Tests.Books;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,14 +13,14 @@ namespace DomainObjects.Tests
         [Test]
         public void TestMethod()
         {
-            var book1 = new Book(1, "Test1");
-            var book2 = new Book(1, "Test2");
-            var book3 = new Book(2, "Test2");
+            //var book1 = new Book(1, "Test1");
+            //var book2 = new Book(1, "Test2");
+            //var book3 = new Book(2, "Test2");
 
-            //var author = new Author();
+            ////var author = new Author();
 
-            Assert.AreEqual(book1, book2);
-            Assert.AreNotEqual(book1, book3);
+            //Assert.AreEqual(book1, book2);
+            //Assert.AreNotEqual(book1, book3);
         }
     }
 }

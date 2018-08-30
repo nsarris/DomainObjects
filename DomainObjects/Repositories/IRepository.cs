@@ -14,19 +14,23 @@ namespace DomainObjects.Repositories
     //    void Insert(T obj);
     //}
 
-    public interface IEntityQueryProvider<TEntity>
-        where TEntity : Core.DomainEntity
+    public interface IEntityQueryProvider
     {
         bool SupportsAsync { get; }
+        bool SupportsQueryable { get; }
+    }
+
+    public interface IEntityQueryProvider<TEntity> : IEntityQueryProvider
+        where TEntity : Core.AggregateRoot<TEntity>
+    {
         TEntity GetById(object id);
         Task<TEntity> GetByIdAsync(object id);
-        bool SupportsQueryable { get; }
         IQueryable<TEntity> ToQueryable();
         SingleQueryable<TEntity> QueryById(object id);
     }
 
-    public interface IEntityQueryProvider<TEntity, TKey> : IEntityQueryProvider<TEntity>
-        where TEntity : Core.DomainEntity<TKey>
+    public interface IEntityQueryProvider<TEntity, TKey> : IEntityQueryProvider
+        where TEntity : Core.AggregateRoot<TEntity, TKey>
     {
         TEntity GetById(TKey id);
         Task<TEntity> GetByIdAsync(TKey id);
@@ -34,34 +38,36 @@ namespace DomainObjects.Repositories
     }
 
     public interface IEntityCommandHandler<TEntity>
-        where TEntity : Core.DomainEntity
+        where TEntity : Core.AggregateRoot<TEntity>
     {
         void Save(TEntity entity);
         void Delete(TEntity entity);
         void DeleteById(object id);
     }
 
-    public interface IEntityCommandHandler<TEntity, TKey> : IEntityCommandHandler<TEntity>
-        where TEntity : Core.DomainEntity<TKey>
+    public interface IEntityCommandHandler<TEntity, in TKey>
+        where TEntity : Core.AggregateRoot<TEntity, TKey>
     {
+        void Save(TEntity entity);
+        void Delete(TEntity entity);
         void DeleteById(TKey id);
     }
 
     public interface IEntityFactory<TEntity>
-        where TEntity : Core.DomainEntity
+        where TEntity : Core.AggregateRoot<TEntity>
     {
         TEntity Create(params IBuildSpecification<TEntity>[] buildSpecifications);
     }
 
 
-    public interface IRepository<TEntity> : IEntityQueryProvider<TEntity>, IEntityCommandHandler<TEntity>, IEntityFactory<TEntity>
-        where TEntity : Core.DomainEntity
+    public interface IRepository<TEntity> : IEntityQueryProvider, IEntityCommandHandler<TEntity>, IEntityFactory<TEntity>
+        where TEntity : Core.AggregateRoot<TEntity>
     {
 
     }
 
-    public interface IRepository<TEntity, TKey> : IRepository<TEntity>, IEntityQueryProvider<TEntity, TKey>, IEntityCommandHandler<TEntity, TKey>, IEntityFactory<TEntity>
-        where TEntity : Core.DomainEntity<TKey>
+    public interface IRepository<TEntity, TKey> : IEntityQueryProvider<TEntity, TKey>, IEntityCommandHandler<TEntity, TKey>
+        where TEntity : Core.AggregateRoot<TEntity, TKey>
     {
 
     }

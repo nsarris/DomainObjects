@@ -15,7 +15,7 @@ namespace DomainObjects.ModelBuilder.Descriptors
         public EntityDescriptor(Type type, List<PropertyDescriptor> propertyDescriptors, List<EntityDescriptor> aggregateDescriptors, List<ValueTypeDescriptor> valueTypeDescriptors)
         {
             Type = type;
-            IsRoot = type.IsSubclassOfDeep(typeof(AggregateRoot));
+            IsRoot = type.IsOrSubclassOfGenericDeep(typeof(AggregateRoot<,>));
             AggregateDescriptors = aggregateDescriptors;
             ValueTypeDescriptors = valueTypeDescriptors;
             PropertyDescriptors = propertyDescriptors.ToList();

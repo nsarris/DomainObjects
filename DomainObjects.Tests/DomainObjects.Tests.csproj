@@ -95,7 +95,6 @@
     <Compile Include="FluentValidationTests.cs" />
     <Compile Include="Helpers\HackLanguageManager.cs" />
     <Compile Include="LiteralService.cs" />
-    <Compile Include="Model.cs" />
     <Compile Include="EqualityTests.cs" />
     <Compile Include="ModelBuilderTests.cs" />
     <Compile Include="SalesDomainModel.cs" />

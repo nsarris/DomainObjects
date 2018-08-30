@@ -13,14 +13,15 @@ using System.Threading.Tasks;
 
 namespace DomainObjects.Metadata
 {
-
     internal static class DomainKeySelectorBuilder
     {
+        private class DummyEntity : DomainEntity<DummyEntity> { }
+
         static readonly string CLASS_NAME_SUFFIX = "_DomainEntityKey_";
 
         private static Expression BuildKeyValueSelectorExpression(Type entityType, List<PropertyInfo> keyProperties, out ParameterExpression entityParameterExpression, out Type keyValueType)
         {
-            entityParameterExpression = Expression.Parameter(typeof(DomainEntity));
+            entityParameterExpression = Expression.Parameter(typeof(DomainEntity<>).MakeGenericTypeCached(entityType));
             var convertedEntityTypeExpression = ExpressionEx.ConvertIfNeeded(entityParameterExpression, entityType);
 
             if (!keyProperties.Any())
@@ -47,14 +48,14 @@ namespace DomainObjects.Metadata
             }
         }
 
-        public static Func<DomainEntity, object> BuildKeyValueSelector(Type type, IEnumerable<PropertyInfo> keyPropertiesEnumerable)
+        public static Func<object, object> BuildKeyValueSelector(Type type, IEnumerable<PropertyInfo> keyPropertiesEnumerable)
         {
             var keyProperties = keyPropertiesEnumerable is List<PropertyInfo> keyPropertiesList ? keyPropertiesList : keyPropertiesEnumerable.ToList();
 
             var selector = BuildKeyValueSelectorExpression(type, keyProperties, out var parameter, out var _);
             var body = ExpressionEx.ConvertIfNeeded(selector, typeof(object));
 
-            return Expression.Lambda<Func<DomainEntity, object>>(body, parameter).Compile();
+            return Expression.Lambda<Func<object, object>>(body, parameter).Compile();
         }
 
         private static Type BuildKeyValueType(Type entityType, List<PropertyInfo> keyProperties)
@@ -95,10 +96,10 @@ namespace DomainObjects.Metadata
 
             return Expression.New(
                     constructor: keyCtorUnSet,
-                    arguments: Expression.Call(entityExpression, nameof(DomainEntity.GetUnAssignedKey), new Type[0], new Expression[0]));
+                    arguments: Expression.Call(entityExpression, nameof(DummyEntity.GetUnAssignedKey), new Type[0], new Expression[0]));
         }
 
-        public static Func<DomainEntity, object> BuildKeySelector(Type entityType, IEnumerable<PropertyInfo> keyPropertiesEnumerable)
+        public static Func<object, object> BuildKeySelector(Type entityType, IEnumerable<PropertyInfo> keyPropertiesEnumerable)
         {
             var keyProperties = keyPropertiesEnumerable is List<PropertyInfo> keyPropertiesList ? keyPropertiesList : keyPropertiesEnumerable.ToList();
             var valueSelectorExpression = BuildKeyValueSelectorExpression(entityType, keyProperties, out var entityParameterExpression, out var keyValueType);
@@ -109,7 +110,7 @@ namespace DomainObjects.Metadata
             var keySetCtorExpression = BuildSetKeyConstructorExpression(keyType, keyValueType, valueSelectorExpression);
             var keyUnSetCtorExpression = BuildUnSetKeyConstructorExpression(keyType, entityExpression);
 
-            var isKeySetExpresion = Expression.Call(entityExpression, nameof(DomainEntity.GetKeyIsAssigned), new Type[0], new Expression[0]);
+            var isKeySetExpresion = Expression.Call(entityExpression, nameof(DummyEntity.GetKeyIsAssigned), new Type[0], new Expression[0]);
 
             var body = Expression.Condition(
                     test: Expression.Equal(isKeySetExpresion, ExpressionEx.Constants.True),
@@ -117,7 +118,7 @@ namespace DomainObjects.Metadata
                     ifFalse: keyUnSetCtorExpression
                 );
 
-            return Expression.Lambda<Func<DomainEntity, object>>(ExpressionEx.ConvertIfNeeded(body, typeof(object)), entityParameterExpression).Compile();
+            return Expression.Lambda<Func<object, object>>(ExpressionEx.ConvertIfNeeded(body, typeof(object)), entityParameterExpression).Compile();
         }
     }
 }

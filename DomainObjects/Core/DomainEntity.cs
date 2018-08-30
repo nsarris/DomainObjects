@@ -275,5 +275,10 @@ namespace DomainObjects.Core
         {
             return (TKey)base.GetKeyValue();
         }
+
+        public bool KeyEquals(DomainEntity<TKey> other)
+        {
+            return this.GetKey() == other.GetKey();
+        }
     }
 }

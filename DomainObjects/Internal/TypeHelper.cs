@@ -33,7 +33,7 @@ namespace DomainObjects
                 return DomainValueType.TimeSpan;
             else if (effectiveType.IsNumeric())
                 return DomainValueType.Number;
-            else if (effectiveType.IsSubclassOfDeep(typeof(DomainValue)))
+            else if (effectiveType.IsOrSubclassOfGenericDeep(typeof(DomainValue<>),out var _))
                 return DomainValueType.Complex;
             else
                 return null;
@@ -48,6 +48,11 @@ namespace DomainObjects
         {
             valueType = GetSupportedValueType(type);
             return valueType != null;
+        }
+
+        public static bool IsOrSubclassOfGenericDeep(this Type type, Type openGenericType)
+        {
+            return IsOrSubclassOfGenericDeep(type, openGenericType, out var _);
         }
 
         public static bool IsOrSubclassOfGenericDeep(this Type type, Type openGenericType, out Type actualType)

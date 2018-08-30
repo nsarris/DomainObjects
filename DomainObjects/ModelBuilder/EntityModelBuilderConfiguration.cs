@@ -16,7 +16,7 @@ namespace DomainObjects.ModelBuilder
         protected EntityModelBuilderConfiguration(Type type)
         {
             EntityType = type;
-            IsRoot = EntityType.IsSubclassOfDeep(typeof(AggregateRoot));
+            IsRoot = EntityType.IsOrSubclassOfGenericDeep(typeof(AggregateRoot<,>));
         }
         internal List<string> IgnoredMembers { get; } = new List<string>();
         internal List<string> KeyMembers { get; } = new List<string>();
@@ -208,7 +208,7 @@ namespace DomainObjects.ModelBuilder
         //}
 
         public ValueListModelConfiguration ValueList<TValue>(Expression<Func<T, ValueList<TValue>>> memberSelector)
-            where TValue : DomainValue
+            where TValue : DomainValue<TValue>
         {
             var configuration = new ValueListModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
             PropertyModelConfigurations.Add(configuration);
@@ -216,7 +216,7 @@ namespace DomainObjects.ModelBuilder
         }
 
         public ValueReadOnlyListModelConfiguration ValueList<TValue>(Expression<Func<T, ValueReadOnlyList<TValue>>> memberSelector)
-            where TValue : DomainValue
+            where TValue : DomainValue<TValue>
         {
             var configuration = new ValueReadOnlyListModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
             PropertyModelConfigurations.Add(configuration);
@@ -224,7 +224,7 @@ namespace DomainObjects.ModelBuilder
         }
 
         public AggregatePropertyModelConfiguration Aggregate<TAggregate>(Expression<Func<T, TAggregate>> memberSelector)
-            where TAggregate : Aggregate
+            where TAggregate : Aggregate<TAggregate>
         {
             var configuration = new AggregatePropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
             PropertyModelConfigurations.Add(configuration);
@@ -232,7 +232,7 @@ namespace DomainObjects.ModelBuilder
         }
 
         public AggregateListModelConfiguration Aggregate<TAggregate>(Expression<Func<T, AggregateList<TAggregate>>> memberSelector)
-            where TAggregate : Aggregate
+            where TAggregate : Aggregate<TAggregate>
         {
             var configuration = new AggregateListModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
             PropertyModelConfigurations.Add(configuration);
@@ -240,7 +240,7 @@ namespace DomainObjects.ModelBuilder
         }
 
         public AggregateReadOnlyListModelConfiguration Aggregate<TAggregate>(Expression<Func<T, AggregateReadOnlyList<TAggregate>>> memberSelector)
-            where TAggregate : Aggregate
+            where TAggregate : Aggregate<TAggregate>
         {
             var configuration = new AggregateReadOnlyListModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
             PropertyModelConfigurations.Add(configuration);

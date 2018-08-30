@@ -4,6 +4,7 @@ using System.Collections.Generic;
 namespace DomainObjects.Core
 {
     public class ValueReadOnlyList<T> : TrackableReadOnlyList<T>
+        where T : DomainValue<T>
     {
         public ValueReadOnlyList()
         {
