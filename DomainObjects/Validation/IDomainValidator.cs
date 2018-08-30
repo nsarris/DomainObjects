@@ -1,11 +1,6 @@
 ﻿namespace DomainObjects.Validation
 {
-    public interface IDomainValidator
-    {
-        TChildValidator ResolveChildValidator<TChildValidator>() where TChildValidator : IDomainValidator;
-    }
-
-    public interface IDomainValidator<T> : IDomainValidator
+    public interface IDomainValidator<T>
     {
         DomainValidationResult Validate(T instance);
     }

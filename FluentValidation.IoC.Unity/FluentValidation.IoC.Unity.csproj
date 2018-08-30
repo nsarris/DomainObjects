@@ -95,11 +95,5 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\FluentValidation.IoC\FluentValidation.IoC.csproj">
-      <Project>{682d02c5-4056-433d-8b7f-4940c09c2f53}</Project>
-      <Name>FluentValidation.IoC</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

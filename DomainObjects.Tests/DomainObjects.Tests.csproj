@@ -92,7 +92,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers\FluentValidation.GreekLanguage.cs" />
-    <Compile Include="FluentValidationDI\Test.cs" />
     <Compile Include="FluentValidationTests.cs" />
     <Compile Include="Helpers\HackLanguageManager.cs" />
     <Compile Include="LiteralService.cs" />
@@ -113,21 +112,9 @@
       <Project>{8cd44b0c-c50d-4328-8efd-9b0b4dd9bdd2}</Project>
       <Name>Dynamix</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DomainObjects.Validation.FluentValidation\DomainObjects.Validation.FluentValidation.csproj">
-      <Project>{e77cbfbf-c997-4c8b-8231-899f354af4b9}</Project>
-      <Name>DomainObjects.Validation.FluentValidation</Name>
-    </ProjectReference>
     <ProjectReference Include="..\DomainObjects\DomainObjects.csproj">
       <Project>{b46a1906-58d6-4559-851c-7f4f42553bb4}</Project>
       <Name>DomainObjects</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\FluentValidation.IoC.Unity\FluentValidation.IoC.Unity.csproj">
-      <Project>{a6354b9c-648b-41bb-8592-eb234bd2411b}</Project>
-      <Name>FluentValidation.IoC.Unity</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\FluentValidation.IoC\FluentValidation.IoC.csproj">
-      <Project>{682d02c5-4056-433d-8b7f-4940c09c2f53}</Project>
-      <Name>FluentValidation.IoC</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

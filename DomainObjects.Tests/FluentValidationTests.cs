@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 using DomainObjects.ModelBuilder;
 using DomainObjects.Tests.Sales;
 using FluentValidation;
-using FluentValidation.IoC;
-using FluentValidation.IoC.Unity;
 using FluentValidation.Resources;
 using NUnit.Framework;
 using Unity;
@@ -23,11 +21,7 @@ namespace DomainObjects.Tests
             HackLanguageManager.AddLanguage(new GreekLanguage());
             ValidatorOptions.LanguageManager.Culture = new System.Globalization.CultureInfo("el");
 
-            var container = new UnityContainer();
-
-            container.RegisterResolverAndFactory<UnityValidatorHierarchicalResolver>();
-            container.RegisterAllValidatorsAsSingletons();
-
+           
             var repo = new CustomerRepository();
 
             var customer = repo.CreateNew();
@@ -39,12 +33,6 @@ namespace DomainObjects.Tests
                     new Phone("", 0),
                 });
 
-            ServiceLocator.LiteralService = new LiteralService();
-
-            using (var validationContext = container.Resolve<IoCValidationContext>())
-            {
-                var r = validationContext.Validate(customer);
-            }
 
             var modelBuilder = new DomainModelBuilder()
                 .HasModelName("Sales");
@@ -60,10 +48,6 @@ namespace DomainObjects.Tests
                 .IgnoreMember(x => x.StringComparer)
                 ;
 
-            
-
-            var customerValidator = container.Resolve<Customer.Validator>();
-            var validationResult = customerValidator.Validate(customer);
         }
     }
 }

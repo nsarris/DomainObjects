@@ -7,21 +7,15 @@ using System.Threading.Tasks;
 using DomainObjects.ChangeTracking;
 using DomainObjects.Metadata;
 using DomainObjects.Validation;
-using Dynamix;
 
 namespace DomainObjects.Core
 {
-    public enum DomainObjectState
-    {
-        Uninitialized,
-        New,
-        Existing,
-        Deleted
-    }
-
     public abstract class DomainEntity : DomainObject, IKeyProvider, ITrackable
     {
+        #region Model Metadata
+
         private DomainEntityMetadata entityMetadata;
+
         public DomainEntityMetadata GetEntityMetadata()
         {
             if (entityMetadata == null)
@@ -30,6 +24,9 @@ namespace DomainObjects.Core
             return entityMetadata;
         }
 
+        #endregion
+
+        #region Ctor
 
         protected DomainEntity()
         {
@@ -37,6 +34,8 @@ namespace DomainObjects.Core
             changeTracker.BeforePropertyChanged += (object sender, PropertyChangedExtendedEventArgs e) => OnBeforePropertyChanged(e.PropertyName, e.Before, e.After);
             changeTracker.AfterPropertyChanged += (object sender, PropertyChangedExtendedEventArgs e) => OnAfterPropertyChanged(e.PropertyName, e.Before, e.After);
         }
+
+        #endregion
 
         #region Key and Equality
 
@@ -240,45 +239,16 @@ namespace DomainObjects.Core
 
         #region Validation
 
-        //public virtual IValidationResult Validate()
-        //{
-        //    Validate(null);
-        //    return null;
-        //}
+        public virtual DomainValidationResult Validate()
+        {
+            Validate(null);
+            return null;
+        }
 
-        //public virtual IValidationResult Validate(IValidationContext validationContext)
-        //{
-        //    //AssertRequireValidationResult
-        //    return null;
-        //}
-
-        //public IEnumerable<ValidationResult> Validate()
-        //{
-        //    return Validate(null);
-        //}
-
-        //public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        //{
-        //    var result = new List<ValidationResult>();
-
-        //    foreach (var prop in this.GetType().GetPropertiesEx())
-        //    {
-        //        var attrs = prop.PropertyInfo.GetCustomAttributes(typeof(ValidationAttribute), true).Cast<ValidationAttribute>();
-        //        foreach (var a in attrs)
-        //        {
-        //            var v = prop.Get(this);
-
-        //            if (!a.IsValid(v))
-        //            {
-        //                var name = prop.PropertyInfo.Name;
-        //                //Translation
-        //                result.Add(new ValidationResult(a.FormatErrorMessage("[" + name + "]"), new[] { prop.PropertyInfo.Name }));
-        //            }
-        //        }
-        //    }
-
-        //    return result;
-        //}
+        public virtual DomainValidationResult Validate(IDomainValidator<Task> validationContext)
+        {
+            return DomainValidationResult.Success;
+        }
 
         #endregion
 

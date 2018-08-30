@@ -26,6 +26,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <LangVersion>7.3</LangVersion>
+    <CodeAnalysisRuleSet>DomainObjects.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -35,6 +36,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <LangVersion>7.3</LangVersion>
+    <CodeAnalysisRuleSet>DomainObjects.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -61,8 +63,10 @@
     <Compile Include="Core\DomainEntity.cs" />
     <Compile Include="ChangeTracking\TrackableBase.cs" />
     <Compile Include="ChangeTracking\TrackableVisitor.cs" />
+    <Compile Include="Core\DomainObjectState.cs" />
     <Compile Include="Core\ValueList.cs" />
     <Compile Include="Core\ValueReadOnlyList.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Internal\ExpressionHelper.cs" />
     <Compile Include="Metadata\DomainAggregateListPropertyMetadata.cs" />
     <Compile Include="Metadata\DomainAggregatePropertyMetadata.cs" />
@@ -72,7 +76,6 @@
     <Compile Include="Metadata\IKeyProvider.cs" />
     <Compile Include="Validation\DomainValidationError.cs" />
     <Compile Include="Validation\DomainValidationResult.cs" />
-    <Compile Include="Validation\DomainValidatorBase.cs" />
     <Compile Include="Validation\IDomainValidator.cs" />
     <Compile Include="_Obsolete\DomainNumber.cs" />
     <Compile Include="Core\DomainObject.cs" />
@@ -131,6 +134,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="DomainObjects.ruleset" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

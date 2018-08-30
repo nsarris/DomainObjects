@@ -6,6 +6,8 @@ namespace DomainObjects.Validation
 {
     public class DomainValidationResult
     {
+        public static DomainValidationResult Success { get; } = new DomainValidationResult();
+
         readonly List<DomainValidationError> errors = new List<DomainValidationError>();
         public bool IsValid { get; private set; } = true;
 
