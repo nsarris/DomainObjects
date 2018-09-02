@@ -207,16 +207,16 @@ namespace DomainObjects.ModelBuilder
         //        return new UnsupportedTypePropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
         //}
 
-        public ValueListModelConfiguration ValueList<TValue>(Expression<Func<T, ValueList<TValue>>> memberSelector)
-            where TValue : DomainValue<TValue>
+        public ValueListModelConfiguration ValueObjectList<TValue>(Expression<Func<T, ValueList<TValue>>> memberSelector)
+            where TValue : DomainValueObject<TValue>
         {
             var configuration = new ValueListModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
             PropertyModelConfigurations.Add(configuration);
             return configuration;
         }
 
-        public ValueReadOnlyListModelConfiguration ValueList<TValue>(Expression<Func<T, ValueReadOnlyList<TValue>>> memberSelector)
-            where TValue : DomainValue<TValue>
+        public ValueReadOnlyListModelConfiguration ValueObjectList<TValue>(Expression<Func<T, ValueObjectReadOnlyList<TValue>>> memberSelector)
+            where TValue : DomainValueObject<TValue>
         {
             var configuration = new ValueReadOnlyListModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
             PropertyModelConfigurations.Add(configuration);
@@ -247,6 +247,4 @@ namespace DomainObjects.ModelBuilder
             return configuration;
         }
     }
-
-
 }

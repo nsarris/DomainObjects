@@ -68,11 +68,9 @@ namespace DomainObjects.Tests
             Assert.IsTrue(invoice.GetObjectState() == Core.DomainObjectState.Existing);
             Assert.IsFalse(invoice.GetIsChanged());
 
-            invoice.InvoiceLines.Add(new InvoiceLine
-            {
-                ProductId = 1,
-                Quantity = 1
-            });
+            var line = invoice.CreateNewLine();
+            line.ProductId = 1;
+            line.Quantity = 1;
 
             Assert.IsFalse(invoice.GetIsChangedDeep());
             Assert.IsTrue(invoice.GetIsChangedDeep());

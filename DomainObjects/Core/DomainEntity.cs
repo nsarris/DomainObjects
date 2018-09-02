@@ -251,15 +251,19 @@ namespace DomainObjects.Core
         }
 
         #endregion
+    }
 
+    public abstract class DomainEntity<T> : DomainEntity where T : DomainEntity<T>
+    {
         #region Clone?
 
-        //???
+        //T Clone()???
 
         #endregion
     }
 
-    public class DomainEntity<TKey> : DomainEntity, IKeyProvider<TKey>
+    public abstract class DomainEntity<T, TKey> : DomainEntity<T>, IKeyProvider<TKey>
+        where T : DomainEntity<T>
     {
         public new DomainKey<TKey> GetKey()
         {
@@ -276,9 +280,14 @@ namespace DomainObjects.Core
             return (TKey)base.GetKeyValue();
         }
 
-        public bool KeyEquals(DomainEntity<TKey> other)
+        public bool KeyEquals(T other)
         {
             return this.GetKey() == other.GetKey();
+        }
+
+        public bool KeyEquals(DomainKey<TKey> other)
+        {
+            return this.GetKey() == other;
         }
     }
 }

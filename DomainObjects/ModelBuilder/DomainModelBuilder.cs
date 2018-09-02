@@ -92,7 +92,7 @@ namespace DomainObjects.ModelBuilder
                         valueTypeDescriptors.AddIfNotNull(ScanValueTypeRecursive(propertyType, visitedTypes));
 
                 }
-                else if (propertyType.HasGenericDefinition(typeof(ValueReadOnlyList<>)))
+                else if (propertyType.HasGenericDefinition(typeof(ValueObjectReadOnlyList<>)))
                 {
                     var elementType = propertyType.GetGenericArguments().First();
                     var elementValueType = elementType.GetSupportedValueType();
@@ -153,7 +153,7 @@ namespace DomainObjects.ModelBuilder
                     }
                 }
                 else if (propertyType.IsOrSubclassOfGenericDeep(typeof(ValueList<>), out var valueListType)
-                    || (readOnly = propertyType.IsOrSubclassOfGenericDeep(typeof(ValueReadOnlyList<>), out valueListType)))
+                    || (readOnly = propertyType.IsOrSubclassOfGenericDeep(typeof(ValueObjectReadOnlyList<>), out valueListType)))
                 {
                     var elementType = valueListType.GetGenericArguments().First();
                     var elementValueType = elementType.GetSupportedValueType();

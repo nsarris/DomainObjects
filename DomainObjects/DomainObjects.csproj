@@ -64,8 +64,8 @@
     <Compile Include="ChangeTracking\TrackableBase.cs" />
     <Compile Include="ChangeTracking\TrackableVisitor.cs" />
     <Compile Include="Core\DomainObjectState.cs" />
-    <Compile Include="Core\ValueList.cs" />
-    <Compile Include="Core\ValueReadOnlyList.cs" />
+    <Compile Include="Core\ValueObjectList.cs" />
+    <Compile Include="Core\ValueObjectReadOnlyList.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Internal\ExpressionHelper.cs" />
     <Compile Include="Metadata\DomainAggregateListPropertyMetadata.cs" />
@@ -79,7 +79,7 @@
     <Compile Include="Validation\IDomainValidator.cs" />
     <Compile Include="_Obsolete\DomainNumber.cs" />
     <Compile Include="Core\DomainObject.cs" />
-    <Compile Include="Core\DomainValue.cs" />
+    <Compile Include="Core\DomainValueObject.cs" />
     <Compile Include="_Obsolete\Immutable.cs" />
     <Compile Include="_Obsolete\ObjectCloner.cs" />
     <Compile Include="Internal\ObjectComparer.cs" />

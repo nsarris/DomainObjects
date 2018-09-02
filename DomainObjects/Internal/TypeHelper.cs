@@ -33,7 +33,7 @@ namespace DomainObjects
                 return DomainValueType.TimeSpan;
             else if (effectiveType.IsNumeric())
                 return DomainValueType.Number;
-            else if (effectiveType.IsOrSubclassOfGenericDeep(typeof(DomainValue<>),out var _))
+            else if (effectiveType.IsOrSubclassOfGenericDeep(typeof(DomainValueObject<>),out var _))
                 return DomainValueType.Complex;
             else
                 return null;

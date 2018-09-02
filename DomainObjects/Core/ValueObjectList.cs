@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace DomainObjects.Core
 {
     public class ValueList<T> : TrackableList<T>
-        where T : DomainValue<T>
+        where T : DomainValueObject<T>
     {
         public ValueList()
         {

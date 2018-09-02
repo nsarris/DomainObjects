@@ -9,8 +9,8 @@ using Dynamix.Reflection;
 
 namespace DomainObjects.Core
 {
-    public abstract class DomainValue<T> : DomainObject, IEquatable<T>
-        where T : DomainValue<T>
+    public abstract class DomainValueObject<T> : DomainObject, IEquatable<T>
+        where T : DomainValueObject<T>
     {
         private const int HashMultiplier = 37;
 
@@ -61,7 +61,7 @@ namespace DomainObjects.Core
 
         //TODO: Type sanity check (supported properties - all private setters to support mutator)
 
-        public static bool operator ==(DomainValue<T> x, DomainValue<T> y)
+        public static bool operator ==(DomainValueObject<T> x, DomainValueObject<T> y)
         {
             if (x is null && y is null)
                 return true;
@@ -72,7 +72,7 @@ namespace DomainObjects.Core
             return x.Equals(y);
         }
 
-        public static bool operator ==(T x, DomainValue<T> y)
+        public static bool operator ==(T x, DomainValueObject<T> y)
         {
             if (x is null && y is null)
                 return true;
@@ -83,22 +83,22 @@ namespace DomainObjects.Core
             return y.Equals(x);
         }
 
-        public static bool operator ==(DomainValue<T> x, T y)
+        public static bool operator ==(DomainValueObject<T> x, T y)
         {
             return y == x;
         }
 
-        public static bool operator !=(DomainValue<T> x, DomainValue<T> y)
+        public static bool operator !=(DomainValueObject<T> x, DomainValueObject<T> y)
         {
             return !(x == y);
         }
 
-        public static bool operator !=(T x, DomainValue<T> y)
+        public static bool operator !=(T x, DomainValueObject<T> y)
         {
             return !(x == y);
         }
 
-        public static bool operator !=(DomainValue<T> x, T y)
+        public static bool operator !=(DomainValueObject<T> x, T y)
         {
             return !(x == y);
         }

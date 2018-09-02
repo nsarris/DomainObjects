@@ -89,7 +89,7 @@ namespace DomainObjects.Tests.Sales
         }
 
     }
-    public class Address : DomainValue<Address>
+    public class Address : DomainValueObject<Address>
     {
         public Address(string street, string number, string city, string postCode, Phone primaryPhone, IEnumerable<Phone> otherPhones)
         {
@@ -98,7 +98,7 @@ namespace DomainObjects.Tests.Sales
             City = city;
             PostCode = postCode;
             PrimaryPhone = primaryPhone;
-            OtherPhones = new ValueReadOnlyList<Phone>(otherPhones);
+            OtherPhones = new ValueObjectReadOnlyList<Phone>(otherPhones);
         }
 
         public string Street { get; }
@@ -106,11 +106,11 @@ namespace DomainObjects.Tests.Sales
         public string City { get; }
         public string PostCode { get; }
         public Phone PrimaryPhone { get; }
-        public ValueReadOnlyList<Phone> OtherPhones { get; }
+        public ValueObjectReadOnlyList<Phone> OtherPhones { get; }
 
         
     }
-    public class Phone : DomainValue<Phone>
+    public class Phone : DomainValueObject<Phone>
     {
         public Phone(string number, int kind)
         {
@@ -145,6 +145,13 @@ namespace DomainObjects.Tests.Sales
         public int CustomerId { get; set; }
         public DateTime DateTime { get; set; }
         public AggregateList<InvoiceLine> InvoiceLines { get; } = new AggregateList<InvoiceLine>();
+
+        public InvoiceLine CreateNewLine()
+        {
+            var line = new InvoiceLine(this);
+            this.InvoiceLines.Add(line);
+            return line;
+        }
     }
 
     [AddINotifyPropertyChangedInterface]
@@ -153,6 +160,13 @@ namespace DomainObjects.Tests.Sales
         public int Id { get; private set; }
         public int ProductId { get; set; }
         public decimal Quantity { get; set; }
+        public override Invoice Parent { get; }
+        public InvoiceLine(Invoice parent)
+        {
+            this.Parent = parent;
+        }
+
+        
     }
 
     public class Product : AggregateRoot<Product, int>
