@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using DomainObjects.ChangeTracking;
@@ -33,6 +34,19 @@ namespace DomainObjects.Core
             changeTracker = new ChangeTracker(this);
             changeTracker.BeforePropertyChanged += (object sender, PropertyChangedExtendedEventArgs e) => OnBeforePropertyChanged(e.PropertyName, e.Before, e.After);
             changeTracker.AfterPropertyChanged += (object sender, PropertyChangedExtendedEventArgs e) => OnAfterPropertyChanged(e.PropertyName, e.Before, e.After);
+        }
+
+        protected DomainEntity(SerializationInfo info, StreamingContext context) 
+            : this()
+        {
+            Deserialize(info, context);
+            SetObjectState(info.GetValue<DomainObjectState>(nameof(state)));
+        }
+
+        protected override void Serialize(SerializationInfo info, StreamingContext context)
+        {
+            base.Serialize(info, context);
+            info.AddValue(nameof(state), GetObjectState());
         }
 
         #endregion
@@ -132,10 +146,10 @@ namespace DomainObjects.Core
             state = DomainObjectState.Deleted;
         }
 
-        //protected void SetObjectState(DomainObjectState state)
-        //{
-        //    this.state = state;
-        //}
+        protected void SetObjectState(DomainObjectState state)
+        {
+            this.state = state;
+        }
 
         #endregion
 
@@ -255,6 +269,15 @@ namespace DomainObjects.Core
 
     public abstract class DomainEntity<T> : DomainEntity where T : DomainEntity<T>
     {
+        protected DomainEntity() 
+        {
+
+        }
+        protected DomainEntity(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+         
+        }
+
         #region Clone?
 
         //T Clone()???
@@ -265,6 +288,15 @@ namespace DomainObjects.Core
     public abstract class DomainEntity<T, TKey> : DomainEntity<T>, IKeyProvider<TKey>
         where T : DomainEntity<T>
     {
+        protected DomainEntity()
+        {
+
+        }
+        protected DomainEntity(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+
+        }
+
         public new DomainKey<TKey> GetKey()
         {
             return (DomainKey<TKey>)base.GetKey();

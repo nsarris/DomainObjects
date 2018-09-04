@@ -105,7 +105,7 @@ namespace DomainObjects.Internal
                 }
                 else
                 {
-                    if (!Equals(right, left))
+                    if (!Equals(prop.Get(right), prop.Get(left)))
                         return false;
                 }
             }

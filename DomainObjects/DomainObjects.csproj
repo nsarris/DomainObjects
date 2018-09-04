@@ -64,6 +64,7 @@
     <Compile Include="ChangeTracking\TrackableBase.cs" />
     <Compile Include="ChangeTracking\TrackableVisitor.cs" />
     <Compile Include="Core\DomainObjectState.cs" />
+    <Compile Include="Core\Extensions.cs" />
     <Compile Include="Core\ValueObjectList.cs" />
     <Compile Include="Core\ValueObjectReadOnlyList.cs" />
     <Compile Include="GlobalSuppressions.cs" />

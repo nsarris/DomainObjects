@@ -10,6 +10,7 @@ using FluentValidation.Internal;
 using FluentValidation.Results;
 using FluentValidation.Validators;
 using DomainObjects.Validation;
+using System.Runtime.Serialization;
 
 namespace DomainObjects.Tests.Sales
 {
@@ -69,6 +70,7 @@ namespace DomainObjects.Tests.Sales
     }
 
     [AddINotifyPropertyChangedInterface]
+    [Serializable]
     public class Customer : AggregateRoot<Customer,int>
     {
         //private string testInnerField  = "test";
@@ -76,7 +78,7 @@ namespace DomainObjects.Tests.Sales
         public int Id { get; private set; }
         public string Name { get; set; }
         public Address MainAddress { get; set; }
-        public ValueList<Address> OtherAddresses { get; set; }
+        public ValueList<Address> OtherAddresses { get; set; } = new ValueList<Address>();
         public StringComparer StringComparer { get; set; }
         public Customer()
         {
@@ -87,8 +89,14 @@ namespace DomainObjects.Tests.Sales
             Id = id;
             Name = name;
         }
+        
+        protected Customer(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+
+        }
 
     }
+    [Serializable]
     public class Address : DomainValueObject<Address>
     {
         public Address(string street, string number, string city, string postCode, Phone primaryPhone, IEnumerable<Phone> otherPhones)
@@ -101,21 +109,32 @@ namespace DomainObjects.Tests.Sales
             OtherPhones = new ValueObjectReadOnlyList<Phone>(otherPhones);
         }
 
+        protected Address(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+
+        }
+
         public string Street { get; }
         public string Number { get; }
         public string City { get; }
         public string PostCode { get; }
         public Phone PrimaryPhone { get; }
-        public ValueObjectReadOnlyList<Phone> OtherPhones { get; }
+        public ValueObjectReadOnlyList<Phone> OtherPhones { get; } = new ValueObjectReadOnlyList<Phone>();
 
         
     }
+    [Serializable]
     public class Phone : DomainValueObject<Phone>
     {
         public Phone(string number, int kind)
         {
             Number = number;
             Kind = kind;
+        }
+
+        protected Phone(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+
         }
 
         public string Number { get; }
@@ -129,6 +148,7 @@ namespace DomainObjects.Tests.Sales
 
 
     [AddINotifyPropertyChangedInterface]
+    [Serializable]
     public class Invoice : AggregateRoot<Invoice, int>
     {
         public Invoice()
@@ -139,6 +159,11 @@ namespace DomainObjects.Tests.Sales
         public Invoice(int id)
         {
             Id = id;
+        }
+
+        protected Invoice(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+
         }
 
         public int Id { get; private set; }
@@ -155,6 +180,7 @@ namespace DomainObjects.Tests.Sales
     }
 
     [AddINotifyPropertyChangedInterface]
+    [Serializable]
     public class InvoiceLine : Aggregate<InvoiceLine, Invoice, int>
     {
         public int Id { get; private set; }
@@ -166,7 +192,10 @@ namespace DomainObjects.Tests.Sales
             this.Parent = parent;
         }
 
-        
+        protected InvoiceLine(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+
+        }
     }
 
     public class Product : AggregateRoot<Product, int>
@@ -174,5 +203,10 @@ namespace DomainObjects.Tests.Sales
         public int Id { get; private set; }
         public string Name { get; set; }
         public decimal UnitPrice { get; set; }
+
+        protected Product(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+
+        }
     }
 }

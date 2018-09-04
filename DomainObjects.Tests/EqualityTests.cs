@@ -21,6 +21,8 @@ namespace DomainObjects.Tests
 
             //Assert.AreEqual(book1, book2);
             //Assert.AreNotEqual(book1, book3);
+
+
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using DomainObjects.Internal;
@@ -18,6 +19,17 @@ namespace DomainObjects.Core
         
         //TODO: infer this from model metadata
         protected virtual bool GetIsShallow() => false;
+
+        protected DomainValueObject()
+        {
+
+        }
+
+        protected DomainValueObject(SerializationInfo info, StreamingContext context)
+            :base(info, context)
+        {
+            
+        }
 
         public override bool Equals(object obj)
         {

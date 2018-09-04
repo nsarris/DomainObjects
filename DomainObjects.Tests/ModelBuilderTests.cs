@@ -9,6 +9,7 @@ using DomainObjects.Core;
 using DomainObjects.ModelBuilder;
 using DomainObjects.Internal;
 using DomainObjects.Tests.Sales;
+using Newtonsoft.Json;
 
 namespace DomainObjects.Tests
 {
@@ -69,6 +70,8 @@ namespace DomainObjects.Tests
             var keyValue3 = customer3.GetKeyValue();
 
             Assert.AreEqual(keyValue2, keyValue3);
+
+            
         }
     }
 }
