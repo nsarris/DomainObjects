@@ -27,6 +27,8 @@ namespace DomainObjects.Internal
             foreach (var attribute in BuildCustomAttributes(type.GetCustomAttributesData()))
                 typeBuilder.SetCustomAttribute(attribute);
 
+            //Force Add Serializable
+
             CreatePassThroughConstructors(typeBuilder, type);
 
             var onPropertyChangedMethod = type.GetMethod("OnPropertyChanged",
