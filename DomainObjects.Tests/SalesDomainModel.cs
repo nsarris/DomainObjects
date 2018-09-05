@@ -74,7 +74,6 @@ namespace DomainObjects.Tests.Sales
     public class Customer : AggregateRoot<Customer,int>
     {
         //private string testInnerField  = "test";
-
         public int Id { get; private set; }
         public string Name { get; set; }
         public Address MainAddress { get; set; }

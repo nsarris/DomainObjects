@@ -1,20 +1,20 @@
-﻿using Dynamix.Reflection;
+﻿using Dynamix.Helpers;
+using Dynamix.Reflection;
 using System;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace DomainObjects.Core
 {
+
     [Serializable]
     public abstract class DomainObject : ISerializable//<T> where T : DomainObject<T>
     {
         protected DomainObject()
         {
-
+  
         }
 
         protected DomainObject(SerializationInfo info, StreamingContext context)
@@ -25,14 +25,14 @@ namespace DomainObjects.Core
 
         protected void Deserialize(SerializationInfo info, StreamingContext context)
         {
-            foreach (var field in this.GetType().GetFieldsEx(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
-                field.Set(this, info.GetValue(field.Name, field.Type));
+            var serializer = DomainObjectSerializer.GetSerializer(this.GetType());
+            serializer.Deserialize(info, this);
         }
 
         protected virtual void Serialize(SerializationInfo info, StreamingContext context)
         {
-            foreach (var field in this.GetType().GetFieldsEx(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
-                info.AddValue(field.Name, field.Get(this));
+            var serializer = DomainObjectSerializer.GetSerializer(this.GetType());
+            serializer.Serialize(info, this);
         }
 
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context) => Serialize(info, context);

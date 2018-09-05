@@ -40,13 +40,15 @@ namespace DomainObjects.Core
             : this()
         {
             Deserialize(info, context);
-            SetObjectState(info.GetValue<DomainObjectState>(nameof(state)));
+            //TODO: Try get, handle changetracking state
+            SetObjectState(info.GetValue<DomainObjectState>("_state_"));
         }
 
         protected override void Serialize(SerializationInfo info, StreamingContext context)
         {
             base.Serialize(info, context);
-            info.AddValue(nameof(state), GetObjectState());
+            //if serialize state
+            info.AddValue("_state_", GetObjectState());
         }
 
         #endregion

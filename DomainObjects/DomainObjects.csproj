@@ -63,6 +63,7 @@
     <Compile Include="Core\DomainEntity.cs" />
     <Compile Include="ChangeTracking\TrackableBase.cs" />
     <Compile Include="ChangeTracking\TrackableVisitor.cs" />
+    <Compile Include="Core\DomainObjectSerializer.cs" />
     <Compile Include="Core\DomainObjectState.cs" />
     <Compile Include="Core\Extensions.cs" />
     <Compile Include="Core\ValueObjectList.cs" />

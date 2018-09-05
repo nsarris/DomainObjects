@@ -2,12 +2,22 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Runtime.Serialization;
 
 namespace DomainObjects.Core
 {
     public static class Extensions
     {
+        private readonly static Lazy<FieldInfoEx> serializationInfoConvertedField = new Lazy<FieldInfoEx>(() =>
+            typeof(SerializationInfo).GetFieldEx("m_converter", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance));
+
+        
+        public static IFormatterConverter GetFormatterConverter(this SerializationInfo info)
+        {
+            return (IFormatterConverter)serializationInfoConvertedField.Value.Get(info);
+        }
+
         public static T GetValue<T>(this SerializationInfo info, string name)
         {
             return (T)info.GetValue(name, typeof(T));
@@ -42,10 +52,6 @@ namespace DomainObjects.Core
 
         public SerializationInfoWrapper<T> AddValue(string memberName)
         {
-            var fields = instance.GetType()
-                    .GetFieldsEx(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic)
-                    .ToList();
-
             info.AddValue(
                 memberName,
                 instance
