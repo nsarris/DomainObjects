@@ -26,6 +26,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>DomainObjects.Tests.ruleset</CodeAnalysisRuleSet>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -35,6 +36,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>DomainObjects.Tests.ruleset</CodeAnalysisRuleSet>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="CommonServiceLocator, Version=2.0.3.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
@@ -100,6 +102,7 @@
     <Compile Include="LiteralService.cs" />
     <Compile Include="EqualityTests.cs" />
     <Compile Include="ModelBuilderTests.cs" />
+    <Compile Include="ProxyBuildTests.cs" />
     <Compile Include="SalesDomainModel.cs" />
     <Compile Include="SerializationTests.cs" />
     <Compile Include="TrackableTests.cs" />

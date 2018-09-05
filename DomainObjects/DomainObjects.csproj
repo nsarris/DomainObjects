@@ -70,6 +70,7 @@
     <Compile Include="Core\ValueObjectReadOnlyList.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Internal\ExpressionHelper.cs" />
+    <Compile Include="Internal\ProxyTypeBuilder.cs" />
     <Compile Include="Metadata\DomainAggregateListPropertyMetadata.cs" />
     <Compile Include="Metadata\DomainAggregatePropertyMetadata.cs" />
     <Compile Include="Metadata\DomainKeyAttribute.cs" />

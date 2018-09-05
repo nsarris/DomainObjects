@@ -24,6 +24,7 @@ namespace DomainObjects.Tests
                 new Address("3", "3", null, null, new Phone("123123", 1), null),
                 });
             var ser = JsonConvert.SerializeObject(customer2);
+
             var customer2Copy = JsonConvert.DeserializeObject<Customer>(ser);
             Assert.IsTrue(ObjectComparer.Default.DeepEquals(customer2, customer2Copy));
         }

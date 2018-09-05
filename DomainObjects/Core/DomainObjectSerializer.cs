@@ -7,12 +7,22 @@ using System.Runtime.Serialization;
 
 namespace DomainObjects.Core
 {
+    public class DeserializeAsAttribute : Attribute
+    {
+        public DeserializeAsAttribute(Type type)
+        {
+            Type = type;
+        }
+
+        public Type Type { get; }
+    }
+
     internal class DomainObjectSerializer
     {
         static readonly Dictionary<Type, DomainObjectSerializer> cache = new Dictionary<Type, DomainObjectSerializer>();
         //readonly Type objectType;
-        readonly Dictionary<string, FieldInfoEx> autoPropertyFields;
-        readonly Dictionary<string, FieldInfoEx> fields;
+        readonly Dictionary<string, (FieldInfoEx field, Type targetType)> autoPropertyFields;
+        readonly Dictionary<string, (FieldInfoEx field, Type targetType)> fields;
 
         public static DomainObjectSerializer GetSerializer<T>()
         {
@@ -37,21 +47,32 @@ namespace DomainObjects.Core
 
             this.fields = objectType
                 .GetFieldsEx(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                .Where(x => !eventNames.Contains(x.Name))
-                .ToDictionary(x => x.Name);
+                .Where(x => !x.FieldInfo.HasAttribute<NonSerializedAttribute>() 
+                    && !eventNames.Contains(x.Name))
+                .ToDictionary(x => x.Name,x => GetFieldWithTargetType(x, objectType));
 
             autoPropertyFields = fields.Values
-                .Where(x => x.AutoPropertyName != null)
-                .ToDictionary(x => x.AutoPropertyName);
+                .Where(x => x.field.AutoPropertyName != null)
+                .ToDictionary(x => x.field.AutoPropertyName);
         }
 
-        private FieldInfoEx GetField(string name)
+        private (FieldInfoEx field, Type targetType) GetField(string name)
         {
             if (autoPropertyFields.TryGetValue(name, out var field)
                || fields.TryGetValue(name, out field))
                 return field;
             else
-                return null;
+                return (null,null);
+        }
+
+        private (FieldInfoEx field, Type targetType) GetFieldWithTargetType(FieldInfoEx field, Type objectType)
+        {
+            if (field.AutoPropertyName == null)
+                return (field, field.Type);
+
+            return (field, 
+                objectType.GetPropertyEx(field.AutoPropertyName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.PropertyInfo?.GetAttribute<DeserializeAsAttribute>()?.Type
+                ?? field.Type);
         }
 
         public void Deserialize(SerializationInfo info, object obj)
@@ -60,15 +81,16 @@ namespace DomainObjects.Core
 
             foreach (var item in info)
             {
-                var field = GetField(item.Name);
+                var (field, tatgetType) = GetField(item.Name);
                 if (field != null)
-                    field.Set(obj, converter.Convert(item.Value, field.Type));
+                    field.Set(obj, converter.Convert(item.Value, tatgetType));
+                        
             }
         }
 
         public void Serialize(SerializationInfo info, object obj)
         {
-            foreach(var field in fields.Values)
+            foreach(var (field, _) in fields.Values)
                 info.AddValue(field.AutoPropertyName ?? field.Name, field.Get(obj));
         }
     }

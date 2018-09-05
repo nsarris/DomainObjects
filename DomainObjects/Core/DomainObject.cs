@@ -25,14 +25,38 @@ namespace DomainObjects.Core
 
         protected void Deserialize(SerializationInfo info, StreamingContext context)
         {
+            OnDeserializing();
             var serializer = DomainObjectSerializer.GetSerializer(this.GetType());
             serializer.Deserialize(info, this);
+            OnDeserialized();
         }
 
         protected virtual void Serialize(SerializationInfo info, StreamingContext context)
         {
+            OnSerializing();
             var serializer = DomainObjectSerializer.GetSerializer(this.GetType());
             serializer.Serialize(info, this);
+            OnSerialized();
+        }
+
+        protected virtual void OnDeserialized()
+        {
+
+        }
+
+        protected virtual void OnDeserializing()
+        {
+
+        }
+
+        protected virtual void OnSerialized()
+        {
+
+        }
+
+        protected virtual void OnSerializing()
+        {
+            
         }
 
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context) => Serialize(info, context);

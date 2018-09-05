@@ -1,4 +1,3 @@
 ﻿1. Are Same (compare values/deep)
 2. ModelValidator / Builder / Registry -> Use attributes
 3. BuildValidators from datamodel metadata (linq2db / ef / dalia)
-4. Serialization (match auto property names, filter event, respect NonSerializable, set deserialization type)

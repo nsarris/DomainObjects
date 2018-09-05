@@ -69,14 +69,16 @@ namespace DomainObjects.Tests.Sales
         }
     }
 
-    [AddINotifyPropertyChangedInterface]
+    //[AddINotifyPropertyChangedInterface]
     [Serializable]
     public class Customer : AggregateRoot<Customer,int>
     {
         //private string testInnerField  = "test";
         public int Id { get; private set; }
-        public string Name { get; set; }
+        public virtual string Name { get; set; }
         public Address MainAddress { get; set; }
+        //public ValueList<Address> OtherAddresses { get; set; } = new ValueList<Address>();
+        //[DeserializeAs(typeof(ValueList<Address>))]
         public ValueList<Address> OtherAddresses { get; set; } = new ValueList<Address>();
         public StringComparer StringComparer { get; set; }
         public Customer()
@@ -93,8 +95,8 @@ namespace DomainObjects.Tests.Sales
         {
 
         }
-
     }
+
     [Serializable]
     public class Address : DomainValueObject<Address>
     {
