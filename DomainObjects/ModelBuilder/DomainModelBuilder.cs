@@ -152,7 +152,7 @@ namespace DomainObjects.ModelBuilder
                         aggregateDescriptors.AddIfNotNull(ScanEntityTypeRecursive(elementType, visitedTypes));
                     }
                 }
-                else if (propertyType.IsOrSubclassOfGenericDeep(typeof(ValueList<>), out var valueListType)
+                else if (propertyType.IsOrSubclassOfGenericDeep(typeof(ValueObjectList<>), out var valueListType)
                     || (readOnly = propertyType.IsOrSubclassOfGenericDeep(typeof(ValueObjectReadOnlyList<>), out valueListType)))
                 {
                     var elementType = valueListType.GetGenericArguments().First();

@@ -207,7 +207,7 @@ namespace DomainObjects.ModelBuilder
         //        return new UnsupportedTypePropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
         //}
 
-        public ValueListModelConfiguration ValueObjectList<TValue>(Expression<Func<T, ValueList<TValue>>> memberSelector)
+        public ValueListModelConfiguration ValueObjectList<TValue>(Expression<Func<T, ValueObjectList<TValue>>> memberSelector)
             where TValue : DomainValueObject<TValue>
         {
             var configuration = new ValueListModelConfiguration(ReflectionHelper.GetProperty(memberSelector));

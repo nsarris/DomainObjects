@@ -79,7 +79,7 @@ namespace DomainObjects.Tests.Sales
         public Address MainAddress { get; set; }
         //public ValueList<Address> OtherAddresses { get; set; } = new ValueList<Address>();
         //[DeserializeAs(typeof(ValueList<Address>))]
-        public ValueList<Address> OtherAddresses { get; set; } = new ValueList<Address>();
+        public ValueObjectList<Address> OtherAddresses { get; set; } = new ValueObjectList<Address>();
         public StringComparer StringComparer { get; set; }
         public Customer()
         {

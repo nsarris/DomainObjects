@@ -3,18 +3,18 @@ using System.Collections.Generic;
 
 namespace DomainObjects.Core
 {
-    public class ValueList<T> : TrackableList<T>
+    public class ValueObjectList<T> : TrackableList<T>
         where T : DomainValueObject<T>
     {
-        public ValueList()
+        public ValueObjectList()
         {
         }
 
-        public ValueList(IList<T> list) : base(list)
+        public ValueObjectList(IList<T> list) : base(list)
         {
         }
 
-        public ValueList(IEnumerable<T> collection) : base(collection)
+        public ValueObjectList(IEnumerable<T> collection) : base(collection)
         {
         }
     }
