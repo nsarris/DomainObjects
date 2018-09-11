@@ -22,9 +22,9 @@ namespace DomainObjects.Tests
             customer.Name = "12";
             customer.Name = "121";
             customer.Name = "121";
-            
-            var c = ProxyTypeBuilder.CreateInstance<Customer>(() => new Customer(1, "123"));
-            //var c1 = ProxyTypeBuilder.CreateInstance<Customer>(() => new Customer(1, customer.Name));
+
+            //var c = ProxyTypeBuilder.CreateInstance<Customer>(() => new Customer(1, "123"));
+            var c1 = ProxyTypeBuilder.CreateInstance<Customer>(() => new Customer(1, customer.Name));
         }
     }
 }

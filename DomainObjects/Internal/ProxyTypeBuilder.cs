@@ -27,6 +27,9 @@ namespace DomainObjects.Internal
             foreach (var attribute in BuildCustomAttributes(type.GetCustomAttributesData()))
                 typeBuilder.SetCustomAttribute(attribute);
 
+            if (!type.HasAttribute<SerializableAttribute>())
+                typeBuilder.SetCustomAttribute(
+                    new CustomAttributeBuilder(typeof(SerializableAttribute).GetConstructor(new Type[] { }), new object[] { }));
             //Force Add Serializable
 
             CreatePassThroughConstructors(typeBuilder, type);
@@ -131,7 +134,7 @@ namespace DomainObjects.Internal
             }).ToArray();
         }
 
-        public static T CreateInstance<T>(Expression<Func<T>> ctorExpression)
+        public static T CreateInstance<T>(Expression<Func<T>> ctorExpression, Func<T,T> initializer = null)
             where T : class
         {
             if (ctorExpression.Body.NodeType != ExpressionType.New)
@@ -145,13 +148,21 @@ namespace DomainObjects.Internal
             var newCtor = newType.GetConstructorsEx()
                 .FirstOrDefault(x => x.ConstructorInfo.GetParameters().Select(p => p.ParameterType).SequenceEqual(ctor.GetParameters().Select(p => p.ParameterType)));
 
+            T instance = null;
+
             if (newExpression.Arguments.All(x => x is ConstantExpression))
-                return (T)newCtor.Invoke(newExpression.Arguments.Select(x => ((ConstantExpression)x).Value).ToArray());
+                instance = (T)newCtor.Invoke(newExpression.Arguments.Select(x => ((ConstantExpression)x).Value).ToArray());
             else
             {
-                var l = new CtorReplacerVisitor(ctor, newCtor).Visit(ctorExpression);
-                return ((Expression<Func<T>>)l).Compile().Invoke();
+                var l = new CtorReplacerVisitor(ctor, newCtor).Visit(ctorExpression) as LambdaExpression;
+                var ll = (new EvaluationVisitor().Visit(l.Body) as ConstantExpression).Value;
+                //return ((Expression<Func<T>>)l).Compile().Invoke();
+                instance =(T)ll;
             }
+
+            initializer?.Invoke(instance);
+
+            return instance;
         }
 
         private class CtorReplacerVisitor : ExpressionVisitor
@@ -174,6 +185,105 @@ namespace DomainObjects.Internal
                 }
                 else
                     return base.VisitNew(node);
+            }
+        }
+
+        public class EvaluationVisitor : ExpressionVisitor
+        {
+            protected override Expression VisitUnary(UnaryExpression node)
+            {
+                var operand = Visit(node.Operand);
+                return Expression.Constant(node.Method.Invoke(operand, Array.Empty<object>()), node.Type);
+            }
+
+            protected override Expression VisitBinary(BinaryExpression node)
+            {
+                var left = Evaluate(node.Left);
+                var right = Evaluate(node.Right);
+                return Expression.Constant(node.Method.GetMethodEx().Invoke(left, right));
+            }
+
+            protected override Expression VisitMethodCall(MethodCallExpression node)
+            {
+                var args = node.Arguments.Select(a => Evaluate(a)).Select(a => a.Value).ToArray();
+                return Expression.Constant(node.Method.GetMethodEx().Invoke(Evaluate(node.Object).Value, args));
+            }
+
+            protected override Expression VisitConstant(ConstantExpression node)
+            {
+                return node;
+            }
+
+            protected override Expression VisitDefault(DefaultExpression node)
+            {
+                return Expression.Constant(node.Type.DefaultOf());
+            }
+
+            protected override Expression VisitExtension(Expression node)
+            {
+                return base.VisitExtension(node.ReduceExtensions());
+            }
+
+            protected override Expression VisitTypeBinary(TypeBinaryExpression node)
+            {
+                return base.VisitTypeBinary(node);
+            }
+
+            protected override Expression VisitConditional(ConditionalExpression node)
+            {
+                var test = true.Equals(Evaluate(node.Test).Value);
+                var ifTrue = Evaluate(node.IfTrue);
+                var ifFalse = Evaluate(node.IfFalse);
+                return Expression.Constant(test ? ifTrue : ifFalse);
+            }
+
+            protected override Expression VisitMember(MemberExpression node)
+            {
+                var instance = Evaluate(node.Expression);
+                if (node.Member.MemberType == MemberTypes.Field)
+                    return Expression.Constant(((FieldInfo)node.Member).GetFieldEx().Get(instance.Value));
+                else if (node.Member.MemberType == MemberTypes.Property)
+                    return Expression.Constant(((PropertyInfo)node.Member).GetPropertyEx().Get(instance.Value));
+                else
+                    throw new InvalidOperationException("Unsupported member type");
+            }
+
+            protected override Expression VisitNew(NewExpression node)
+            {
+                var args = node.Arguments.Select(a => Evaluate(a)).Select(a => a.Value).ToArray();
+                return Expression.Constant(node.Constructor.GetConstructorEx().Invoke(args));
+            }
+
+            protected override Expression VisitDynamic(DynamicExpression node)
+            {
+                throw new NotSupportedException("Dynamic is not supported in lambda evaluator");
+                //return base.VisitDynamic(node);
+            }
+
+            //protected override ElementInit VisitElementInit(ElementInit node)
+            //{
+            //    var args = node.Arguments.Select(a => Evaluate(a)).Select(a => a.Value).ToArray();
+            //    return Expression.Constant(node.AddMethod.GetMethodEx().Invoke(args.First(), args.Skip(1).ToArray()));
+            //}
+
+            protected override Expression VisitIndex(IndexExpression node)
+            {
+                var args = node.Arguments.Select(a => Evaluate(a)).Select(a => a.Value).ToArray();
+                return Expression.Constant(node.Indexer.GetPropertyEx().Get(Evaluate(node.Object), args));
+            }
+
+            protected override Expression VisitNewArray(NewArrayExpression node)
+            {
+                var array = Array.CreateInstance(node.Type, node.Expressions.Count);
+                var i = 0;
+                foreach (var e in node.Expressions)
+                    array.SetValue(Evaluate(e).Value, i);
+                return Expression.Constant(array);
+            }
+
+            private ConstantExpression Evaluate(Expression node)
+            {
+                return (ConstantExpression)Visit(node);
             }
         }
     }
