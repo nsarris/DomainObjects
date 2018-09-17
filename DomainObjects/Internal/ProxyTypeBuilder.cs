@@ -1,4 +1,5 @@
-﻿using Dynamix.Reflection;
+﻿using Dynamix.Helpers;
+using Dynamix.Reflection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -226,7 +227,7 @@ namespace DomainObjects.Internal
 
             protected override Expression VisitTypeBinary(TypeBinaryExpression node)
             {
-                return base.VisitTypeBinary(node);
+                return Expression.Constant(ConvertEx.ConvertTo(Evaluate(node.Expression).Value, node.TypeOperand));
             }
 
             protected override Expression VisitConditional(ConditionalExpression node)
@@ -264,6 +265,14 @@ namespace DomainObjects.Internal
             //{
             //    var args = node.Arguments.Select(a => Evaluate(a)).Select(a => a.Value).ToArray();
             //    return Expression.Constant(node.AddMethod.GetMethodEx().Invoke(args.First(), args.Skip(1).ToArray()));
+            //}
+
+            //protected override Expression VisitInvocation(InvocationExpression node)
+            //{
+
+            //    return Expression.Constant(Expression.Invoke(node.Expression, node.Arguments.Select(x => Evaluate(x)).ToArray()));
+                
+            //    return base.VisitInvocation(node);
             //}
 
             protected override Expression VisitIndex(IndexExpression node)
