@@ -21,7 +21,7 @@ namespace DomainObjects.ModelBuilder
         internal List<string> IgnoredMembers { get; } = new List<string>();
         internal List<string> KeyMembers { get; } = new List<string>();
         internal List<PropertyModelConfiguration> PropertyModelConfigurations { get; } = new List<PropertyModelConfiguration>();
-        internal Type EntityType { get; set; }
+        internal Type EntityType { get; }
         internal bool IsRoot { get; }
     }
 
@@ -59,9 +59,9 @@ namespace DomainObjects.ModelBuilder
             return this;
         }
 
-        public StringPropertyModelConfiguration Property(Expression<Func<T, string>> memberSelector)
+        public StringEntityPropertyModelConfiguration<T> Property(Expression<Func<T, string>> memberSelector)
         {
-            var configuration = new StringPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
+            var configuration = new StringEntityPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
             PropertyModelConfigurations.Add(configuration);
             return configuration;
         }
@@ -172,7 +172,7 @@ namespace DomainObjects.ModelBuilder
                 switch (domainPropertyType.Value)
                 {
                     case DomainValueType.String:
-                        return new StringPropertyModelConfiguration(property);
+                        return new StringEntityPropertyModelConfiguration<T>(this, property);
                     case DomainValueType.Boolean:
                         return new BooleanPropertyModelConfiguration(property);
                     case DomainValueType.Number:
@@ -183,7 +183,7 @@ namespace DomainObjects.ModelBuilder
                         return new TimeSpanPropertyModelConfiguration(property);
                     case DomainValueType.Enum:
                         return new EnumPropertyModelConfiguration(property);
-                    case DomainValueType.Complex:
+                    case DomainValueType.ValueObject:
                         return new ValueTypePropertyModelConfiguration(property);
                     default:
                         break;

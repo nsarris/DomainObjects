@@ -44,7 +44,7 @@ namespace DomainObjects.Metadata
                     var enumConfiguration = configuration as EnumPropertyModelConfiguration;
                     EnumType = Nullable.GetUnderlyingType(descriptor.Property.Type) ?? descriptor.Property.Type;
                     break;
-                case DomainValueType.Complex:
+                case DomainValueType.ValueObject:
                     var valueTypeConfiguration = configuration as ValueTypePropertyModelConfiguration;
                     break;
             }

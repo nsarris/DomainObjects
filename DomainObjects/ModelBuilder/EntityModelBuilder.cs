@@ -62,8 +62,8 @@ namespace DomainObjects.ModelBuilder
             //Validate Key
             if (!keyProperties.Any())
                 throw new InvalidOperationException($"Entity {Descriptor.Type.Name} has no key defined");
-            else if(keyProperties.Count > 1 && keyProperties.Any(x => x.DomainValueType == DomainValueType.Complex) 
-                    || keyProperties.Count(x => x.DomainValueType == DomainValueType.Complex) > 1)
+            else if(keyProperties.Count > 1 && keyProperties.Any(x => x.DomainValueType == DomainValueType.ValueObject) 
+                    || keyProperties.Count(x => x.DomainValueType == DomainValueType.ValueObject) > 1)
                 throw new InvalidOperationException($"Entity {Descriptor.Type.Name} has a complex type and at least one more property in its key configuration. This is not supported"); 
 
             var metadata = new DomainEntityMetadata(Descriptor.Type, properties);

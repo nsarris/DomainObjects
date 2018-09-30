@@ -39,7 +39,7 @@ namespace DomainObjects.ModelBuilder.Configuration
 
         public new NumericPropertyModelConfiguration IsRequired()
         {
-            base.IsRequired();
+            IsOptional = false;
             return this;
         }
     }

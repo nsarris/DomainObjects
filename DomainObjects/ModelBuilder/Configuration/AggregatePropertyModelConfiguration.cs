@@ -8,9 +8,9 @@ namespace DomainObjects.ModelBuilder.Configuration
         {
         }
 
-        public new AggregatePropertyModelConfiguration IsRequired()
+        public AggregatePropertyModelConfiguration IsRequired()
         {
-            base.IsRequired();
+            IsOptional = false;
             return this;
         }
     }

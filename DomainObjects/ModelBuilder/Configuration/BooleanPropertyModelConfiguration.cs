@@ -8,9 +8,9 @@ namespace DomainObjects.ModelBuilder.Configuration
         {
         }
 
-        public new BooleanPropertyModelConfiguration IsRequired()
+        public BooleanPropertyModelConfiguration IsRequired()
         {
-            base.IsRequired();
+            IsOptional = false;
             return this;
         }
     }

@@ -6,7 +6,7 @@ namespace DomainObjects.ModelBuilder.Configuration
 {
     public abstract class PropertyModelConfiguration
     {
-        internal bool IsOptional { get; private set; }
+        internal bool IsOptional { get; set; }
         //internal bool IsNullable { get; }
         //internal Type EffectiveType { get; }
 
@@ -20,10 +20,10 @@ namespace DomainObjects.ModelBuilder.Configuration
             IsOptional = property.PropertyType.IsClass || property.PropertyType.IsNullable();
         }
 
-        public PropertyModelConfiguration IsRequired()
-        {
-            IsOptional = false;
-            return this;
-        }
+        //internal PropertyModelConfiguration IsRequired()
+        //{
+        //    IsOptional = false;
+        //    return this;
+        //}
     }
 }

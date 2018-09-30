@@ -7,54 +7,56 @@ namespace DomainObjects.ModelBuilder.Configuration
 {
     public class StringPropertyModelConfiguration : PropertyModelConfiguration
     {
-        int? maxLength = 0;
+        internal uint? MaxLength { get; set; }
         internal StringPropertyModelConfiguration(PropertyInfo property) : base(property)
         {
         }
+    }
 
-        public StringPropertyModelConfiguration HasMaxLength(int maxLength)
+    public static class PropertyModelConfigurationExtensions
+    {
+        public static T IsRequired<T>(this T c)
+            where T : PropertyModelConfiguration
         {
-            this.maxLength = maxLength;
-            return this;
+            c.IsOptional = false;
+            return c;
         }
 
-        public new StringPropertyModelConfiguration IsRequired()
+        public static T HasMaxLength<T>(this T c, uint maxLength)
+            where T : StringPropertyModelConfiguration
         {
-            base.IsRequired();
-            return this;
+            c.MaxLength = maxLength;
+            return c;
         }
     }
 
-    //public class StringPropertyModelConfiguration<T> : PropertyModelConfiguration
-    //    where T : DomainObject
+    public class StringEntityPropertyModelConfiguration<T> : StringPropertyModelConfiguration
+        where T : DomainEntity
+    {
+        private readonly EntityModelBuilderConfiguration<T> propertyConfiguration;
+
+        public StringEntityPropertyModelConfiguration(EntityModelBuilderConfiguration<T> propertyConfiguration, PropertyInfo property) : base(property)
+        {
+            this.propertyConfiguration = propertyConfiguration;
+        }
+        public EntityModelBuilderConfiguration<T> End()
+        {
+            return propertyConfiguration;
+        }
+    }
+
+    //public class StringValueObjectPropertyModelConfiguration<T> : StringPropertyModelConfiguration
+    //    where T : DomainEntity
     //{
-    //    readonly List<Func<string, bool>> validators= new List<Func<string, bool>>();
-        
-    //    public StringPropertyModelConfiguration(PropertyInfo property) : base(property)
-    //    {
-    //    }
+    //    private readonly EntityModelBuilderConfiguration<T> propertyConfiguration;
 
-    //    public StringPropertyModelConfiguration<T> HasMaxLength(int maxLength)
+    //    public StringValueObjectPropertyModelConfiguration(EntityModelBuilderConfiguration<T> propertyConfiguration, PropertyInfo property) : base(property)
     //    {
-    //        validators.Add((string x) => string.IsNullOrWhiteSpace(x) || x.Trim().Length <= maxLength);
-    //        return this;
+    //        this.propertyConfiguration = propertyConfiguration;
     //    }
-
-    //    public StringPropertyModelConfiguration<T> Requires(Func<string,bool> validator)
-    //    {
-    //        validators.Add(validator);
-    //        return this;
-    //    }
-
-    //    public new StringPropertyModelConfiguration<T> IsRequired()
-    //    {
-    //        base.IsRequired();
-    //        return this;
-    //    }
-
     //    public EntityModelBuilderConfiguration<T> End()
     //    {
-    //        return null;
+    //        return propertyConfiguration;
     //    }
     //}
 }

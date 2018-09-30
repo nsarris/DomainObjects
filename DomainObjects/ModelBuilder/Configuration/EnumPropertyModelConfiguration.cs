@@ -11,9 +11,9 @@ namespace DomainObjects.ModelBuilder.Configuration
             UnderlyingType = property.PropertyType.GetEnumUnderlyingType();
         }
 
-        public new EnumPropertyModelConfiguration IsRequired()
+        public EnumPropertyModelConfiguration IsRequired()
         {
-            base.IsRequired();
+            IsOptional = false;
             return this;
         }
     }

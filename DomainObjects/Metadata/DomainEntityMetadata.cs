@@ -53,7 +53,7 @@ namespace DomainObjects.Metadata
         public void SetKey(object entity, params object[] values)
         {
             //Primitives
-            if (!keyProperties.Any(x => x.DomainValueType == DomainValueType.Complex))
+            if (!keyProperties.Any(x => x.DomainValueType == DomainValueType.ValueObject))
             {
                 if (values.Length != keyProperties.Count)
                     throw new InvalidOperationException($"Values given dont match the number of key properties in Entity {EntityType.Name}");

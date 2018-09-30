@@ -10,6 +10,7 @@ using DomainObjects.ModelBuilder;
 using DomainObjects.Internal;
 using DomainObjects.Tests.Sales;
 using Newtonsoft.Json;
+using DomainObjects.ModelBuilder.Configuration;
 
 namespace DomainObjects.Tests
 {
@@ -31,6 +32,11 @@ namespace DomainObjects.Tests
                 .HasKey(x => new { x.Id })
                 //.HasKey(x => new { x.MainAddress })
                 .IgnoreMember(x => x.StringComparer)
+                .Property(x => x.Name)
+                    .HasMaxLength(20)
+                    .IsRequired()
+                    .End()
+                
                 ;
 
             //customerBuilder.HasKey(x => new { x.Id, x.Name });

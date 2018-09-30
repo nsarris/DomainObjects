@@ -12,7 +12,7 @@ namespace DomainObjects.Metadata
         DateTime,
         TimeSpan,
         Enum,
-        Complex,
+        ValueObject,
     }
 
     public enum DomainPropertyType

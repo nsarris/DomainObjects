@@ -88,7 +88,7 @@ namespace DomainObjects.ModelBuilder
                 if (TypeHelper.IsSupportedValueType(propertyType, out var valueType))
                 {
                     propertyDescriptors.Add(new ValuePropertyDescriptor(property, valueType.Value));
-                    if (valueType == DomainValueType.Complex)
+                    if (valueType == DomainValueType.ValueObject)
                         valueTypeDescriptors.AddIfNotNull(ScanValueTypeRecursive(propertyType, visitedTypes));
 
                 }
@@ -102,7 +102,7 @@ namespace DomainObjects.ModelBuilder
                     else
                     {
                         propertyDescriptors.Add(new ValueListPropertyDescriptor(property, elementType, elementValueType.Value, true));
-                        if (valueType == DomainValueType.Complex)
+                        if (valueType == DomainValueType.ValueObject)
                             valueTypeDescriptors.AddIfNotNull(ScanValueTypeRecursive(elementType, visitedTypes));
                     }
                 }
@@ -131,7 +131,7 @@ namespace DomainObjects.ModelBuilder
                 if (TypeHelper.IsSupportedValueType(propertyType, out var valueType))
                 {
                     propertyDescriptors.Add(new ValuePropertyDescriptor(property, valueType.Value));
-                    if (valueType == DomainValueType.Complex)
+                    if (valueType == DomainValueType.ValueObject)
                         valueTypeDescriptors.AddIfNotNull(ScanValueTypeRecursive(propertyType, visitedTypes));
                     
                 }
@@ -163,7 +163,7 @@ namespace DomainObjects.ModelBuilder
                     else
                     {
                         propertyDescriptors.Add(new ValueListPropertyDescriptor(property, elementType, elementValueType.Value, readOnly));
-                        if (valueType == DomainValueType.Complex)
+                        if (valueType == DomainValueType.ValueObject)
                             valueTypeDescriptors.AddIfNotNull(ScanValueTypeRecursive(elementType, visitedTypes));
                     }
                 }

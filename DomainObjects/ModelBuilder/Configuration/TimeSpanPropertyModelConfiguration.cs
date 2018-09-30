@@ -27,7 +27,7 @@ namespace DomainObjects.ModelBuilder
 
         public new TimeSpanPropertyModelConfiguration IsRequired()
         {
-            base.IsRequired();
+            IsOptional = false;
             return this;
         }
     }

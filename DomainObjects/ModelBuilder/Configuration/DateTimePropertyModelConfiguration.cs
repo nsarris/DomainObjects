@@ -16,9 +16,9 @@ namespace DomainObjects.ModelBuilder.Configuration
             return this;
         }
 
-        public new DateTimePropertyModelConfiguration IsRequired()
+        public DateTimePropertyModelConfiguration IsRequired()
         {
-            base.IsRequired();
+            IsOptional = false;
             return this;
         }
     }

@@ -34,7 +34,7 @@ namespace DomainObjects
             else if (effectiveType.IsNumeric())
                 return DomainValueType.Number;
             else if (effectiveType.IsOrSubclassOfGenericDeep(typeof(DomainValueObject<>),out var _))
-                return DomainValueType.Complex;
+                return DomainValueType.ValueObject;
             else
                 return null;
         }
