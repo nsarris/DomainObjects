@@ -13,15 +13,8 @@ namespace DomainObjects.ModelBuilder.Configuration
         }
     }
 
-    public static class PropertyModelConfigurationExtensions
+    public static class StringPropertyModelConfigurationExtensions
     {
-        public static T IsRequired<T>(this T c)
-            where T : PropertyModelConfiguration
-        {
-            c.IsOptional = false;
-            return c;
-        }
-
         public static T HasMaxLength<T>(this T c, uint maxLength)
             where T : StringPropertyModelConfiguration
         {

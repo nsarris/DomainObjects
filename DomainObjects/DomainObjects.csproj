@@ -123,7 +123,7 @@
     <Compile Include="ModelBuilder\Configuration\PropertyModelConfiguration.cs" />
     <Compile Include="ModelBuilder\Configuration\StringPropertyModelConfiguration.cs" />
     <Compile Include="ModelBuilder\Configuration\UnsupportedTypePropertyModelConfiguration.cs" />
-    <Compile Include="ModelBuilder\Configuration\ValueTypePropertyModelConfiguration.cs" />
+    <Compile Include="ModelBuilder\Configuration\ValueObjectPropertyModelConfiguration.cs" />
     <Compile Include="ModelBuilder\ValueTypeModelBuilder.cs" />
     <Compile Include="Patterns\Specification\IBuildSpecification.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

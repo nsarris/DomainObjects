@@ -1,46 +1,79 @@
-﻿using System.Reflection;
+﻿using DomainObjects.Core;
+using System.Reflection;
 
 namespace DomainObjects.ModelBuilder.Configuration
 {
     public class NumericPropertyModelConfiguration : PropertyModelConfiguration
     {
-        int? precision = 0;
-        int? scale = 0;
-        decimal? minValue;
-        decimal? maxValue;
+        internal byte? Precision { get; set; }
+        internal byte? Scale { get; set; }
+        internal decimal? MinValue { get; set; }
+        internal decimal? MaxValue { get; set; }
 
         internal NumericPropertyModelConfiguration(PropertyInfo property) : base(property)
         {
         }
+    }
 
-        public NumericPropertyModelConfiguration HasPrecision(int precision)
+    public static class NumericPropertyModelConfigurationExtensions
+    {
+        public static T HasPrecision<T>(this T c, byte precision)
+            where T : NumericPropertyModelConfiguration
         {
-            this.precision = precision;
-            return this;
+            c.Precision = precision;
+            return c;
         }
 
-        public NumericPropertyModelConfiguration HasScale(int scale)
+        public static T HasScale<T>(this T c, byte scale)
+            where T : NumericPropertyModelConfiguration
         {
-            this.scale = scale;
-            return this;
+            c.Scale = scale;
+            return c;
         }
 
-        public NumericPropertyModelConfiguration HasMinValue(decimal minValue)
+        public static T HasMinValue<T>(this T c, decimal minValue)
+            where T : NumericPropertyModelConfiguration
         {
-            this.minValue = minValue;
-            return this;
+            c.MinValue = minValue;
+            return c;
         }
 
-        public NumericPropertyModelConfiguration HasMaxValue(decimal maxValue)
+        public static T HasMaxValue<T>(this T c, decimal maxValue)
+            where T : NumericPropertyModelConfiguration
         {
-            this.maxValue = maxValue;
-            return this;
-        }
-
-        public new NumericPropertyModelConfiguration IsRequired()
-        {
-            IsOptional = false;
-            return this;
+            c.MaxValue = maxValue;
+            return c;
         }
     }
+
+
+    public class NumericEntityPropertyModelConfiguration<T> : NumericPropertyModelConfiguration
+        where T : DomainEntity
+    {
+        private readonly EntityModelBuilderConfiguration<T> propertyConfiguration;
+
+        public NumericEntityPropertyModelConfiguration(EntityModelBuilderConfiguration<T> propertyConfiguration, PropertyInfo property) : base(property)
+        {
+            this.propertyConfiguration = propertyConfiguration;
+        }
+        public EntityModelBuilderConfiguration<T> End()
+        {
+            return propertyConfiguration;
+        }
+    }
+
+    //public class NumericEntityPropertyModelConfiguration<T> : NumericPropertyModelConfiguration
+    //    where T : DomainEntity
+    //{
+    //    private readonly EntityModelBuilderConfiguration<T> propertyConfiguration;
+
+    //    public NumericEntityPropertyModelConfiguration(EntityModelBuilderConfiguration<T> propertyConfiguration, PropertyInfo property) : base(property)
+    //    {
+    //        this.propertyConfiguration = propertyConfiguration;
+    //    }
+    //    public EntityModelBuilderConfiguration<T> End()
+    //    {
+    //        return propertyConfiguration;
+    //    }
+    //}
 }

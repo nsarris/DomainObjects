@@ -26,4 +26,14 @@ namespace DomainObjects.ModelBuilder.Configuration
         //    return this;
         //}
     }
+
+    public static class PropertyModelConfigurationExtensions
+    {
+        public static T IsRequired<T>(this T c)
+            where T : PropertyModelConfiguration
+        {
+            c.IsOptional = false;
+            return c;
+        }
+    }
 }

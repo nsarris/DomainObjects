@@ -36,7 +36,9 @@ namespace DomainObjects.Tests
                     .HasMaxLength(20)
                     .IsRequired()
                     .End()
-                
+                .Property(x => x.Id)
+                    .HasPrecision(1)
+                    .End()
                 ;
 
             //customerBuilder.HasKey(x => new { x.Id, x.Name });

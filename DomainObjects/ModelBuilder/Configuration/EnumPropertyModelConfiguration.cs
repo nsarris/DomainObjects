@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DomainObjects.Core;
+using System;
 using System.Reflection;
 
 namespace DomainObjects.ModelBuilder.Configuration
@@ -10,11 +11,35 @@ namespace DomainObjects.ModelBuilder.Configuration
         {
             UnderlyingType = property.PropertyType.GetEnumUnderlyingType();
         }
+    }
 
-        public EnumPropertyModelConfiguration IsRequired()
+    public class EnumEntityPropertyModelConfiguration<T> : EnumPropertyModelConfiguration
+        where T : DomainEntity
+    {
+        private readonly EntityModelBuilderConfiguration<T> propertyConfiguration;
+
+        public EnumEntityPropertyModelConfiguration(EntityModelBuilderConfiguration<T> propertyConfiguration, PropertyInfo property) : base(property)
         {
-            IsOptional = false;
-            return this;
+            this.propertyConfiguration = propertyConfiguration;
+        }
+        public EntityModelBuilderConfiguration<T> End()
+        {
+            return propertyConfiguration;
         }
     }
+
+    //public class EnumEntityPropertyModelConfiguration<T> : EnumPropertyModelConfiguration
+    //    where T : DomainEntity
+    //{
+    //    private readonly EntityModelBuilderConfiguration<T> propertyConfiguration;
+
+    //    public EnumEntityPropertyModelConfiguration(EntityModelBuilderConfiguration<T> propertyConfiguration, PropertyInfo property) : base(property)
+    //    {
+    //        this.propertyConfiguration = propertyConfiguration;
+    //    }
+    //    public EntityModelBuilderConfiguration<T> End()
+    //    {
+    //        return propertyConfiguration;
+    //    }
+    //}
 }

@@ -66,103 +66,111 @@ namespace DomainObjects.ModelBuilder
             return configuration;
         }
 
-        public DateTimePropertyModelConfiguration Property(Expression<Func<T, DateTime>> memberSelector)
+        public DateTimeEntityPropertyModelConfiguration<T> Property(Expression<Func<T, DateTime>> memberSelector)
         {
-            var configuration = new DateTimePropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
+            var configuration = new DateTimeEntityPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
             PropertyModelConfigurations.Add(configuration);
             return configuration;
         }
 
-        public TimeSpanPropertyModelConfiguration Property(Expression<Func<T, TimeSpan>> memberSelector)
+        public TimeSpanEntityPropertyModelConfiguration<T> Property(Expression<Func<T, TimeSpan>> memberSelector)
         {
-            var configuration = new TimeSpanPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
+            var configuration = new TimeSpanEntityPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
             PropertyModelConfigurations.Add(configuration);
             return configuration;
         }
 
-        public BooleanPropertyModelConfiguration Property(Expression<Func<T, bool>> memberSelector)
+        public BooleanEntityPropertyModelConfiguration<T> Property(Expression<Func<T, bool>> memberSelector)
         {
-            var configuration = new BooleanPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
+            var configuration = new BooleanEntityPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
             PropertyModelConfigurations.Add(configuration);
             return configuration;
         }
 
-        public NumericPropertyModelConfiguration Property(Expression<Func<T, sbyte>> memberSelector)
+        public NumericEntityPropertyModelConfiguration<T> Property(Expression<Func<T, sbyte>> memberSelector)
         {
-            var configuration = new NumericPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
+            var configuration = new NumericEntityPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
             PropertyModelConfigurations.Add(configuration);
             return configuration;
         }
 
-        public NumericPropertyModelConfiguration Property(Expression<Func<T, byte>> memberSelector)
+        public NumericEntityPropertyModelConfiguration<T> Property(Expression<Func<T, byte>> memberSelector)
         {
-            var configuration = new NumericPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
+            var configuration = new NumericEntityPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
             PropertyModelConfigurations.Add(configuration);
             return configuration;
         }
 
-        public NumericPropertyModelConfiguration Property(Expression<Func<T, short>> memberSelector)
+        public NumericEntityPropertyModelConfiguration<T> Property(Expression<Func<T, short>> memberSelector)
         {
-            var configuration = new NumericPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
+            var configuration = new NumericEntityPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
             PropertyModelConfigurations.Add(configuration);
             return configuration;
         }
 
-        public NumericPropertyModelConfiguration Property(Expression<Func<T, ushort>> memberSelector)
+        public NumericEntityPropertyModelConfiguration<T> Property(Expression<Func<T, ushort>> memberSelector)
         {
-            var configuration = new NumericPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
+            var configuration = new NumericEntityPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
             PropertyModelConfigurations.Add(configuration);
             return configuration;
         }
 
-        public NumericPropertyModelConfiguration Property(Expression<Func<T, int>> memberSelector)
+        public NumericEntityPropertyModelConfiguration<T> Property(Expression<Func<T, int>> memberSelector)
         {
-            var configuration = new NumericPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
+            var configuration = new NumericEntityPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
             PropertyModelConfigurations.Add(configuration);
             return configuration;
         }
 
-        public NumericPropertyModelConfiguration Property(Expression<Func<T, uint>> memberSelector)
+        public NumericEntityPropertyModelConfiguration<T> Property(Expression<Func<T, uint>> memberSelector)
         {
-            var configuration = new NumericPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
+            var configuration = new NumericEntityPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
             PropertyModelConfigurations.Add(configuration);
             return configuration;
         }
 
-        public NumericPropertyModelConfiguration Property(Expression<Func<T, long>> memberSelector)
+        public NumericEntityPropertyModelConfiguration<T> Property(Expression<Func<T, long>> memberSelector)
         {
-            var configuration = new NumericPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
+            var configuration = new NumericEntityPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
             PropertyModelConfigurations.Add(configuration);
             return configuration;
         }
 
-        public NumericPropertyModelConfiguration Property(Expression<Func<T, ulong>> memberSelector)
+        public NumericEntityPropertyModelConfiguration<T> Property(Expression<Func<T, ulong>> memberSelector)
         {
-            var configuration = new NumericPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
+            var configuration = new NumericEntityPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
             PropertyModelConfigurations.Add(configuration);
             return configuration;
         }
 
-        public NumericPropertyModelConfiguration Property(Expression<Func<T, float>> memberSelector)
+        public NumericEntityPropertyModelConfiguration<T> Property(Expression<Func<T, float>> memberSelector)
         {
-            var configuration = new NumericPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
+            var configuration = new NumericEntityPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
             PropertyModelConfigurations.Add(configuration);
             return configuration;
         }
 
-        public NumericPropertyModelConfiguration Property(Expression<Func<T, double>> memberSelector)
+        public NumericEntityPropertyModelConfiguration<T> Property(Expression<Func<T, double>> memberSelector)
         {
-            var configuration = new NumericPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
+            var configuration = new NumericEntityPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
             PropertyModelConfigurations.Add(configuration);
             return configuration;
         }
 
-        public NumericPropertyModelConfiguration Property(Expression<Func<T, decimal>> memberSelector)
+        public NumericEntityPropertyModelConfiguration<T> Property(Expression<Func<T, decimal>> memberSelector)
         {
-            var configuration = new NumericPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
+            var configuration = new NumericEntityPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
             PropertyModelConfigurations.Add(configuration);
             return configuration;
         }
+
+        //public ValueObjectEntityPropertyModelConfiguration<T> Property<TValueObject>(Expression<Func<T, TValueObject>> memberSelector)
+        //    where TValueObject : DomainValueObject<TValueObject>
+        //{
+        //    var configuration = new ValueObjectEntityPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
+        //    PropertyModelConfigurations.Add(configuration);
+        //    return configuration;
+        //}
 
         internal PropertyModelConfiguration Property(PropertyInfo property)
         {
@@ -174,17 +182,17 @@ namespace DomainObjects.ModelBuilder
                     case DomainValueType.String:
                         return new StringEntityPropertyModelConfiguration<T>(this, property);
                     case DomainValueType.Boolean:
-                        return new BooleanPropertyModelConfiguration(property);
+                        return new BooleanEntityPropertyModelConfiguration<T>(this, property);
                     case DomainValueType.Number:
-                        return new NumericPropertyModelConfiguration(property);
+                        return new NumericEntityPropertyModelConfiguration<T>(this, property);
                     case DomainValueType.DateTime:
-                        return new DateTimePropertyModelConfiguration(property);
+                        return new DateTimeEntityPropertyModelConfiguration<T>(this, property);
                     case DomainValueType.TimeSpan:
-                        return new TimeSpanPropertyModelConfiguration(property);
+                        return new TimeSpanEntityPropertyModelConfiguration<T>(this, property);
                     case DomainValueType.Enum:
-                        return new EnumPropertyModelConfiguration(property);
+                        return new EnumEntityPropertyModelConfiguration<T>(this, property);
                     case DomainValueType.ValueObject:
-                        return new ValueTypePropertyModelConfiguration(property);
+                        return new ValueObjectEntityPropertyModelConfiguration<T>(this, property);
                     default:
                         break;
                 }
