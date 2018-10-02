@@ -23,7 +23,7 @@ namespace DomainObjects.ModelBuilder.Configuration
         }
     }
 
-    public class StringEntityPropertyModelConfiguration<T> : StringPropertyModelConfiguration
+    public class StringEntityPropertyModelConfiguration<T> : StringPropertyModelConfiguration, IEntityPropertyModelConfiguration<T>
         where T : DomainEntity
     {
         private readonly EntityModelBuilderConfiguration<T> propertyConfiguration;

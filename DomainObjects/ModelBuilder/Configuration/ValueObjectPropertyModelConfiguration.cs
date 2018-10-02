@@ -10,7 +10,7 @@ namespace DomainObjects.ModelBuilder.Configuration
         }
     }
 
-    public class ValueObjectEntityPropertyModelConfiguration<T> : ValueObjectPropertyModelConfiguration
+    public class ValueObjectEntityPropertyModelConfiguration<T> : ValueObjectPropertyModelConfiguration, IEntityPropertyModelConfiguration<T>
         where T : DomainEntity
     {
         private readonly EntityModelBuilderConfiguration<T> propertyConfiguration;

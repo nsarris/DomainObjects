@@ -1,11 +1,27 @@
-﻿using System.Reflection;
+﻿using DomainObjects.Core;
+using System.Reflection;
 
 namespace DomainObjects.ModelBuilder.Configuration
 {
-    public class ValueReadOnlyListModelConfiguration : PropertyModelConfiguration
+    public class ValueReadOnlyListPropertyModelConfiguration : PropertyModelConfiguration
     {
-        public ValueReadOnlyListModelConfiguration(PropertyInfo property) : base(property)
+        public ValueReadOnlyListPropertyModelConfiguration(PropertyInfo property) : base(property)
         {
+        }
+    }
+
+    public class ValueReadOnlyListEntityPropertyModelConfiguration<T> : ValueReadOnlyListPropertyModelConfiguration, IEntityPropertyModelConfiguration<T>
+        where T : DomainEntity
+    {
+        private readonly EntityModelBuilderConfiguration<T> propertyConfiguration;
+
+        public ValueReadOnlyListEntityPropertyModelConfiguration(EntityModelBuilderConfiguration<T> propertyConfiguration, PropertyInfo property) : base(property)
+        {
+            this.propertyConfiguration = propertyConfiguration;
+        }
+        public EntityModelBuilderConfiguration<T> End()
+        {
+            return propertyConfiguration;
         }
     }
 }

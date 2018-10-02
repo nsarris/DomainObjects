@@ -104,7 +104,7 @@
     <Compile Include="ModelBuilder\Configuration\BooleanPropertyModelConfiguration.cs" />
     <Compile Include="ModelBuilder\Configuration\TimeSpanPropertyModelConfiguration.cs" />
     <Compile Include="ModelBuilder\Configuration\DateTimePropertyModelConfiguration.cs" />
-    <Compile Include="ModelBuilder\Configuration\ValueListModelConfiguration.cs" />
+    <Compile Include="ModelBuilder\Configuration\ValueListPropertyModelConfiguration.cs" />
     <Compile Include="ModelBuilder\Configuration\ValueReadOnlyListModelConfiguration.cs" />
     <Compile Include="ModelBuilder\Descriptors\AggregateListPropertyDescriptor.cs" />
     <Compile Include="ModelBuilder\Descriptors\AggregatePropertyDescriptor.cs" />

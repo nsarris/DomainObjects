@@ -20,11 +20,11 @@ namespace DomainObjects.Metadata
         {
             if (descriptor.IsReadOnly)
             {
-                var listConfiguration = configuration as ValueReadOnlyListModelConfiguration;
+                var listConfiguration = configuration as ValueReadOnlyListPropertyModelConfiguration;
             }
             else
             {
-                var listConfiguration = configuration as ValueListModelConfiguration;
+                var listConfiguration = configuration as ValueListPropertyModelConfiguration;
             }
 
             ElementType = descriptor.ElementType;

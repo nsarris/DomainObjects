@@ -32,7 +32,7 @@ namespace DomainObjects.ModelBuilder
         }
     }
 
-    public class TimeSpanEntityPropertyModelConfiguration<T> : TimeSpanPropertyModelConfiguration
+    public class TimeSpanEntityPropertyModelConfiguration<T> : TimeSpanPropertyModelConfiguration, IEntityPropertyModelConfiguration<T>
         where T : DomainEntity
     {
         private readonly EntityModelBuilderConfiguration<T> propertyConfiguration;

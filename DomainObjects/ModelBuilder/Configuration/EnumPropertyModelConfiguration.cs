@@ -13,7 +13,7 @@ namespace DomainObjects.ModelBuilder.Configuration
         }
     }
 
-    public class EnumEntityPropertyModelConfiguration<T> : EnumPropertyModelConfiguration
+    public class EnumEntityPropertyModelConfiguration<T> : EnumPropertyModelConfiguration, IEntityPropertyModelConfiguration<T>
         where T : DomainEntity
     {
         private readonly EntityModelBuilderConfiguration<T> propertyConfiguration;

@@ -172,7 +172,7 @@ namespace DomainObjects.ModelBuilder
         //    return configuration;
         //}
 
-        internal PropertyModelConfiguration Property(PropertyInfo property)
+        internal IEntityPropertyModelConfiguration<T> Property(PropertyInfo property)
         {
             var domainPropertyType = property.PropertyType.GetSupportedValueType();
 
@@ -197,10 +197,10 @@ namespace DomainObjects.ModelBuilder
                         break;
                 }
 
-            return new UnsupportedTypePropertyModelConfiguration(property);
+            return new UnsupportedTypeEntityPropertyModelConfiguration<T>(this, property);
         }
 
-        public PropertyModelConfiguration Property<TMember>(Expression<Func<T, TMember>> memberSelector)
+        public IEntityPropertyModelConfiguration<T> Property<TMember>(Expression<Func<T, TMember>> memberSelector)
         {
             return Property(ReflectionHelper.GetProperty(memberSelector));
         }
@@ -215,42 +215,42 @@ namespace DomainObjects.ModelBuilder
         //        return new UnsupportedTypePropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
         //}
 
-        public ValueListModelConfiguration ValueObjectList<TValue>(Expression<Func<T, ValueObjectList<TValue>>> memberSelector)
+        public ValueListEntityPropertyModelConfiguration<T> ValueObjectList<TValue>(Expression<Func<T, ValueObjectList<TValue>>> memberSelector)
             where TValue : DomainValueObject<TValue>
         {
-            var configuration = new ValueListModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
+            var configuration = new ValueListEntityPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
             PropertyModelConfigurations.Add(configuration);
             return configuration;
         }
 
-        public ValueReadOnlyListModelConfiguration ValueObjectList<TValue>(Expression<Func<T, ValueObjectReadOnlyList<TValue>>> memberSelector)
+        public ValueReadOnlyListEntityPropertyModelConfiguration<T> ValueObjectList<TValue>(Expression<Func<T, ValueObjectReadOnlyList<TValue>>> memberSelector)
             where TValue : DomainValueObject<TValue>
         {
-            var configuration = new ValueReadOnlyListModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
+            var configuration = new ValueReadOnlyListEntityPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
             PropertyModelConfigurations.Add(configuration);
             return configuration;
         }
 
-        public AggregatePropertyModelConfiguration Aggregate<TAggregate>(Expression<Func<T, TAggregate>> memberSelector)
+        public AggregateEntityPropertyModelConfiguration<T> Aggregate<TAggregate>(Expression<Func<T, TAggregate>> memberSelector)
             where TAggregate : Aggregate<TAggregate>
         {
-            var configuration = new AggregatePropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
+            var configuration = new AggregateEntityPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
             PropertyModelConfigurations.Add(configuration);
             return configuration;
         }
 
-        public AggregateListModelConfiguration Aggregate<TAggregate>(Expression<Func<T, AggregateList<TAggregate>>> memberSelector)
+        public AggregateListEntityPropertyModelConfiguration<T> Aggregate<TAggregate>(Expression<Func<T, AggregateList<TAggregate>>> memberSelector)
             where TAggregate : Aggregate<TAggregate>
         {
-            var configuration = new AggregateListModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
+            var configuration = new AggregateListEntityPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
             PropertyModelConfigurations.Add(configuration);
             return configuration;
         }
 
-        public AggregateReadOnlyListModelConfiguration Aggregate<TAggregate>(Expression<Func<T, AggregateReadOnlyList<TAggregate>>> memberSelector)
+        public AggregateReadOnlyListEntityPropertyModelConfiguration<T> Aggregate<TAggregate>(Expression<Func<T, AggregateReadOnlyList<TAggregate>>> memberSelector)
             where TAggregate : Aggregate<TAggregate>
         {
-            var configuration = new AggregateReadOnlyListModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
+            var configuration = new AggregateReadOnlyListEntityPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
             PropertyModelConfigurations.Add(configuration);
             return configuration;
         }

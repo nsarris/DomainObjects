@@ -39,7 +39,7 @@ namespace DomainObjects.ModelBuilder.Configuration
         }
     }
 
-    public class DateTimeEntityPropertyModelConfiguration<T> : DateTimePropertyModelConfiguration
+    public class DateTimeEntityPropertyModelConfiguration<T> : DateTimePropertyModelConfiguration, IEntityPropertyModelConfiguration<T>
     where T : DomainEntity
     {
         private readonly EntityModelBuilderConfiguration<T> propertyConfiguration;

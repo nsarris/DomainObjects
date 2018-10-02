@@ -15,7 +15,7 @@ namespace DomainObjects.ModelBuilder.Configuration
         
     }
 
-    public class BooleanEntityPropertyModelConfiguration<T> : BooleanPropertyModelConfiguration
+    public class BooleanEntityPropertyModelConfiguration<T> : BooleanPropertyModelConfiguration, IEntityPropertyModelConfiguration<T>
         where T : DomainEntity
     {
         private readonly EntityModelBuilderConfiguration<T> propertyConfiguration;

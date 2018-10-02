@@ -47,7 +47,7 @@ namespace DomainObjects.ModelBuilder.Configuration
     }
 
 
-    public class NumericEntityPropertyModelConfiguration<T> : NumericPropertyModelConfiguration
+    public class NumericEntityPropertyModelConfiguration<T> : NumericPropertyModelConfiguration, IEntityPropertyModelConfiguration<T>
         where T : DomainEntity
     {
         private readonly EntityModelBuilderConfiguration<T> propertyConfiguration;

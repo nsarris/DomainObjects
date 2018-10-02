@@ -21,7 +21,7 @@ namespace DomainObjects.Metadata
             }
             else
             {
-                var listConfiguration = configuration as AggregateListModelConfiguration;
+                var listConfiguration = configuration as AggregateListProprertyModelConfiguration;
             }
 
             AggregateType = descriptor.ElementType;

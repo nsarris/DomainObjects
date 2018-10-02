@@ -1,4 +1,5 @@
-﻿using Dynamix.Reflection;
+﻿using DomainObjects.Core;
+using Dynamix.Reflection;
 using System;
 using System.Reflection;
 
@@ -25,6 +26,12 @@ namespace DomainObjects.ModelBuilder.Configuration
         //    IsOptional = false;
         //    return this;
         //}
+    }
+
+    public interface IEntityPropertyModelConfiguration<T>
+        where T : DomainEntity
+    {
+        EntityModelBuilderConfiguration<T> End();
     }
 
     public static class PropertyModelConfigurationExtensions
