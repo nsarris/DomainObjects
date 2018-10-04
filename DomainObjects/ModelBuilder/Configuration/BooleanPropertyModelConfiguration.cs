@@ -30,18 +30,18 @@ namespace DomainObjects.ModelBuilder.Configuration
         }
     }
 
-    //public class BooleanEntityPropertyModelConfiguration<T> : BooleanPropertyModelConfiguration
-    //    where T : DomainEntity
-    //{
-    //    private readonly EntityModelBuilderConfiguration<T> propertyConfiguration;
+    public class BooleanValueObjectPropertyModelConfiguration<T> : BooleanPropertyModelConfiguration, IValueObjectPropertyModelConfiguration<T>
+        where T : DomainValueObject<T>
+    {
+        private readonly ValueTypeModelBuilderConfiguration<T> propertyConfiguration;
 
-    //    public BooleanEntityPropertyModelConfiguration(EntityModelBuilderConfiguration<T> propertyConfiguration, PropertyInfo property) : base(property)
-    //    {
-    //        this.propertyConfiguration = propertyConfiguration;
-    //    }
-    //    public EntityModelBuilderConfiguration<T> End()
-    //    {
-    //        return propertyConfiguration;
-    //    }
-    //}
+        public BooleanValueObjectPropertyModelConfiguration(ValueTypeModelBuilderConfiguration<T> propertyConfiguration, PropertyInfo property) : base(property)
+        {
+            this.propertyConfiguration = propertyConfiguration;
+        }
+        public ValueTypeModelBuilderConfiguration<T> End()
+        {
+            return propertyConfiguration;
+        }
+    }
 }

@@ -8,9 +8,12 @@ namespace DomainObjects.Metadata
 {
     public class DomainValueTypeMetadata
     {
-        public DomainValueTypeMetadata(Type type)
+        private readonly Dictionary<string, DomainPropertyMetadata> propertyMetadata;
+
+        public DomainValueTypeMetadata(Type type, IEnumerable<DomainPropertyMetadata> propertyMetadata)
         {
             Type = type;
+            this.propertyMetadata = propertyMetadata.ToDictionary(x => x.Property.Name);
         }
 
         public Type Type { get; }

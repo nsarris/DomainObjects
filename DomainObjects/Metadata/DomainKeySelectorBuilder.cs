@@ -21,7 +21,8 @@ namespace DomainObjects.Metadata
 
         private static Expression BuildKeyValueSelectorExpression(Type entityType, List<PropertyInfo> keyProperties, out ParameterExpression entityParameterExpression, out Type keyValueType)
         {
-            entityParameterExpression = Expression.Parameter(typeof(DomainEntity<>).MakeGenericTypeCached(entityType));
+            //entityParameterExpression = Expression.Parameter(typeof(DomainEntity<>).MakeGenericTypeCached(entityType));
+            entityParameterExpression = Expression.Parameter(typeof(object));
             var convertedEntityTypeExpression = ExpressionEx.ConvertIfNeeded(entityParameterExpression, entityType);
 
             if (!keyProperties.Any())

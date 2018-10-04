@@ -5,8 +5,27 @@ namespace DomainObjects.ModelBuilder.Configuration
 {
     public class AggregateListProprertyModelConfiguration : PropertyModelConfiguration
     {
+        internal decimal? MinCount { get; set; }
+        internal decimal? MaxCount { get; set; }
         public AggregateListProprertyModelConfiguration(PropertyInfo property) : base(property)
         {
+        }
+    }
+
+    public static class AggregateListPropertyModelConfigurationExtensions
+    {
+        public static T HasMinCount<T>(this T c, decimal minValue)
+            where T : AggregateListProprertyModelConfiguration
+        {
+            c.MinCount = minValue;
+            return c;
+        }
+
+        public static T HasMaxCount<T>(this T c, decimal maxValue)
+            where T : AggregateListProprertyModelConfiguration
+        {
+            c.MaxCount = maxValue;
+            return c;
         }
     }
 

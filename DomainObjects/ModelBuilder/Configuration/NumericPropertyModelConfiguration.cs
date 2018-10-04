@@ -62,18 +62,18 @@ namespace DomainObjects.ModelBuilder.Configuration
         }
     }
 
-    //public class NumericEntityPropertyModelConfiguration<T> : NumericPropertyModelConfiguration
-    //    where T : DomainEntity
-    //{
-    //    private readonly EntityModelBuilderConfiguration<T> propertyConfiguration;
+    public class NumericValueObjectPropertyModelConfiguration<T> : NumericPropertyModelConfiguration, IValueObjectPropertyModelConfiguration<T>
+        where T : DomainValueObject<T>
+    {
+        private readonly ValueTypeModelBuilderConfiguration<T> propertyConfiguration;
 
-    //    public NumericEntityPropertyModelConfiguration(EntityModelBuilderConfiguration<T> propertyConfiguration, PropertyInfo property) : base(property)
-    //    {
-    //        this.propertyConfiguration = propertyConfiguration;
-    //    }
-    //    public EntityModelBuilderConfiguration<T> End()
-    //    {
-    //        return propertyConfiguration;
-    //    }
-    //}
+        public NumericValueObjectPropertyModelConfiguration(ValueTypeModelBuilderConfiguration<T> propertyConfiguration, PropertyInfo property) : base(property)
+        {
+            this.propertyConfiguration = propertyConfiguration;
+        }
+        public ValueTypeModelBuilderConfiguration<T> End()
+        {
+            return propertyConfiguration;
+        }
+    }
 }

@@ -51,7 +51,7 @@ namespace DomainObjects.ModelBuilder
             var valueTypeModelBuilders = rootDescriptors
                 .SelectMany(x => x.ValueTypeDescriptors)
                 .SelectManyRecursive(x => x.ValueTypeDescriptors)
-                .Select(x => new ValueTypeModelBuilder(
+                .Select(x => new ValueObjectModelBuilder(
                     descriptor: x,
                     configuration: entityModelBuilderConfigurations.TryGetValue(x.Type, out var entityModelBuilder) ? entityModelBuilder : null
                 ))
@@ -144,7 +144,7 @@ namespace DomainObjects.ModelBuilder
                     || (readOnly = propertyType.IsOrSubclassOfGenericDeep(typeof(AggregateReadOnlyList<>), out aggregateListType)))
                 {
                     var elementType = aggregateListType.GetGenericArguments().Single();
-                    if (!elementType.IsSubclassOfDeep(typeof(Aggregate<>)))
+                    if (!elementType.IsOrSubclassOfGenericDeep(typeof(Aggregate<>)))
                         propertyDescriptors.Add(new UnsupportedPropertyDescriptor(property));
                     else
                     {

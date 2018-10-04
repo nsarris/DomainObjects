@@ -210,7 +210,7 @@ namespace DomainObjects.ModelBuilder
         //    if (typeof(TMember).IsEnum)
         //        return new EnumPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
         //    else if (typeof(TMember).IsSubclassOfDeep(typeof(DomainValue)))
-        //        return new ValueTypePropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
+        //        return new ValueObjectPropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
         //    else
         //        return new UnsupportedTypePropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
         //}

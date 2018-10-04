@@ -38,18 +38,18 @@ namespace DomainObjects.ModelBuilder.Configuration
         }
     }
 
-    //public class StringValueObjectPropertyModelConfiguration<T> : StringPropertyModelConfiguration
-    //    where T : DomainEntity
-    //{
-    //    private readonly EntityModelBuilderConfiguration<T> propertyConfiguration;
+    public class StringValueObjectPropertyModelConfiguration<T> : StringPropertyModelConfiguration, IValueObjectPropertyModelConfiguration<T>
+        where T : DomainValueObject<T>
+    {
+        private readonly ValueTypeModelBuilderConfiguration<T> propertyConfiguration;
 
-    //    public StringValueObjectPropertyModelConfiguration(EntityModelBuilderConfiguration<T> propertyConfiguration, PropertyInfo property) : base(property)
-    //    {
-    //        this.propertyConfiguration = propertyConfiguration;
-    //    }
-    //    public EntityModelBuilderConfiguration<T> End()
-    //    {
-    //        return propertyConfiguration;
-    //    }
-    //}
+        public StringValueObjectPropertyModelConfiguration(ValueTypeModelBuilderConfiguration<T> propertyConfiguration, PropertyInfo property) : base(property)
+        {
+            this.propertyConfiguration = propertyConfiguration;
+        }
+        public ValueTypeModelBuilderConfiguration<T> End()
+        {
+            return propertyConfiguration;
+        }
+    }
 }

@@ -24,4 +24,19 @@ namespace DomainObjects.ModelBuilder.Configuration
             return propertyConfiguration;
         }
     }
+
+    public class ValueReadOnlyListValueObjectPropertyModelConfiguration<T> : ValueReadOnlyListPropertyModelConfiguration, IValueObjectPropertyModelConfiguration<T>
+        where T : DomainValueObject<T>
+    {
+        private readonly ValueTypeModelBuilderConfiguration<T> propertyConfiguration;
+
+        public ValueReadOnlyListValueObjectPropertyModelConfiguration(ValueTypeModelBuilderConfiguration<T> propertyConfiguration, PropertyInfo property) : base(property)
+        {
+            this.propertyConfiguration = propertyConfiguration;
+        }
+        public ValueTypeModelBuilderConfiguration<T> End()
+        {
+            return propertyConfiguration;
+        }
+    }
 }

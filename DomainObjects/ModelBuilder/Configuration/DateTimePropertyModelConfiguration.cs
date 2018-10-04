@@ -54,18 +54,18 @@ namespace DomainObjects.ModelBuilder.Configuration
         }
     }
 
-    //public class DateTimeEntityPropertyModelConfiguration<T> : DateTimePropertyModelConfiguration
-    //    where T : DomainEntity
-    //{
-    //    private readonly EntityModelBuilderConfiguration<T> propertyConfiguration;
+    public class DateTimeValueObjectPropertyModelConfiguration<T> : DateTimePropertyModelConfiguration, IValueObjectPropertyModelConfiguration<T>
+        where T : DomainValueObject<T>
+    {
+        private readonly ValueTypeModelBuilderConfiguration<T> propertyConfiguration;
 
-    //    public DateTimeEntityPropertyModelConfiguration(EntityModelBuilderConfiguration<T> propertyConfiguration, PropertyInfo property) : base(property)
-    //    {
-    //        this.propertyConfiguration = propertyConfiguration;
-    //    }
-    //    public EntityModelBuilderConfiguration<T> End()
-    //    {
-    //        return propertyConfiguration;
-    //    }
-    //}
+        public DateTimeValueObjectPropertyModelConfiguration(ValueTypeModelBuilderConfiguration<T> propertyConfiguration, PropertyInfo property) : base(property)
+        {
+            this.propertyConfiguration = propertyConfiguration;
+        }
+        public ValueTypeModelBuilderConfiguration<T> End()
+        {
+            return propertyConfiguration;
+        }
+    }
 }
