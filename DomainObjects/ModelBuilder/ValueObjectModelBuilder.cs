@@ -17,7 +17,7 @@ namespace DomainObjects.ModelBuilder
         public ValueTypeDescriptor Descriptor { get; }
         public EntityModelBuilderConfiguration Configuration { get; }
 
-        public DomainValueTypeMetadata Build()
+        public DomainValueObjectMetadata Build()
         {
             var properties = new List<DomainPropertyMetadata>();
 
@@ -56,7 +56,7 @@ namespace DomainObjects.ModelBuilder
                 properties.Add(propertyMetadata);
             }
 
-            var metadata = new DomainValueTypeMetadata(Descriptor.Type, properties);
+            var metadata = new DomainValueObjectMetadata(Descriptor.Type, properties);
 
             return metadata;
         }

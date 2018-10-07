@@ -19,16 +19,16 @@ namespace DomainObjects.Metadata
 
             foreach (var descriptor in domainModel.GetEntityDescriptors())
             {
-                if (entityModelMap.TryGetValue(descriptor.EntityType, out var modelMap))
+                if (entityModelMap.TryGetValue(descriptor.Type, out var modelMap))
                 {
                     if (modelMap != domainModel)
                         throw new InvalidOperationException("Cannot register an entity with two different domain models");
                 }
                 else
-                    entityModelMap.Add(descriptor.EntityType, domainModel);
+                    entityModelMap.Add(descriptor.Type, domainModel);
 
-                if (!entityDescriptors.ContainsKey(descriptor.EntityType))
-                    entityDescriptors.Add(descriptor.EntityType, descriptor);
+                if (!entityDescriptors.ContainsKey(descriptor.Type))
+                    entityDescriptors.Add(descriptor.Type, descriptor);
             }
         }
 

@@ -76,6 +76,7 @@
     <Compile Include="Metadata\DomainKeyAttribute.cs" />
     <Compile Include="Metadata\DomainKeySelectorBuilder.cs" />
     <Compile Include="Core\DomainKey.cs" />
+    <Compile Include="Metadata\DomainObjectMetadata.cs" />
     <Compile Include="Metadata\IKeyProvider.cs" />
     <Compile Include="ModelBuilder\ValueObjectModelBuilderConfiguration.cs" />
     <Compile Include="Validation\DomainValidationError.cs" />
@@ -98,7 +99,7 @@
     <Compile Include="Metadata\DomainPropertyMetadata.cs" />
     <Compile Include="Metadata\DomainValueListPropertyMetadata.cs" />
     <Compile Include="Metadata\DomainValuePropertyMetadata.cs" />
-    <Compile Include="Metadata\DomainValueTypeMetadata.cs" />
+    <Compile Include="Metadata\DomainValueObjectMetadata.cs" />
     <Compile Include="ModelBuilder\Configuration\AggregateListModelConfiguration.cs" />
     <Compile Include="ModelBuilder\Configuration\AggregatePropertyModelConfiguration.cs" />
     <Compile Include="ModelBuilder\Configuration\AggregateReadOnlyListModelConfiguration.cs" />
