@@ -47,6 +47,7 @@ namespace DomainObjects.ModelBuilder.Configuration
         {
             this.propertyConfiguration = propertyConfiguration;
         }
+
         public ValueTypeModelBuilderConfiguration<T> End()
         {
             return propertyConfiguration;

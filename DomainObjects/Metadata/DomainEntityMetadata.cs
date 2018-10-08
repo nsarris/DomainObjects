@@ -13,20 +13,16 @@ namespace DomainObjects.Metadata
         private readonly List<DomainValuePropertyMetadata> keyProperties;
         private readonly Func<object, object> keySelector;
         private readonly Func<object, object> keyValueSelector;
-        //private readonly Dictionary<Type, DomainEntityMetadata> aggregateTypes;
-
-        //public IReadOnlyDictionary<Type, DomainEntityMetadata> AggregateTypes => aggregateTypes;
+        
         
         public bool IsRoot { get; }
 
         public DomainEntityMetadata(Type entityType, IEnumerable<DomainPropertyMetadata> propertyMetadata)
-            //, IEnumerable<DomainEntityMetadata> aggregateTypes)
             :base(entityType, propertyMetadata)
         {
             keyProperties = this.propertyMetadata.Values.OfType<DomainValuePropertyMetadata>().Where(x => x.IsKeyMember).ToList();
             keySelector = DomainKeySelectorBuilder.BuildKeySelector(entityType, keyProperties.Select(x => x.Property.PropertyInfo).ToList());
             keyValueSelector = DomainKeySelectorBuilder.BuildKeyValueSelector(entityType, keyProperties.Select(x => x.Property.PropertyInfo).ToList());
-            //this.aggregateTypes = aggregateTypes.ToDictionary(x => x.EntityType);
 
             IsRoot = entityType.IsOrSubclassOfGenericDeep(typeof(AggregateRoot<,>));
         }
@@ -60,7 +56,7 @@ namespace DomainObjects.Metadata
                 foreach(var keyValue in keyProperties.Zip(values, (key, value) => new { key, value }))
                     keyValue.key.Property.Set(entity, keyValue.value);
             }
-            //DomainValue
+            //DomainValueObject
             else
             {
                 var keyProperty = keyProperties.First();
@@ -101,7 +97,5 @@ namespace DomainObjects.Metadata
         {
             return propertyMetadata.Values.OfType<DomainAggregateListPropertyMetadata>();
         }
-
-
     }
 }

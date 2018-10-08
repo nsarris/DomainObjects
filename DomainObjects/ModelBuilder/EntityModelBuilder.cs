@@ -19,18 +19,18 @@ namespace DomainObjects.ModelBuilder
 
         public DomainEntityMetadata Build()
         {
+            var propertyDescriptors = Descriptor.PropertyDescriptors
+                .Where(x => (Configuration == null || !Configuration.IgnoredMembers.Contains(x.Property.Name)) && x.Property.Name != "Parent");
+
+            ValidateModel(propertyDescriptors);
+
             var properties = new List<DomainPropertyMetadata>();
 
-            foreach (var prop in Descriptor.PropertyDescriptors
-                .Where(x => (Configuration == null || !Configuration.IgnoredMembers.Contains(x.Property.Name)) && x.Property.Name != "Parent"))
+            foreach (var prop in propertyDescriptors)
             {
-                var keyPosition = Configuration?.KeyMembers.IndexOf(prop.Property.Name);
-
-                if (keyPosition > 0 && !(prop is ValuePropertyDescriptor))
-                    throw new InvalidOperationException($"Key properties can only be supported on value types");
-                
                 DomainPropertyMetadata propertyMetadata = null;
                 var configuration = Configuration?.PropertyModelConfigurations.FirstOrDefault(x => x.Property.Name == prop.Property.Name);
+                var keyPosition = GetKeyPosition(prop);
 
                 if (prop is ValuePropertyDescriptor valuePropertyDescriptor)
                 {
@@ -48,39 +48,47 @@ namespace DomainObjects.ModelBuilder
                 {
                     propertyMetadata = new DomainAggregateListPropertyMetadata(aggregateListPropertyDescriptor, configuration);
                 }
-                else if(prop is UnsupportedPropertyDescriptor unsupportedPropertyDescriptor)
-                {
-                    throw new InvalidOperationException($"Unsupported property {prop.Property.Name} of Type {prop.Property.Type.Name} in Entity {Descriptor.Type.Name}");
-                }
 
                 properties.Add(propertyMetadata);
             }
 
-            //TODO: Get Aggregates
-            var keyProperties = properties.OfType<DomainValuePropertyMetadata>().Where(x => x.IsKeyMember).ToList();
+            return new DomainEntityMetadata(Descriptor.Type, properties);
+        }
 
-            //Validate Key
+        private int? GetKeyPosition(PropertyDescriptor property) => Configuration?.KeyMembers.IndexOf(property.Property.Name);
+        
+
+        private void ValidateModel(IEnumerable<PropertyDescriptor> propertyDescriptors) //SanityCheck
+        {
+            var properties = propertyDescriptors
+                .Select(x => new
+                {
+                    KeyPosition = GetKeyPosition(x),
+                    Property = x
+                })
+                .ToList();
+
+            var unsupportedProperty = properties.Select(x => x.Property).OfType<UnsupportedPropertyDescriptor>().FirstOrDefault();
+            if (unsupportedProperty != null)
+                throw new InvalidOperationException($"Unsupported property {unsupportedProperty.Property.Name} of Type {unsupportedProperty.Property.Type.Name} in Entity {Descriptor.Type.Name}");
+
+            var ctors = Descriptor.Type.GetConstructors(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+
+            if (ctors.Length == 0)
+                throw new InvalidOperationException($"Entity type {Descriptor.Type.Name} does not have public constructors");
+
+            ValidateKey(properties.Where(x => x.KeyPosition >= 0).Select(x => x.Property).ToList());
+        }
+
+        private void ValidateKey(List<PropertyDescriptor> keyProperties)
+        {
             if (!keyProperties.Any())
                 throw new InvalidOperationException($"Entity {Descriptor.Type.Name} has no key defined");
-            else if(keyProperties.Count > 1 && keyProperties.Any(x => x.DomainValueType == DomainValueType.ValueObject) 
-                    || keyProperties.Count(x => x.DomainValueType == DomainValueType.ValueObject) > 1)
-                throw new InvalidOperationException($"Entity {Descriptor.Type.Name} has a complex type and at least one more property in its key configuration. This is not supported"); 
-
-            var metadata = new DomainEntityMetadata(Descriptor.Type, properties);
-
-            return metadata;
-        }
-
-        private void ValidateModel() //SanityCheck
-        {
-            //At least one key member
-            //Only one complex key member
-            //No unsupported types
-        }
-
-        private void ValidateKey()
-        {
-
+            else if (!keyProperties.All(x => x is ValuePropertyDescriptor))
+                throw new InvalidOperationException($"Key properties can only be supported on value types");
+            else if (keyProperties.Count > 1 && keyProperties.Any(x => TypeHelper.GetSupportedValueType(x.Property.Type) == DomainValueType.ValueObject)
+                    || keyProperties.Count(x => TypeHelper.GetSupportedValueType(x.Property.Type) == DomainValueType.ValueObject) > 1)
+                throw new InvalidOperationException($"Entity {Descriptor.Type.Name} has a complex type and at least one more property in its key configuration. This is not supported");
         }
     }
 }

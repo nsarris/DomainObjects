@@ -9,7 +9,7 @@ namespace DomainObjects.Metadata
         public Type Type { get; }
 
         protected readonly Dictionary<string, DomainPropertyMetadata> propertyMetadata;
-        
+
         public DomainObjectMetadata(Type type, IEnumerable<DomainPropertyMetadata> propertyMetadata)
         {
             Type = type;

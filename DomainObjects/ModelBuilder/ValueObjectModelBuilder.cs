@@ -19,22 +19,21 @@ namespace DomainObjects.ModelBuilder
 
         public DomainValueObjectMetadata Build()
         {
+            var propertyDescriptors = Descriptor.PropertyDescriptors
+                .Where(x => (Configuration == null || !Configuration.IgnoredMembers.Contains(x.Property.Name)) && x.Property.Name != "Parent");
+
+            ValidateModel(propertyDescriptors);
+
             var properties = new List<DomainPropertyMetadata>();
 
-            foreach (var prop in Descriptor.PropertyDescriptors
-                .Where(x => Configuration == null || !Configuration.IgnoredMembers.Contains(x.Property.Name)))
+            foreach (var prop in propertyDescriptors)
             {
-                var keyPosition = Configuration?.KeyMembers.IndexOf(prop.Property.Name);
-
-                if (keyPosition > 0 && !(prop is ValuePropertyDescriptor))
-                    throw new InvalidOperationException($"Key properties can only be supported value types");
-
                 DomainPropertyMetadata propertyMetadata = null;
                 var configuration = Configuration?.PropertyModelConfigurations.FirstOrDefault(x => x.Property.Name == prop.Property.Name);
 
                 if (prop is ValuePropertyDescriptor valuePropertyDescriptor)
                 {
-                    propertyMetadata = new DomainValuePropertyMetadata(valuePropertyDescriptor, configuration, keyPosition >= 0 ? keyPosition : null);
+                    propertyMetadata = new DomainValuePropertyMetadata(valuePropertyDescriptor, configuration, null);
                 }
                 else if (prop is ValueListPropertyDescriptor valueListPropertyDescriptor)
                 {
@@ -56,13 +55,27 @@ namespace DomainObjects.ModelBuilder
                 properties.Add(propertyMetadata);
             }
 
-            var metadata = new DomainValueObjectMetadata(Descriptor.Type, properties);
-
-            return metadata;
+            return new DomainValueObjectMetadata(Descriptor.Type, properties);
         }
 
-        //TODO:Validate
-        //Validate all properties are supported
-        //Validate constructor has all properties in sequence
+        private void ValidateModel(IEnumerable<PropertyDescriptor> propertyDescriptors)
+        {
+            var unsupportedProperty = propertyDescriptors.OfType<UnsupportedPropertyDescriptor>().FirstOrDefault();
+            if (unsupportedProperty != null)
+                throw new InvalidOperationException($"Unsupported property {unsupportedProperty.Property.Name} of Type {unsupportedProperty.Property.Type.Name} in Entity {Descriptor.Type.Name}");
+
+            var ctors = Descriptor.Type.GetConstructors(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+
+            if (ctors.Length == 0)
+                throw new InvalidOperationException($"ValueObject type {Descriptor.Type.Name} does not have public constructors");
+
+            //var ctor = ctors.FirstOrDefault();
+
+            //var ctorParameters = ctor.GetParameters().Select(x => (Name: x.Name.ToLower(), x.ParameterType)).OrderBy(x => x.Name).ToList();
+            //var propertiesToCompare = propertyDescriptors.Select(x => (Name: x.Property.Name.ToLower(), x.Property.Type)).OrderBy(x => x.Name).ToList();
+
+            //if (!ctorParameters.SequenceEqual(propertiesToCompare))
+            //    throw new InvalidOperationException($"ValueObject type {Descriptor.Type.Name} does not have a single constructor that includes all supported properties");
+        }
     }
 }
