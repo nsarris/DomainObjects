@@ -58,7 +58,7 @@ namespace DomainObjects.ModelBuilder
         private int? GetKeyPosition(PropertyDescriptor property) => Configuration?.KeyMembers.IndexOf(property.Property.Name);
         
 
-        private void ValidateModel(IEnumerable<PropertyDescriptor> propertyDescriptors) //SanityCheck
+        private void ValidateModel(IEnumerable<PropertyDescriptor> propertyDescriptors)
         {
             var properties = propertyDescriptors
                 .Select(x => new
