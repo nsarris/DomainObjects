@@ -8,23 +8,28 @@ namespace DomainObjects.Metadata
     public class DomainModelMetadata
     {
         readonly Dictionary<Type, DomainEntityMetadata> entityMetadata;
-        readonly Dictionary<Type, DomainValueObjectMetadata> valueTypeMetadata;
+        readonly Dictionary<Type, DomainValueObjectMetadata> valueObjectMetadata;
 
         public string ModelName { get; }
 
-        public IEnumerable<DomainEntityMetadata> GetAggregateRootDescriptors()
+        public IEnumerable<DomainEntityMetadata> GetAggregateRootsMetadata()
         {
             return entityMetadata.Values.Where(x => x.IsRoot);
         }
 
-        public IEnumerable<DomainEntityMetadata> GetAggregateDescriptors()
+        public IEnumerable<DomainEntityMetadata> GetAggregatesMetadata()
         {
             return entityMetadata.Values.Where(x => !x.IsRoot);
         }
 
-        public IEnumerable<DomainEntityMetadata> GetEntityDescriptors()
+        public IEnumerable<DomainEntityMetadata> GetEntitiesMetadata()
         {
             return entityMetadata.Values;
+        }
+
+        public IEnumerable<DomainValueObjectMetadata> GetValueObjectsMetadata()
+        {
+            return valueObjectMetadata.Values;
         }
 
         public bool TryGetEntityMetadata(Type entityType, out DomainEntityMetadata domainEntityDescriptor)
@@ -51,24 +56,24 @@ namespace DomainObjects.Metadata
 
         public bool TryGetValueObjectMetadata(Type entityType, out DomainValueObjectMetadata domainValueObjectDescriptor)
         {
-            return valueTypeMetadata.TryGetValue(entityType, out domainValueObjectDescriptor);
+            return valueObjectMetadata.TryGetValue(entityType, out domainValueObjectDescriptor);
         }
 
         public bool TryGetValueObjectMetadata<T>(out DomainValueObjectMetadata domainValueObjectDescriptor)
             where T : DomainObject
         {
-            return valueTypeMetadata.TryGetValue(typeof(T), out domainValueObjectDescriptor);
+            return valueObjectMetadata.TryGetValue(typeof(T), out domainValueObjectDescriptor);
         }
 
         public DomainValueObjectMetadata GetValueObjectMetadata(Type domainValueObjectType)
         {
-            return valueTypeMetadata[domainValueObjectType];
+            return valueObjectMetadata[domainValueObjectType];
         }
 
         public DomainValueObjectMetadata GetValueObjectMetadata<T>()
             where T : DomainEntity
         {
-            return valueTypeMetadata[typeof(T)];
+            return valueObjectMetadata[typeof(T)];
         }
 
         public DomainModelMetadata(string modelName, IEnumerable<DomainEntityMetadata> entityMetadata, IEnumerable<DomainValueObjectMetadata> valueTypeMetadata)
@@ -76,7 +81,7 @@ namespace DomainObjects.Metadata
             ModelName = modelName;
 
             this.entityMetadata = entityMetadata.ToDictionary(x => x.Type);
-            this.valueTypeMetadata = valueTypeMetadata.ToDictionary(x => x.Type);
+            this.valueObjectMetadata = valueTypeMetadata.ToDictionary(x => x.Type);
         }
     }
 }

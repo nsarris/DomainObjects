@@ -1,3 +1,5 @@
 ﻿1. Are Same (compare values/deep)
-2. ModelValidator / Builder / Registry -> Use attributes
-3. BuildValidators from datamodel metadata (linq2db / ef / dalia)
+2. Use attributes for model building?
+3. BuildValidators from datamodel metadata (linq2db / ef / dalia - extension project)
+4. Cloning
+5. Immutable mutator

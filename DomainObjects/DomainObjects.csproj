@@ -63,6 +63,7 @@
     <Compile Include="Core\DomainEntity.cs" />
     <Compile Include="ChangeTracking\TrackableBase.cs" />
     <Compile Include="ChangeTracking\TrackableVisitor.cs" />
+    <Compile Include="Core\DomainKeyValue.cs" />
     <Compile Include="Core\DomainObjectSerializer.cs" />
     <Compile Include="Core\DomainObjectState.cs" />
     <Compile Include="Core\Extensions.cs" />
@@ -71,6 +72,7 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Internal\ExpressionHelper.cs" />
     <Compile Include="Internal\ProxyTypeBuilder.cs" />
+    <Compile Include="Internal\TypeConstructor.cs" />
     <Compile Include="Metadata\DomainAggregateListPropertyMetadata.cs" />
     <Compile Include="Metadata\DomainAggregatePropertyMetadata.cs" />
     <Compile Include="Metadata\DomainKeyAttribute.cs" />
@@ -79,10 +81,12 @@
     <Compile Include="Metadata\DomainObjectMetadata.cs" />
     <Compile Include="Metadata\IKeyProvider.cs" />
     <Compile Include="ModelBuilder\ValueObjectModelBuilderConfiguration.cs" />
+    <Compile Include="Repositories\IEntityCommandHandler.cs" />
+    <Compile Include="Repositories\IEntityFactory.cs" />
+    <Compile Include="Repositories\IEntityQueryProvider.cs" />
     <Compile Include="Validation\DomainValidationError.cs" />
     <Compile Include="Validation\DomainValidationResult.cs" />
     <Compile Include="Validation\IDomainValidator.cs" />
-    <Compile Include="_Obsolete\DomainNumber.cs" />
     <Compile Include="Core\DomainObject.cs" />
     <Compile Include="Core\DomainValueObject.cs" />
     <Compile Include="_Obsolete\Immutable.cs" />
@@ -127,10 +131,8 @@
     <Compile Include="ModelBuilder\Configuration\UnsupportedTypePropertyModelConfiguration.cs" />
     <Compile Include="ModelBuilder\Configuration\ValueObjectPropertyModelConfiguration.cs" />
     <Compile Include="ModelBuilder\ValueObjectModelBuilder.cs" />
-    <Compile Include="Patterns\Specification\IBuildSpecification.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\IRepository.cs" />
-    <Compile Include="Repositories\IRepositoryFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Dynamix\Dynamix\Dynamix.csproj">
