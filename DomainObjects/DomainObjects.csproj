@@ -63,6 +63,7 @@
     <Compile Include="Core\DomainEntity.cs" />
     <Compile Include="ChangeTracking\TrackableBase.cs" />
     <Compile Include="ChangeTracking\TrackableVisitor.cs" />
+    <Compile Include="Core\DomainEntityFactory.cs" />
     <Compile Include="Core\DomainKeyValue.cs" />
     <Compile Include="Core\DomainObjectSerializer.cs" />
     <Compile Include="Core\DomainObjectState.cs" />
@@ -72,7 +73,6 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Internal\ExpressionHelper.cs" />
     <Compile Include="Internal\ProxyTypeBuilder.cs" />
-    <Compile Include="Internal\TypeConstructor.cs" />
     <Compile Include="Metadata\DomainAggregateListPropertyMetadata.cs" />
     <Compile Include="Metadata\DomainAggregatePropertyMetadata.cs" />
     <Compile Include="Metadata\DomainKeyAttribute.cs" />

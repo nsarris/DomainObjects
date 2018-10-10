@@ -85,6 +85,8 @@ namespace DomainObjects.Metadata
             return propertyMetadata.Values.OfType<DomainAggregatePropertyMetadata>();
         }
 
+        public IEnumerable<DomainPropertyMetadata> GetKeyProperties() => keyProperties.AsEnumerable();
+
         public DomainAggregateListPropertyMetadata GetAggregateListProperty(string propertyName)
         {
             var p = propertyMetadata[propertyName] as DomainAggregateListPropertyMetadata;

@@ -40,7 +40,7 @@ namespace DomainObjects.Tests.Sales
         public Customer CreateNew()
         {
             var customer = new Customer();
-            customer.InitNew(false);
+            customer.InitNew();
             return customer;
         }
 
@@ -57,7 +57,7 @@ namespace DomainObjects.Tests.Sales
         public Invoice CreateNew()
         {
             var invoice = new Invoice();
-            invoice.InitNew(false);
+            invoice.InitNew();
             return invoice;
         }
 
@@ -204,6 +204,10 @@ namespace DomainObjects.Tests.Sales
         public int Id { get; private set; }
         public string Name { get; set; }
         public decimal UnitPrice { get; set; }
+        public Product()
+        {
+
+        }
 
         protected Product(SerializationInfo info, StreamingContext context) : base(info, context)
         {

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using DomainObjects.ChangeTracking;
 using DomainObjects.Metadata;
 using DomainObjects.Validation;
+using Dynamix.Reflection;
 
 namespace DomainObjects.Core
 {
@@ -114,24 +115,27 @@ namespace DomainObjects.Core
             return state;
         }
 
-        private void Init(bool isNew, bool keyIsSet)
+        private void Init(bool isNew)
         {
+            this.keyIsAssigned = this.GetEntityMetadata().GetKeyProperties().All(x => x.Property.Get(this) != x.Property.Type.DefaultOf());
+
             if (isNew)
             {
                 MarkNew();
-                this.keyIsAssigned = keyIsSet;
             }
             else
             {
+                if (!this.keyIsAssigned)
+                    throw new InvalidOperationException($"Entity of type {this.GetType().Name} cannot be marked as existing when all of the key property values are default");
+
                 MarkExisting();
-                this.keyIsAssigned = true;
             }
 
             BeginTrackingDeep();
         }
 
-        public void InitNew(bool keyIsSet) => Init(true, keyIsSet);
-        public void InitExisting() => Init(false, true);
+        public void InitNew() => Init(true);
+        public void InitExisting() => Init(false);
 
         public void MarkNew()
         {

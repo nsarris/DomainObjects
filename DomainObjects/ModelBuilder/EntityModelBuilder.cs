@@ -75,7 +75,7 @@ namespace DomainObjects.ModelBuilder
             var ctors = Descriptor.Type.GetConstructors(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
 
             if (ctors.Length == 0)
-                throw new InvalidOperationException($"Entity type {Descriptor.Type.Name} does not have public constructors");
+                throw new InvalidOperationException($"Entity type {Descriptor.Type.Name} does not have any public constructors");
 
             ValidateKey(properties.Where(x => x.KeyPosition >= 0).Select(x => x.Property).ToList());
         }

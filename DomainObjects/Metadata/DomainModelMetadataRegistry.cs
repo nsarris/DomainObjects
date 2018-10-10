@@ -1,6 +1,8 @@
 ﻿using DomainObjects.Core;
+using DomainObjects.Internal;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DomainObjects.Metadata
 {
@@ -49,7 +51,10 @@ namespace DomainObjects.Metadata
 
         public static DomainEntityMetadata GetEntityMetadta(Type type)
         {
-            if (!type.IsOrSubclassOfGenericDeep(typeof(Aggregate<,,>)) || !type.IsOrSubclassOfGenericDeep(typeof(AggregateRoot<,>)))
+            if (type.GetInterfaces().Contains(typeof(IDynamicProxy)))
+                type = type.BaseType;
+
+            if (!type.IsOrSubclassOfGenericDeep(typeof(Aggregate<,,>)) && !type.IsOrSubclassOfGenericDeep(typeof(AggregateRoot<,>)))
                 throw new InvalidOperationException($"Given type {type.Name} is not a Domain Aggregate<T,TParent,TKey> or AggregateRoot<T,TKey>");
 
             if (entityDescriptors.TryGetValue(type, out var descriptor))

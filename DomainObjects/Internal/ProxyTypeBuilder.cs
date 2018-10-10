@@ -11,6 +11,11 @@ using System.Threading.Tasks;
 
 namespace DomainObjects.Internal
 {
+    public interface IDynamicProxy
+    {
+        
+    }
+
     static class ProxyTypeBuilder
     {
         private const string ProxyTypeSuffix = "_DynamicProxy";
@@ -57,6 +62,9 @@ namespace DomainObjects.Internal
                     typeBuilder.SetCustomAttribute(
                         new CustomAttributeBuilder(typeof(SerializableAttribute).GetConstructor(new Type[] { }), new object[] { }));
 
+                //Add IDynamicProxy interface
+                typeBuilder.AddInterfaceImplementation(typeof(IDynamicProxy));
+
                 //Inherit all constructors
                 CreatePassthroughConstructors(typeBuilder, type);
 
@@ -99,7 +107,12 @@ namespace DomainObjects.Internal
                 }
 
                 //Build Type
-                return typeBuilder.CreateType();
+                returnType = typeBuilder.CreateType();
+
+                //Add to cache
+                cache.Add(type, returnType);
+
+                return returnType;
             }
         }
 
@@ -195,18 +208,6 @@ namespace DomainObjects.Internal
 
             return instance;
         }
-
-        //public class ProxyInitializer<T1>
-        //    where T1 : class
-        //{
-        //    public T1 Initialize(int x,int y)
-        //    {
-        //        var proxyType = BuildPropertyChangedProxy<T1>();
-        //        //var ctor = ctor from int,int
-        //        //build
-        //        //init
-        //    }
-        //}
 
         private class CtorReplacerVisitor : ExpressionVisitor
         {

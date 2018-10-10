@@ -56,7 +56,7 @@ namespace DomainObjects.Tests
             var customer2 = new Customer(0, "No");
 
             customer2.MainAddress = new Address("1", "1", null, null, null, null);
-            customer2.InitNew(false);
+            customer2.InitNew();
             //customer2.SetKey(1, "Nikos");
             customer2.SetKey(1);
 
