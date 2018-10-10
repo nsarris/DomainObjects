@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using DomainObjects.Internal;
+using DomainObjects.Metadata;
 using Dynamix;
 using Dynamix.Reflection;
 
@@ -15,10 +16,23 @@ namespace DomainObjects.Core
     {
         private const int HashMultiplier = 37;
 
+        #region Model Metadata
+
+        private DomainValueObjectMetadata entityMetadata;
+
+        public DomainValueObjectMetadata GetEntityMetadata()
+        {
+            if (entityMetadata == null)
+                entityMetadata = DomainModelMetadataRegistry.GetValueObjectMetadata(this.GetType());
+
+            return entityMetadata;
+        }
+
+        #endregion
+
         //TODO: Implement an activator (mutator like) to set initial properties selectively?
-        
-        //TODO: infer this from model metadata
-        protected virtual bool GetIsShallow() => false;
+
+        protected virtual bool GetIsShallow() => entityMetadata.IsShallow;
 
         protected DomainValueObject()
         {

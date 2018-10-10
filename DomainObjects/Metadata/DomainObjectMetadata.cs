@@ -7,6 +7,7 @@ namespace DomainObjects.Metadata
     public class DomainObjectMetadata
     {
         public Type Type { get; }
+        public bool IsShallow { get; }
 
         protected readonly Dictionary<string, DomainPropertyMetadata> propertyMetadata;
 
@@ -14,6 +15,7 @@ namespace DomainObjects.Metadata
         {
             Type = type;
             this.propertyMetadata = propertyMetadata.ToDictionary(x => x.Name);
+            IsShallow = propertyMetadata.All(x => x is DomainValuePropertyMetadata v && v.DomainValueType != DomainValueType.ValueObject);
         }
         public DomainPropertyMetadata GetProperty(string propertyName)
         {

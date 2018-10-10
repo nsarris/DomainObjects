@@ -24,7 +24,7 @@ namespace DomainObjects.Tests.Sales
         public bool IsPositive(int i) => i > 0;
     }
 
-    public class CityExistanceService
+    public class CityExistenceService
     {
         public bool Exists(string cityName)
         {

@@ -21,7 +21,6 @@ namespace DomainObjects.Metadata
 
         private static Expression BuildKeyValueSelectorExpression(Type entityType, List<PropertyInfo> keyProperties, out ParameterExpression entityParameterExpression, out Type keyValueType)
         {
-            //entityParameterExpression = Expression.Parameter(typeof(DomainEntity<>).MakeGenericTypeCached(entityType));
             entityParameterExpression = Expression.Parameter(typeof(object));
             var convertedEntityTypeExpression = ExpressionEx.ConvertIfNeeded(entityParameterExpression, entityType);
 
@@ -63,7 +62,6 @@ namespace DomainObjects.Metadata
         {
             var dynamicTypeBuilderDescriptor =
                 new DynamicTypeDescriptorBuilder("_" + entityType.FullName + CLASS_NAME_SUFFIX)
-                //TODO: This can be removed when the type knows when to go shallow
                 .HasBaseType<DomainKeyValue>();
 
             keyProperties

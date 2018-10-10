@@ -20,7 +20,7 @@ namespace DomainObjects.Core
         public DomainEntityMetadata GetEntityMetadata()
         {
             if (entityMetadata == null)
-                entityMetadata = DomainModelMetadataRegistry.GetEntityDescriptor(this.GetType());
+                entityMetadata = DomainModelMetadataRegistry.GetEntityMetadta(this.GetType());
 
             return entityMetadata;
         }
@@ -252,21 +252,6 @@ namespace DomainObjects.Core
 
 
         #endregion
-
-        #region Validation
-
-        public virtual DomainValidationResult Validate()
-        {
-            Validate(null);
-            return null;
-        }
-
-        public virtual DomainValidationResult Validate(IDomainValidator<Task> validationContext)
-        {
-            return DomainValidationResult.Success;
-        }
-
-        #endregion
     }
 
     public abstract class DomainEntity<T> : DomainEntity where T : DomainEntity<T>
@@ -279,6 +264,21 @@ namespace DomainObjects.Core
         {
          
         }
+
+        #region Validation
+
+        public virtual DomainValidationResult Validate()
+        {
+            return Validate(null);
+        }
+
+        public virtual DomainValidationResult Validate(IDomainValidator<T> validator)
+        {
+            return DomainValidationResult.Success;
+        }
+
+        #endregion
+
 
         #region Clone?
 
