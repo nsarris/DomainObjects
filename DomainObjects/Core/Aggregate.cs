@@ -31,11 +31,11 @@ namespace DomainObjects.Core
     public abstract class Aggregate<T, TParent, TKey> : Aggregate<T, TKey>
         where T : Aggregate<T, TParent, TKey>
     {
-        public abstract TParent Parent { get; }
+        public TParent Parent { get; }
 
-        protected Aggregate()
+        protected Aggregate(TParent parent)
         {
-
+            Parent = parent;
         }
         protected Aggregate(SerializationInfo info, StreamingContext context) : base(info, context)
         {

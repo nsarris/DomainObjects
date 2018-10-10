@@ -37,46 +37,41 @@ namespace DomainObjects.Tests.Sales
 
     public class CustomerRepository
     {
+        DomainEntityFactory<Customer, int, string> factory = new DomainEntityFactory<Customer, int, string>();
         public Customer CreateNew()
         {
-            var customer = new Customer();
-            customer.InitNew();
-            return customer;
+            return factory.New.Construct(0, null);
         }
 
         public Customer GetById(int id)
         {
-            var customer = new Customer(id, "Test" + id);
-            customer.InitExisting();
-            return customer;
+            return factory.Existing.ConstructWithDefaults(("id", id));
         }
     }
 
     public class InvoiceRepository
     {
+        DomainEntityFactory<Invoice, int> factory = new DomainEntityFactory<Invoice, int>();
         public Invoice CreateNew()
         {
-            var invoice = new Invoice();
-            invoice.InitNew();
-            return invoice;
+            return factory.New.Construct(0);
         }
 
         public Invoice GetById(int id)
         {
-            var invoice = new Invoice(id);
-            invoice.InitExisting();
-            return invoice;
+            return factory.Existing.Construct(id);
         }
     }
 
     //[AddINotifyPropertyChangedInterface]
     [Serializable]
-    public class Customer : AggregateRoot<Customer,int>
+    public class Customer : AggregateRoot<Customer, int>
     {
         //private string testInnerField  = "test";
-        public int Id { get; private set; }
+        public virtual int Id { get; private set; }
+        public virtual int Code{ get; set; }
         public virtual string Name { get; set; }
-        public Address MainAddress { get; set; }
+        public virtual Address MainAddress { get; set; }
         //public ValueList<Address> OtherAddresses { get; set; } = new ValueList<Address>();
         //[DeserializeAs(typeof(ValueList<Address>))]
         public ValueObjectList<Address> OtherAddresses { get; set; } = new ValueObjectList<Address>();
@@ -90,7 +85,7 @@ namespace DomainObjects.Tests.Sales
             Id = id;
             Name = name;
         }
-        
+
         protected Customer(SerializationInfo info, StreamingContext context) : base(info, context)
         {
 
@@ -122,7 +117,7 @@ namespace DomainObjects.Tests.Sales
         public Phone PrimaryPhone { get; }
         public ValueObjectReadOnlyList<Phone> OtherPhones { get; } = new ValueObjectReadOnlyList<Phone>();
 
-        
+
     }
     [Serializable]
     public class Phone : DomainValueObject<Phone>
@@ -143,12 +138,12 @@ namespace DomainObjects.Tests.Sales
 
     }
 
-    
 
 
 
 
-    [AddINotifyPropertyChangedInterface]
+
+    //[AddINotifyPropertyChangedInterface]
     [Serializable]
     public class Invoice : AggregateRoot<Invoice, int>
     {
@@ -167,30 +162,33 @@ namespace DomainObjects.Tests.Sales
 
         }
 
-        public int Id { get; private set; }
-        public int CustomerId { get; set; }
-        public DateTime DateTime { get; set; }
+        public virtual int Id { get; private set; }
+        public virtual int CustomerId { get; set; }
+        public virtual DateTime DateTime { get; set; }
         public AggregateList<InvoiceLine> InvoiceLines { get; } = new AggregateList<InvoiceLine>();
+
+        DomainEntityFactory<InvoiceLine, Invoice> linefactory = new DomainEntityFactory<InvoiceLine, Invoice>();
 
         public InvoiceLine CreateNewLine()
         {
-            var line = new InvoiceLine(this);
+            var line = linefactory.New.Construct(this);
             this.InvoiceLines.Add(line);
             return line;
         }
     }
 
-    [AddINotifyPropertyChangedInterface]
+    //[AddINotifyPropertyChangedInterface]
     [Serializable]
     public class InvoiceLine : Aggregate<InvoiceLine, Invoice, int>
     {
-        public int Id { get; private set; }
-        public int ProductId { get; set; }
-        public decimal Quantity { get; set; }
-        public override Invoice Parent { get; }
+        public virtual int Id { get; private set; }
+        public virtual int ProductId { get; set; }
+        public virtual decimal Quantity { get; set; }
+        
         public InvoiceLine(Invoice parent)
+            :base(parent)
         {
-            this.Parent = parent;
+            
         }
 
         protected InvoiceLine(SerializationInfo info, StreamingContext context) : base(info, context)

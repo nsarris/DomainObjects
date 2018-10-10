@@ -72,13 +72,14 @@ namespace DomainObjects.Internal
                 var onPropertyChangedMethod = type.GetMethod(OnPropertyChangedMethodName,
                     BindingFlags.Instance | BindingFlags.NonPublic);
 
-                //Override all non inexed parameters injecting OnPropertyChanged
+                //Override all non inexed virtual properties intercepting them with OnPropertyChanged
                 var propertyInfos = type.GetProperties().Where(p => p.CanRead && p.CanWrite && p.GetIndexParameters().Length == 0 && p.SetMethod.IsVirtual);
                 foreach (var item in propertyInfos)
                 {
                     var baseMethod = item.SetMethod;
                     var setAccessor = typeBuilder.DefineMethod
                            (baseMethod.Name, baseMethod.Attributes, typeof(void), new[] { item.PropertyType });
+                    
                     var il = setAccessor.GetILGenerator();
                     var retLabel = il.DefineLabel();
 
@@ -98,7 +99,9 @@ namespace DomainObjects.Internal
                     il.Emit(OpCodes.Ldarg_0);
                     il.Emit(OpCodes.Ldstr, item.Name);
                     il.Emit(OpCodes.Ldloc_0);
+                    if (item.PropertyType.IsValueType) il.Emit(OpCodes.Box, item.PropertyType);
                     il.Emit(OpCodes.Ldarg_1);
+                    if (item.PropertyType.IsValueType) il.Emit(OpCodes.Box, item.PropertyType);
                     il.Emit(OpCodes.Call, onPropertyChangedMethod);
 
                     il.MarkLabel(retLabel);

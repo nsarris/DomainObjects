@@ -19,6 +19,7 @@ namespace DomainObjects.Tests
             var customerProxy = ProxyTypeBuilder.BuildPropertyChangedProxy<Customer>();
             var customer = (Customer)customerProxy.GetConstructorsEx().First().InvokeWithDefaults();
             customer.BeginTracking();
+            customer.Code = 1;
             customer.Name = "12";
             customer.Name = "121";
             customer.Name = "121";
