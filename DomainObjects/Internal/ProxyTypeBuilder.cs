@@ -82,16 +82,33 @@ namespace DomainObjects.Internal
                     
                     var il = setAccessor.GetILGenerator();
                     var retLabel = il.DefineLabel();
-
-                    il.DeclareLocal(typeof(object));
+                    //Declare local and load current value
+                    il.DeclareLocal(item.PropertyType);
                     il.Emit(OpCodes.Ldarg_0);
                     il.Emit(OpCodes.Call, item.GetMethod);
                     il.Emit(OpCodes.Stloc_0);
 
-                    il.Emit(OpCodes.Ldloc_0);
-                    il.Emit(OpCodes.Ldarg_1);
-                    il.Emit(OpCodes.Beq, retLabel);
+                    //Check if same value
+                    //Goto to retLabel if
+                    if (!item.PropertyType.IsValueType)
+                    {
+                        il.Emit(OpCodes.Ldloc_0);
+                        il.Emit(OpCodes.Ldarg_1);
+                        il.Emit(OpCodes.Beq, retLabel);
+                    }
+                    else
+                    {
+                        var (defaultComparerGetter, equalsMethod) = GetDefaultComparerPropertyGetter(item.PropertyType);
 
+                        il.Emit(OpCodes.Call, defaultComparerGetter);
+
+                        il.Emit(OpCodes.Ldloc_0);
+                        il.Emit(OpCodes.Ldarg_1);
+                        il.Emit(OpCodes.Callvirt, equalsMethod);
+                        il.Emit(OpCodes.Brtrue, retLabel);
+                    }
+
+                    //Call base to 
                     il.Emit(OpCodes.Ldarg_0);
                     il.Emit(OpCodes.Ldarg_1);
                     il.Emit(OpCodes.Call, baseMethod);
@@ -118,6 +135,15 @@ namespace DomainObjects.Internal
                 return returnType;
             }
         }
+
+        private static (MethodInfo defaultComparerGetter, MethodInfo equalsMethod) GetDefaultComparerPropertyGetter(Type type)
+        {
+            var genericEqualityComparer = typeof(EqualityComparer<>).MakeGenericTypeCached(new Type[] { type });
+            var defaultComparerProperty = genericEqualityComparer.GetPropertiesExDic()["Default"];
+            var propertyGetMethod = defaultComparerProperty.PropertyInfo.GetGetMethod();
+            return (propertyGetMethod, genericEqualityComparer.GetMethod("Equals", new Type[] { type , type }));
+        }
+        
 
         private static void CreatePassthroughConstructors(this TypeBuilder builder, Type baseType)
         {

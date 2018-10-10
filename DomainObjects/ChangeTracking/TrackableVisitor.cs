@@ -55,9 +55,10 @@ namespace DomainObjects.ChangeTracking
                     if ((prop.Get(trackedObject) as ITrackableCollection).GetIsChanged())
                         return true;
 
-                    if (trackableList.ElementType.IsAssignableTo(typeof(ITrackable)))
-                        foreach (ITrackable item in trackableList)
-                            GetIsChangedDeep(item, visited);
+                    if (trackableList.ElementType.IsAssignableTo(typeof(ITrackableObject)))
+                        foreach (ITrackableObject item in trackableList)
+                            if (GetIsChangedDeep(item, visited))
+                                return true;
                 }
             }
 

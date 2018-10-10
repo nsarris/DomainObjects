@@ -32,7 +32,7 @@ namespace DomainObjects.Core
 
         //TODO: Implement an activator (mutator like) to set initial properties selectively?
 
-        protected virtual bool GetIsShallow() => entityMetadata.IsShallow;
+        protected virtual bool GetIsShallow() => GetEntityMetadata().IsShallow;
 
         protected DomainValueObject()
         {
@@ -98,35 +98,35 @@ namespace DomainObjects.Core
             return x.Equals(y);
         }
 
-        public static bool operator ==(T x, DomainValueObject<T> y)
-        {
-            if (x is null && y is null)
-                return true;
+        //public static bool operator ==(T x, DomainValueObject<T> y)
+        //{
+        //    if (x is null && y is null)
+        //        return true;
 
-            if (x is null || y is null)
-                return false;
+        //    if (x is null || y is null)
+        //        return false;
 
-            return y.Equals(x);
-        }
+        //    return y.Equals(x);
+        //}
 
-        public static bool operator ==(DomainValueObject<T> x, T y)
-        {
-            return y == x;
-        }
+        //public static bool operator ==(DomainValueObject<T> x, T y)
+        //{
+        //    return y == x;
+        //}
 
         public static bool operator !=(DomainValueObject<T> x, DomainValueObject<T> y)
         {
             return !(x == y);
         }
 
-        public static bool operator !=(T x, DomainValueObject<T> y)
-        {
-            return !(x == y);
-        }
+        //public static bool operator !=(T x, DomainValueObject<T> y)
+        //{
+        //    return !(x == y);
+        //}
 
-        public static bool operator !=(DomainValueObject<T> x, T y)
-        {
-            return !(x == y);
-        }
+        //public static bool operator !=(DomainValueObject<T> x, T y)
+        //{
+        //    return !(x == y);
+        //}
     }
 }

@@ -69,7 +69,8 @@ namespace DomainObjects.Tests.Sales
     {
         //private string testInnerField  = "test";
         public virtual int Id { get; private set; }
-        public virtual int Code{ get; set; }
+        public virtual int Code { get; set; }
+        public virtual decimal Quantity { get; set; }
         public virtual string Name { get; set; }
         public virtual Address MainAddress { get; set; }
         //public ValueList<Address> OtherAddresses { get; set; } = new ValueList<Address>();

@@ -57,11 +57,31 @@ namespace DomainObjects.Tests
             customer.Name = "New Name";
 
             Assert.IsTrue(customer.GetIsChanged());
+
+            customer.MainAddress = new Address("", "", "", "", null, null);
+            customer.AcceptChangesDeep();
+
+            Assert.IsFalse(customer.GetIsChanged());
+
+            customer.MainAddress = new Address("", "", "", "", null, null);
+
+            //var a1 = new Address("", "", "", "", null, null);
+            //var a2 = new Address("", "", "", "", null, null);
+
+            //Assert.IsTrue(a1 == a2);
+            //Assert.IsTrue(a1.Equals(a2));
+            //Assert.IsTrue(object.Equals(a1, a2));
+            //Assert.IsTrue(EqualityComparer<Address>.Default.Equals(a1, a2));
+            //Assert.IsFalse(object.ReferenceEquals(a1, a2));
+
+            Assert.IsFalse(customer.GetIsChanged());
         }
 
         [Test]
         public void TestAggregateChange()
         {
+            
+
             var repo = new InvoiceRepository();
             var invoice = repo.GetById(1);
 
@@ -73,7 +93,6 @@ namespace DomainObjects.Tests
             line.Quantity = 1;
             line.ProductId = 1;
             
-
             Assert.IsTrue(invoice.GetIsChangedDeep());
 
             invoice.AcceptChangesDeep();

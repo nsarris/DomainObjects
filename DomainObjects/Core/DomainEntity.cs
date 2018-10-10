@@ -12,7 +12,7 @@ using Dynamix.Reflection;
 
 namespace DomainObjects.Core
 {
-    public abstract class DomainEntity : DomainObject, IKeyProvider, ITrackable
+    public abstract class DomainEntity : DomainObject, IKeyProvider, ITrackableObject
     {
         #region Model Metadata
 
