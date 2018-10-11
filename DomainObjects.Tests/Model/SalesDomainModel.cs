@@ -43,6 +43,11 @@ namespace DomainObjects.Tests.Sales
             return factory.New.Construct(0, null);
         }
 
+        public Customer CreateNew(int id, string name)
+        {
+            return factory.New.Construct(id, name);
+        }
+
         public Customer GetById(int id)
         {
             return factory.Existing.ConstructWithDefaults(("id", id));

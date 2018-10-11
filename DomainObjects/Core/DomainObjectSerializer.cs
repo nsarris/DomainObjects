@@ -1,4 +1,5 @@
-﻿using Dynamix.Reflection;
+﻿using DomainObjects.Serialization;
+using Dynamix.Reflection;
 using System;
 using System.Collections.Generic;
 using System.Linq;

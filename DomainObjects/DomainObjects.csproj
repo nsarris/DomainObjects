@@ -39,6 +39,9 @@
     <CodeAnalysisRuleSet>DomainObjects.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Collections.Immutable, Version=1.2.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Collections.Immutable.1.5.0\lib\netstandard2.0\System.Collections.Immutable.dll</HintPath>
@@ -67,7 +70,8 @@
     <Compile Include="Core\DomainKeyValue.cs" />
     <Compile Include="Core\DomainObjectSerializer.cs" />
     <Compile Include="Core\DomainObjectState.cs" />
-    <Compile Include="Core\Extensions.cs" />
+    <Compile Include="Serialization\DomainObjectSerializer.cs" />
+    <Compile Include="Serialization\SerializationExtensions.cs" />
     <Compile Include="Core\ValueObjectList.cs" />
     <Compile Include="Core\ValueObjectReadOnlyList.cs" />
     <Compile Include="GlobalSuppressions.cs" />
@@ -84,6 +88,7 @@
     <Compile Include="Repositories\IEntityCommandHandler.cs" />
     <Compile Include="Repositories\IEntityFactory.cs" />
     <Compile Include="Repositories\IEntityQueryProvider.cs" />
+    <Compile Include="Serialization\SerializationInfoWrapper.cs" />
     <Compile Include="Validation\DomainValidationError.cs" />
     <Compile Include="Validation\DomainValidationResult.cs" />
     <Compile Include="Validation\IDomainValidator.cs" />

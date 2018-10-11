@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using DomainObjects.ChangeTracking;
 using DomainObjects.Metadata;
 using DomainObjects.Validation;
+using DomainObjects.Serialization;
 using Dynamix.Reflection;
 
 namespace DomainObjects.Core

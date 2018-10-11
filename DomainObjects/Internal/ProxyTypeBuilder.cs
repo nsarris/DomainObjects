@@ -34,12 +34,17 @@ namespace DomainObjects.Internal
         }
         static Lazy<Builders> builders = new Lazy<Builders>(() => new Builders(typeof(ProxyTypeBuilder).FullName));
 
-        static Dictionary<Type, Type> cache = new Dictionary<Type, Type>();
-        static object syncRoot = new object();
+        static readonly Dictionary<Type, Type> cache = new Dictionary<Type, Type>();
+        static readonly object syncRoot = new object();
 
-        public static Type BuildPropertyChangedProxy<T>() where T : class
+
+        public static Type BuildPropertyChangedProxy<T>() where T : class 
+            => BuildPropertyChangedProxy(typeof(T));
+
+        public static Type BuildPropertyChangedProxy(Type type) 
         {
-            var type = typeof(T);
+            if (!type.IsClass)
+                throw new ArgumentException("A proxy can only be built for class types", nameof(type));
 
             if (cache.TryGetValue(type, out var returnType))
                 return returnType;
