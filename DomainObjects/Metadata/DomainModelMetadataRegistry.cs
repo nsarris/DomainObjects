@@ -54,7 +54,7 @@ namespace DomainObjects.Metadata
             if (type.GetInterfaces().Contains(typeof(IDynamicProxy)))
                 type = type.BaseType;
 
-            if (!type.IsOrSubclassOfGenericDeep(typeof(Aggregate<,,>)) && !type.IsOrSubclassOfGenericDeep(typeof(AggregateRoot<,>)))
+            if (!type.IsDomainEntity())
                 throw new InvalidOperationException($"Given type {type.Name} is not a Domain Aggregate<T,TParent,TKey> or AggregateRoot<T,TKey>");
 
             if (entityDescriptors.TryGetValue(type, out var descriptor))
@@ -68,7 +68,7 @@ namespace DomainObjects.Metadata
 
         public static DomainValueObjectMetadata GetValueObjectMetadata(Type type)
         {
-            if (!type.IsOrSubclassOfGenericDeep(typeof(DomainValueObject<>)))
+            if (!type.IsDomainValueObject())
                 throw new InvalidOperationException($"Given type {type.Name} is not a DomainValueObject<T>");
 
             if (valueObjectDescriptors.TryGetValue(type, out var descriptor))

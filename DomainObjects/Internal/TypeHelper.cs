@@ -2,6 +2,7 @@
 using DomainObjects.Metadata;
 using Dynamix.Reflection;
 using System;
+using System.Collections.Generic;
 
 namespace DomainObjects
 {
@@ -33,7 +34,7 @@ namespace DomainObjects
                 return DomainValueType.TimeSpan;
             else if (effectiveType.IsNumeric())
                 return DomainValueType.Number;
-            else if (effectiveType.IsOrSubclassOfGenericDeep(typeof(DomainValueObject<>),out var _))
+            else if (effectiveType.IsDomainValueObject())
                 return DomainValueType.ValueObject;
             else
                 return null;
@@ -50,59 +51,59 @@ namespace DomainObjects
             return valueType != null;
         }
 
-        public static bool IsOrSubclassOfGenericDeep(this Type type, Type openGenericType)
+        public static bool IsAggregate(this Type type)
         {
-            return IsOrSubclassOfGenericDeep(type, openGenericType, out var _);
+            return type.IsOrSubclassOfGeneric(typeof(Aggregate<,,>));
         }
 
-        public static bool IsOrSubclassOfGenericDeep(this Type type, Type openGenericType, out Type actualType)
+        public static bool IsAggregateRoot(this Type type)
         {
-            actualType = null;
+            return type.IsOrSubclassOfGeneric(typeof(AggregateRoot<,>));
+        }
+
+        public static bool IsDomainEntity(this Type type)
+        {
+            return type.IsAggregate() || type.IsAggregateRoot();
+        }
+
+        public static bool IsDomainValueObject(this Type type)
+        {
+            return type.IsSubclassOfGeneric(typeof(DomainValueObject<>));
+        }
+
+        public static bool IsAggregateList(this Type type)
+        {
+            return type.IsOrSubclassOfGeneric(typeof(AggregateList<>));
+        }
+
+        public static bool IsAggregateList(this Type type, out Type elementType, out bool readOnly)
+        {
+            readOnly = type.IsOrSubclassOfGeneric(typeof(AggregateReadOnlyList<>), out elementType);
+
+            return readOnly || type.IsOrSubclassOfGeneric(typeof(AggregateList<>), out elementType);
+        }
+
+        public static bool IsDomainValueObjectList(this Type type, out Type elementType, out bool readOnly)
+        {
+            readOnly = type.IsOrSubclassOfGeneric(typeof(ValueObjectReadOnlyList<>), out elementType);
+
+            return readOnly || type.IsOrSubclassOfGeneric(typeof(ValueObjectList<>), out elementType);
+        }
+
+        public static bool IsFrameworkType(this Type type)
+        {
+            return type.IsGenericOrGenericSuperclassOf(typeof(AggregateRoot<,>))
+                || type.IsGenericOrGenericSuperclassOf(typeof(Aggregate<,,>))
+                || type.IsGenericOrGenericSuperclassOf(typeof(DomainValueObject<>));
+        }
+
+        public static IEnumerable<Type> GetBaseTypes(this Type type)
+        {
             while (type != typeof(object))
             {
-                if (type.IsGenericType && type.GetGenericTypeDefinition() == openGenericType)
-                {
-                    actualType = type;
-                    return true;
-                }
                 type = type.BaseType;
+                yield return type;
             }
-            return false;
-        }
-
-        //public static bool HasGenericDefinition(this Type type, Type openGenericType, out Type actualType)
-        //{
-        //    actualType = null;
-
-        //    if (type.IsGenericType && type.GetGenericTypeDefinition() == openGenericType)
-        //    {
-        //        actualType = type;
-        //        return true;
-        //    }
-
-        //    return false;
-        //}
-
-        public static bool IsOrSubclassOfDeep(this Type type, Type typeToCompare)
-        {
-            if (typeToCompare == typeof(object))
-                return true;
-
-            while (type != typeof(object))
-            {
-                if (type == typeToCompare)
-
-                    return true;
-
-                type = type.BaseType;
-            }
-            return false;
-        }
-
-        public static bool IsSubclassOfDeep(this Type type, Type typeToCompare)
-        {
-            
-            return type.BaseType.IsOrSubclassOfDeep(typeToCompare);
         }
     }
 }

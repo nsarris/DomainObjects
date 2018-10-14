@@ -24,7 +24,7 @@ namespace DomainObjects.Metadata
             keySelector = DomainKeySelectorBuilder.BuildKeySelector(entityType, keyProperties.Select(x => x.Property.PropertyInfo).ToList());
             keyValueSelector = DomainKeySelectorBuilder.BuildKeyValueSelector(entityType, keyProperties.Select(x => x.Property.PropertyInfo).ToList());
 
-            IsRoot = entityType.IsOrSubclassOfGenericDeep(typeof(AggregateRoot<,>));
+            IsRoot = entityType.IsAggregateRoot();
         }
 
         public object GetKey(object entity)

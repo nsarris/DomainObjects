@@ -12,25 +12,6 @@ namespace DomainObjects.Tests
     [TestFixture]
     public class TrackableTests
     {
-
-        [OneTimeSetUp]
-        public void Setup()
-        {
-            var modelBuilder = new DomainModelBuilder()
-                .HasModelName("Sales");
-
-            var invoiceBuilder = modelBuilder.Entity<Invoice>().HasKey(x => x.Id);
-            var invoiceLineBuilder = modelBuilder.Entity<InvoiceLine>().HasKey(x => x.Id);
-            var productBuilder = modelBuilder.Entity<Product>().HasKey(x => x.Id);
-
-            var customerBuilder = modelBuilder.Entity<Customer>().HasKey(x => x.Id)
-                .IgnoreMember(x => x.StringComparer)
-                ;
-
-            var model = modelBuilder.Build();
-        }
-        
-
         [Test]
         public void TestNewEntity()
         {

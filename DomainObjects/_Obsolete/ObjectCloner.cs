@@ -176,7 +176,6 @@ namespace DomainObjects.Core
 
         public virtual void VisitProperty(object currentSource,object currentClone, PropertyInfoEx prop)
         {
-            object v = prop.Get(currentSource, true);
             var propType = prop.PropertyInfo.PropertyType;
 
             if (!prop.IsEnumerable)

@@ -22,13 +22,13 @@ namespace DomainObjects.ModelBuilder
 
         public EntityModelBuilderConfiguration<T> Entity<T>() where T : DomainEntity
         {
-            if (!entityModelBuilderConfigurations.TryGetValue(typeof(T), out var entityModelBuilder))
+            if (!entityModelBuilderConfigurations.TryGetValue(typeof(T), out var entityModelBuilderConfiguration))
             {
-                entityModelBuilder = new EntityModelBuilderConfiguration<T>();
-                entityModelBuilderConfigurations.Add(typeof(T), entityModelBuilder);
+                entityModelBuilderConfiguration = new EntityModelBuilderConfiguration<T>();
+                entityModelBuilderConfigurations.Add(typeof(T), entityModelBuilderConfiguration);
             }
 
-            return (EntityModelBuilderConfiguration<T>)entityModelBuilder;
+            return (EntityModelBuilderConfiguration<T>)entityModelBuilderConfiguration;
         }
 
         public DomainModelMetadata Build()
@@ -57,8 +57,6 @@ namespace DomainObjects.ModelBuilder
                 ))
                 .ToList();
 
-            //Validate
-
             var domainModel = new DomainModelMetadata(
                 modelName,
                 entityModelBuilders.Select(x => x.Build()).ToList(),
@@ -72,7 +70,7 @@ namespace DomainObjects.ModelBuilder
 
 
 
-        private ValueTypeDescriptor ScanValueTypeRecursive(Type type, HashSet<Type> visitedTypes)
+        private ValueTypeDescriptor ScanValueObjectTypeRecursive(Type type, HashSet<Type> visitedTypes)
         {
             if (visitedTypes.Contains(type))
                 return null;
@@ -81,7 +79,8 @@ namespace DomainObjects.ModelBuilder
             var valueTypeDescriptors = new List<ValueTypeDescriptor>();
 
             foreach (var property in type.GetPropertiesEx()
-                .Where(x => x.PropertyInfo.GetIndexParameters().Length == 0))
+                .Where(x => x.PropertyInfo.GetIndexParameters().Length == 0
+                    && !x.PropertyInfo.DeclaringType.IsFrameworkType()))
             {
                 var propertyType = property.PropertyInfo.PropertyType;
 
@@ -89,7 +88,7 @@ namespace DomainObjects.ModelBuilder
                 {
                     propertyDescriptors.Add(new ValuePropertyDescriptor(property, valueType.Value));
                     if (valueType == DomainValueType.ValueObject)
-                        valueTypeDescriptors.AddIfNotNull(ScanValueTypeRecursive(propertyType, visitedTypes));
+                        valueTypeDescriptors.AddIfNotNull(ScanValueObjectTypeRecursive(propertyType, visitedTypes));
 
                 }
                 else if (propertyType.HasGenericDefinition(typeof(ValueObjectReadOnlyList<>)))
@@ -103,7 +102,7 @@ namespace DomainObjects.ModelBuilder
                     {
                         propertyDescriptors.Add(new ValueListPropertyDescriptor(property, elementType, elementValueType.Value, true));
                         if (valueType == DomainValueType.ValueObject)
-                            valueTypeDescriptors.AddIfNotNull(ScanValueTypeRecursive(elementType, visitedTypes));
+                            valueTypeDescriptors.AddIfNotNull(ScanValueObjectTypeRecursive(elementType, visitedTypes));
                     }
                 }
                 else
@@ -123,28 +122,26 @@ namespace DomainObjects.ModelBuilder
             var valueTypeDescriptors = new List<ValueTypeDescriptor>();
 
             foreach (var property in type.GetPropertiesEx()
-                .Where(x => x.PropertyInfo.GetIndexParameters().Length == 0))
+                .Where(x => x.PropertyInfo.GetIndexParameters().Length == 0
+                    && !x.PropertyInfo.DeclaringType.IsFrameworkType()))
             {
-                var readOnly = false;
                 var propertyType = property.PropertyInfo.PropertyType;
                 
                 if (TypeHelper.IsSupportedValueType(propertyType, out var valueType))
                 {
                     propertyDescriptors.Add(new ValuePropertyDescriptor(property, valueType.Value));
                     if (valueType == DomainValueType.ValueObject)
-                        valueTypeDescriptors.AddIfNotNull(ScanValueTypeRecursive(propertyType, visitedTypes));
-                    
+                        valueTypeDescriptors.AddIfNotNull(ScanValueObjectTypeRecursive(propertyType, visitedTypes));
                 }
-                else if (propertyType.IsOrSubclassOfGenericDeep(typeof(Aggregate<>)))
+                else if (propertyType.IsAggregate())
                 {
                     propertyDescriptors.Add(new AggregatePropertyDescriptor(property));
                     aggregateDescriptors.AddIfNotNull(ScanEntityTypeRecursive(propertyType, visitedTypes));
                 }
-                else if (propertyType.IsOrSubclassOfGenericDeep(typeof(AggregateList<>), out var aggregateListType)
-                    || (readOnly = propertyType.IsOrSubclassOfGenericDeep(typeof(AggregateReadOnlyList<>), out aggregateListType)))
+                else if (propertyType.IsAggregateList(out var listElementType, out var readOnly))
                 {
-                    var elementType = aggregateListType.GetGenericArguments().Single();
-                    if (!elementType.IsOrSubclassOfGenericDeep(typeof(Aggregate<>)))
+                    var elementType = listElementType.GetGenericArguments().Single();
+                    if (!elementType.IsAggregate())
                         propertyDescriptors.Add(new UnsupportedPropertyDescriptor(property));
                     else
                     {
@@ -152,10 +149,9 @@ namespace DomainObjects.ModelBuilder
                         aggregateDescriptors.AddIfNotNull(ScanEntityTypeRecursive(elementType, visitedTypes));
                     }
                 }
-                else if (propertyType.IsOrSubclassOfGenericDeep(typeof(ValueObjectList<>), out var valueListType)
-                    || (readOnly = propertyType.IsOrSubclassOfGenericDeep(typeof(ValueObjectReadOnlyList<>), out valueListType)))
+                else if (propertyType.IsDomainValueObjectList(out listElementType, out readOnly))
                 {
-                    var elementType = valueListType.GetGenericArguments().First();
+                    var elementType = listElementType.GetGenericArguments().First();
                     var elementValueType = elementType.GetSupportedValueType();
 
                     if (!elementValueType.HasValue)
@@ -164,7 +160,7 @@ namespace DomainObjects.ModelBuilder
                     {
                         propertyDescriptors.Add(new ValueListPropertyDescriptor(property, elementType, elementValueType.Value, readOnly));
                         if (valueType == DomainValueType.ValueObject)
-                            valueTypeDescriptors.AddIfNotNull(ScanValueTypeRecursive(elementType, visitedTypes));
+                            valueTypeDescriptors.AddIfNotNull(ScanValueObjectTypeRecursive(elementType, visitedTypes));
                     }
                 }
                 else

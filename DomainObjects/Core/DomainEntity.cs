@@ -13,10 +13,12 @@ using Dynamix.Reflection;
 
 namespace DomainObjects.Core
 {
+    #pragma warning disable S3925 // "ISerializable" should be implemented correctly
     public abstract class DomainEntity : DomainObject, IKeyProvider, ITrackableObject
     {
         #region Model Metadata
 
+        [NonSerialized]
         private DomainEntityMetadata entityMetadata;
 
         public DomainEntityMetadata GetEntityMetadata()
@@ -38,7 +40,7 @@ namespace DomainObjects.Core
             changeTracker.AfterPropertyChanged += (object sender, PropertyChangedExtendedEventArgs e) => OnAfterPropertyChanged(e.PropertyName, e.Before, e.After);
         }
 
-        protected DomainEntity(SerializationInfo info, StreamingContext context) 
+        protected DomainEntity(SerializationInfo info, StreamingContext context)
             : this()
         {
             Deserialize(info, context);
@@ -118,7 +120,7 @@ namespace DomainObjects.Core
 
         private void Init(bool isNew)
         {
-            this.keyIsAssigned = this.GetEntityMetadata().GetKeyProperties().All(x => x.Property.Get(this) != x.Property.Type.DefaultOf());
+            this.keyIsAssigned = this.GetEntityMetadata().GetKeyProperties().All(x => !Equals(x.Property.Get(this), x.Property.Type.DefaultOf()));
 
             if (isNew)
             {
@@ -162,6 +164,7 @@ namespace DomainObjects.Core
 
         #region Change Tracking
 
+        [NonSerialized]
         private readonly ChangeTracker changeTracker;
 
         public void MarkChanged()
@@ -261,13 +264,13 @@ namespace DomainObjects.Core
 
     public abstract class DomainEntity<T> : DomainEntity where T : DomainEntity<T>
     {
-        protected DomainEntity() 
+        protected DomainEntity()
         {
 
         }
         protected DomainEntity(SerializationInfo info, StreamingContext context) : base(info, context)
         {
-         
+
         }
 
         #region Validation
@@ -283,7 +286,6 @@ namespace DomainObjects.Core
         }
 
         #endregion
-
 
         #region Clone?
 
@@ -329,4 +331,5 @@ namespace DomainObjects.Core
             return this.GetKey() == other;
         }
     }
+    #pragma warning restore S3925 // "ISerializable" should be implemented correctly
 }

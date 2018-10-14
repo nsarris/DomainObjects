@@ -20,31 +20,31 @@ namespace DomainObjects.Tests
         [Test]
         public void TestBuilder()
         {
-            var modelBuilder = new DomainModelBuilder()
-                .HasModelName("Sales");
+            //var modelBuilder = new DomainModelBuilder()
+            //    .HasModelName("Sales");
 
-            var invoiceBuilder = modelBuilder.Entity<Invoice>().HasKey(x => x.Id);
-            var invoiceLineBuilder = modelBuilder.Entity<InvoiceLine>().HasKey(x => x.Id);
-            var productBuilder = modelBuilder.Entity<Product>().HasKey(x => x.Id);
+            //var invoiceBuilder = modelBuilder.Entity<Invoice>().HasKey(x => x.Id);
+            //var invoiceLineBuilder = modelBuilder.Entity<InvoiceLine>().HasKey(x => x.Id);
+            //var productBuilder = modelBuilder.Entity<Product>().HasKey(x => x.Id);
 
-            var customerBuilder = modelBuilder
-                .Entity<Customer>()
-                .HasKey(x => new { x.Id })
-                //.HasKey(x => new { x.MainAddress })
-                .IgnoreMember(x => x.StringComparer)
-                .Property(x => x.Name)
-                    .HasMaxLength(20)
-                    .IsRequired()
-                    .End()
-                .Property(x => x.Id)
-                    .HasPrecision(1)
-                    .End()
-                ;
+            //var customerBuilder = modelBuilder
+            //    .Entity<Customer>()
+            //    .HasKey(x => new { x.Id })
+            //    //.HasKey(x => new { x.MainAddress })
+            //    .IgnoreMember(x => x.StringComparer)
+            //    .Property(x => x.Name)
+            //        .HasMaxLength(20)
+            //        .IsRequired()
+            //        .End()
+            //    .Property(x => x.Id)
+            //        .HasPrecision(1)
+            //        .End()
+            //    ;
 
-            //customerBuilder.HasKey(x => new { x.Id, x.Name });
-            //customerBuilder.HasKey(x => new { x.Id });
+            ////customerBuilder.HasKey(x => new { x.Id, x.Name });
+            ////customerBuilder.HasKey(x => new { x.Id });
 
-            var model = modelBuilder.Build();
+            //var model = modelBuilder.Build();
 
             var customer = new Customer();
 

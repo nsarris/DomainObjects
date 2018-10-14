@@ -16,7 +16,7 @@ namespace DomainObjects.ModelBuilder
         protected EntityModelBuilderConfiguration(Type type)
         {
             EntityType = type;
-            IsRoot = EntityType.IsOrSubclassOfGenericDeep(typeof(AggregateRoot<,>));
+            IsRoot = EntityType.IsAggregateRoot();
         }
         internal List<string> IgnoredMembers { get; } = new List<string>();
         internal List<string> KeyMembers { get; } = new List<string>();

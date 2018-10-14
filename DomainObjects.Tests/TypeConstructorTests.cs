@@ -19,20 +19,6 @@ namespace DomainObjects.Tests
     [TestFixture]
     class TypeConstructorTests
     {
-        [OneTimeSetUp]
-        public void Setup()
-        {
-            var modelBuilder = new DomainModelBuilder()
-                .HasModelName("Sales");
-
-            var invoiceBuilder = modelBuilder.Entity<Invoice>().HasKey(x => x.Id);
-            var invoiceLineBuilder = modelBuilder.Entity<InvoiceLine>().HasKey(x => x.Id);
-            var productBuilder = modelBuilder.Entity<Product>().HasKey(x => x.Id);
-            var customerBuilder = modelBuilder.Entity<Customer>().HasKey(x => new { x.Id }).IgnoreMember(x => x.StringComparer);
-
-            modelBuilder.Build();
-        }
-
         [Test]
         public void DomainTypeConstructorTest()
         {

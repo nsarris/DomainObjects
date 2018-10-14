@@ -15,23 +15,6 @@ namespace DomainObjects.Tests
     [TestFixture]
     class SerializationTests
     {
-        [OneTimeSetUp]
-        public void Setup()
-        {
-            var modelBuilder = new DomainModelBuilder()
-                .HasModelName("Sales");
-
-            var invoiceBuilder = modelBuilder.Entity<Invoice>().HasKey(x => x.Id);
-            var invoiceLineBuilder = modelBuilder.Entity<InvoiceLine>().HasKey(x => x.Id);
-            var productBuilder = modelBuilder.Entity<Product>().HasKey(x => x.Id);
-
-            var customerBuilder = modelBuilder.Entity<Customer>().HasKey(x => x.Id)
-                .IgnoreMember(x => x.StringComparer)
-                ;
-
-            var model = modelBuilder.Build();
-        }
-
         [Test]
         public void SerializationTest()
         {
@@ -55,17 +38,35 @@ namespace DomainObjects.Tests
             var customerRepository = new CustomerRepository();
 
 
-            var customer2 = customerRepository.CreateNew(0, "No");
+            var customer = customerRepository.CreateNew(0, "No");
 
-            customer2.MainAddress = new Address("1", "1", null, null, new Phone("!23", 1), null);
-            customer2.OtherAddresses.AddRange(new[] {
+            customer.MainAddress = new Address("1", "1", null, null, new Phone("!23", 1), null);
+            customer.OtherAddresses.AddRange(new[] {
                 new Address("2", "2", null, null, new Phone("9123", 1), null),
                 new Address("3", "3", null, null, new Phone("123123", 1), null),
                 });
-            var ser = serializer.Serialize(customer2);
+            var serializedCustomer = serializer.Serialize(customer);
 
-            var customer2Copy = serializer.Deserialize<Customer>(ser);
-            Assert.IsTrue(ObjectComparer.Default.DeepEquals(customer2, customer2Copy));
+            var customerCopy = serializer.Deserialize<Customer>(serializedCustomer);
+            Assert.IsTrue(ObjectComparer.Default.DeepEquals(customer, customerCopy));
+
+            var invoiceRepository = new InvoiceRepository();
+
+            var invoice = invoiceRepository.CreateNew();
+            var line = invoice.CreateNewLine();
+            line.Quantity = 0.5m;
+            line.ProductId = 1;
+            line.SetKey(1);
+
+            line = invoice.CreateNewLine();
+            line.Quantity = 0.7m;
+            line.ProductId = 2;
+            line.SetKey(2);
+            
+            var serializedInvoice = serializer.Serialize(invoice);
+
+            var invoiceCopy = serializer.Deserialize<Invoice>(serializedInvoice);
+            Assert.IsTrue(ObjectComparer.Default.DeepEquals(invoice, invoiceCopy));
         }
     }
 }

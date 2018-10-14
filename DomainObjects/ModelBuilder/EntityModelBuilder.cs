@@ -20,7 +20,7 @@ namespace DomainObjects.ModelBuilder
         public DomainEntityMetadata Build()
         {
             var propertyDescriptors = Descriptor.PropertyDescriptors
-                .Where(x => (Configuration == null || !Configuration.IgnoredMembers.Contains(x.Property.Name)) && x.Property.Name != "Parent");
+                .Where(x => (Configuration == null || !Configuration.IgnoredMembers.Contains(x.Property.Name)) && !x.Property.PropertyInfo.DeclaringType.IsFrameworkType());
 
             ValidateModel(propertyDescriptors);
 

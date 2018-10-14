@@ -20,7 +20,6 @@ namespace DomainObjects.Tests
             HackLanguageManager.AddLanguage(new GreekLanguage());
             ValidatorOptions.LanguageManager.Culture = new System.Globalization.CultureInfo("el");
 
-           
             var repo = new CustomerRepository();
 
             var customer = repo.CreateNew();
@@ -31,22 +30,6 @@ namespace DomainObjects.Tests
                     new Phone("456", 0),
                     new Phone("", 0),
                 });
-
-
-            var modelBuilder = new DomainModelBuilder()
-                .HasModelName("Sales");
-
-            var invoiceBuilder = modelBuilder.Entity<Invoice>().HasKey(x => x.Id);
-            var invoiceLineBuilder = modelBuilder.Entity<InvoiceLine>().HasKey(x => x.Id);
-            var productBuilder = modelBuilder.Entity<Product>().HasKey(x => x.Id);
-
-            var customerBuilder = modelBuilder
-                .Entity<Customer>()
-                .HasKey(x => new { x.Id })
-                //.HasKey(x => new { x.MainAddress })
-                .IgnoreMember(x => x.StringComparer)
-                ;
-
         }
     }
 }

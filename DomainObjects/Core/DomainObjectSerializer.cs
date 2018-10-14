@@ -1,4 +1,5 @@
-﻿using DomainObjects.Serialization;
+﻿using DomainObjects.Internal;
+using DomainObjects.Serialization;
 using Dynamix.Reflection;
 using System;
 using System.Collections.Generic;
@@ -21,7 +22,6 @@ namespace DomainObjects.Core
     internal class DomainObjectSerializer
     {
         static readonly Dictionary<Type, DomainObjectSerializer> cache = new Dictionary<Type, DomainObjectSerializer>();
-        //readonly Type objectType;
         readonly Dictionary<string, (FieldInfoEx field, Type targetType)> autoPropertyFields;
         readonly Dictionary<string, (FieldInfoEx field, Type targetType)> fields;
 
@@ -43,8 +43,10 @@ namespace DomainObjects.Core
 
         public DomainObjectSerializer(Type objectType)
         {
-            //this.objectType = objectType;
             var eventNames = objectType.GetEvents().Select(x => x.Name).ToList();
+
+            if (objectType.GetInterfaces().Contains(typeof(IDynamicProxy)))
+                objectType = objectType.BaseType;
 
             this.fields = objectType
                 .GetFieldsEx(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)

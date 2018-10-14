@@ -173,6 +173,7 @@ namespace DomainObjects.Tests.Sales
         public virtual DateTime DateTime { get; set; }
         public AggregateList<InvoiceLine> InvoiceLines { get; } = new AggregateList<InvoiceLine>();
 
+        [NonSerialized]
         DomainEntityFactory<InvoiceLine, Invoice> linefactory = new DomainEntityFactory<InvoiceLine, Invoice>();
 
         public InvoiceLine CreateNewLine()

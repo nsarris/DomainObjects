@@ -12,14 +12,20 @@ namespace DomainObjects.Serialization
 {
     public class DomainObjectContractResolver : DefaultContractResolver
     {
+        public Type GetActualTypeCreate(Type objectType)
+        {
+            //Assert type
+            return objectType.IsSubclassOf(typeof(DomainEntity)) ?
+                ProxyTypeBuilder.BuildPropertyChangedProxy(objectType) : objectType;
+        }
+        protected override JsonContract CreateContract(Type objectType)
+        {
+            return base.CreateContract(GetActualTypeCreate(objectType));
+        }
+
         protected override JsonObjectContract CreateObjectContract(Type objectType)
         {
-            var contract = base.CreateObjectContract(objectType);
-            //Assert type
-            if (objectType.IsSubclassOf(typeof(DomainEntity)))
-                contract.CreatedType = ProxyTypeBuilder.BuildPropertyChangedProxy(objectType);
-
-            return contract;
+            return base.CreateObjectContract(GetActualTypeCreate(objectType));
         }
     }
 

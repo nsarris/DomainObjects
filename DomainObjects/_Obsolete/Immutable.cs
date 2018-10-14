@@ -22,7 +22,7 @@ namespace DomainObjects.Core
 
             var props = GetType().GetPropertiesEx().ToList();
             if (data.Length != props.Count)
-                throw new Exception("Contrstructor parameter count doesn't match Immutable property count");
+                throw new InvalidOperationException("Contrstructor parameter count doesn't match Immutable property count");
 
             foreach (var prop in props)
             {
@@ -34,13 +34,13 @@ namespace DomainObjects.Core
                     if (propType.IsSubclassOf(typeof(Immutable)))
                     {
                         if (v == null)
-                            throw new Exception("A nested immutable cannot be null, please provide a value");
+                            throw new InvalidOperationException("A nested immutable cannot be null, please provide a value");
                     }
                     else // List
                     {
-                        var collectionType = GetCollectionType(propType);
-                        if (collectionType.TypeEnum == SupportedCollectionTypeEnum.None || !collectionType.ElementType.IsSubclassOf(typeof(Immutable)))
-                            throw new Exception("Only Immutables, ReadOnlyCollection<>, ImmutableList<> and ImmutableArray<> class types are supported as Immutable properties");
+                        var collectionType = GetCollectionTypeDescriptor(propType);
+                        if (collectionType.TypeEnum == SupportedCollectionType.None || !collectionType.ElementType.IsSubclassOf(typeof(Immutable)))
+                            throw new InvalidOperationException("Only Immutables, ReadOnlyCollection<>, ImmutableList<> and ImmutableArray<> class types are supported as Immutable properties");
 
 
                         if (v == null)
@@ -51,7 +51,7 @@ namespace DomainObjects.Core
                             {
                                 var elementType = ImplementsIEnumerableOfImmutableType(propType);
                                 if (elementType == null)
-                                    throw new Exception("Unexpected collection type");
+                                    throw new InvalidOperationException("Unexpected collection type");
 
                                 v = collectionType.FromIEnumerable(v);
                             }
@@ -81,7 +81,7 @@ namespace DomainObjects.Core
             //}
         }
 
-        private enum SupportedCollectionTypeEnum
+        private enum SupportedCollectionType
         {
             None,
             ReadOnlyCollection,
@@ -89,17 +89,17 @@ namespace DomainObjects.Core
             ImmutableList
         }
 
-        private class SupportedCollectionType
+        private class SupportedCollectionTypeDescriptor
         {
-            public SupportedCollectionTypeEnum TypeEnum { get; set; }
+            public SupportedCollectionType TypeEnum { get; set; }
             public Type ElementType { get; set; }
             public Type GetCollectionGenericType()
             {
-                if (TypeEnum == SupportedCollectionTypeEnum.ReadOnlyCollection)
+                if (TypeEnum == SupportedCollectionType.ReadOnlyCollection)
                     return typeof(ReadOnlyCollection<>);
-                else if (TypeEnum == SupportedCollectionTypeEnum.ImmutableList)
+                else if (TypeEnum == SupportedCollectionType.ImmutableList)
                     return typeof(ImmutableList<>);
-                else if (TypeEnum == SupportedCollectionTypeEnum.ImmutableArray)
+                else if (TypeEnum == SupportedCollectionType.ImmutableArray)
                     return typeof(ImmutableArray<>);
                 else
                     return null;
@@ -115,14 +115,14 @@ namespace DomainObjects.Core
 
             public object Create()
             {
-                if (TypeEnum == SupportedCollectionTypeEnum.ReadOnlyCollection)
+                if (TypeEnum == SupportedCollectionType.ReadOnlyCollection)
                 {
                     var l = Activator.CreateInstance(typeof(List<>).MakeGenericType(new[] { ElementType }));
                     return Activator.CreateInstance(GetCollectionType(), new object[] { l });
                 }
-                else if (TypeEnum == SupportedCollectionTypeEnum.ImmutableList)
+                else if (TypeEnum == SupportedCollectionType.ImmutableList)
                     return GetCollectionType().GetField("Empty").GetValue(null);
-                else if (TypeEnum == SupportedCollectionTypeEnum.ImmutableArray)
+                else if (TypeEnum == SupportedCollectionType.ImmutableArray)
                     return Activator.CreateInstance(GetCollectionType());
                 else
                     return null;
@@ -131,43 +131,43 @@ namespace DomainObjects.Core
 
             public object FromIEnumerable(object enumerable)
             {
-                if (TypeEnum == SupportedCollectionTypeEnum.ReadOnlyCollection)
+                if (TypeEnum == SupportedCollectionType.ReadOnlyCollection)
                 {
                     var list = typeof(Enumerable).GetMethod("ToList").MakeGenericMethod(new[] { ElementType }).Invoke(null, new[] { enumerable });
                     return Activator.CreateInstance(GetCollectionType(), new object[] { list });
                 }
-                else if (TypeEnum == SupportedCollectionTypeEnum.ImmutableList)
+                else if (TypeEnum == SupportedCollectionType.ImmutableList)
                     return typeof(ImmutableList).GetMethod("ToImmutableList").MakeGenericMethod(new[] { ElementType }).Invoke(null, new[] { enumerable });
-                else if (TypeEnum == SupportedCollectionTypeEnum.ImmutableArray)
+                else if (TypeEnum == SupportedCollectionType.ImmutableArray)
                     return typeof(ImmutableArray).GetMethod("ToImmutableArray").MakeGenericMethod(new[] { ElementType }).Invoke(null, new[] { enumerable });
                 else
                     return null;
             }
         }
 
-        private static SupportedCollectionType GetCollectionType(Type t)
+        private static SupportedCollectionTypeDescriptor GetCollectionTypeDescriptor(Type t)
         {
-            SupportedCollectionTypeEnum tenum = SupportedCollectionTypeEnum.None;
+            SupportedCollectionType tenum = SupportedCollectionType.None;
             Type e = null;
 
             if ((t.IsClass || t.IsStruct()) && t.IsGenericType)
             {
                 if (t.GetGenericTypeDefinition() == typeof(ReadOnlyCollection<>))
                 {
-                    tenum = SupportedCollectionTypeEnum.ReadOnlyCollection;
+                    tenum = SupportedCollectionType.ReadOnlyCollection;
                 }
                 else if (t.GetGenericTypeDefinition() == typeof(ImmutableList<>))
                 {
-                    tenum = SupportedCollectionTypeEnum.ImmutableList;
+                    tenum = SupportedCollectionType.ImmutableList;
                 }
                 else if (t.GetGenericTypeDefinition() == typeof(ImmutableArray<>))
                 {
-                    tenum = SupportedCollectionTypeEnum.ImmutableArray;
+                    tenum = SupportedCollectionType.ImmutableArray;
                 }
                 e = t.GetGenericArguments().First();
             }
 
-            return new SupportedCollectionType { TypeEnum = tenum, ElementType = e };
+            return new SupportedCollectionTypeDescriptor { TypeEnum = tenum, ElementType = e };
         }
 
         private static Type ImplementsIEnumerableOfImmutableType(Type t)
@@ -188,14 +188,14 @@ namespace DomainObjects.Core
 
 
             if (T.GetFields().Any(x => x.IsPublic))
-                throw new Exception("Public fields not alloed in Immutable types, use properties with private setters");
+                throw new InvalidOperationException("Public fields not alloed in Immutable types, use properties with private setters");
 
             var propTypes = new List<Type>();
             var props = T.GetPropertiesEx().ToList();
             foreach (var prop in props)
             {
                 if (prop.PublicSet)
-                    throw new Exception("Public setters not allowed on Immutable types");
+                    throw new InvalidOperationException("Public setters not allowed on Immutable types");
 
                 var type = prop.PropertyInfo.PropertyType;
                 propTypes.Add(type);
@@ -203,20 +203,20 @@ namespace DomainObjects.Core
                 {
                     if (type.IsInterface)
                     {
-                        throw new Exception("Interfaces are not allowed as properties to Immutable objects, use Immutable objects.");
+                        throw new InvalidOperationException("Interfaces are not allowed as properties to Immutable objects, use Immutable objects.");
                     }
                     else if (type.IsClass)
                     {
                         if (!type.IsSubclassOf(typeof(Immutable)))
                         {
-                            var collectionType = GetCollectionType(type);
-                            if (collectionType.TypeEnum == SupportedCollectionTypeEnum.None)
-                                throw new Exception("Only Immutables, ReadOnlyCollection<>, ImmutableList<> and ImmutableArray<> class types are supported as Immutable properties");
+                            var collectionType = GetCollectionTypeDescriptor(type);
+                            if (collectionType.TypeEnum == SupportedCollectionType.None)
+                                throw new InvalidOperationException("Only Immutables, ReadOnlyCollection<>, ImmutableList<> and ImmutableArray<> class types are supported as Immutable properties");
                         }
                     }
                     else if (prop.PropertyInfo.PropertyType.IsStruct())
                     {
-                        throw new Exception("Structs are not allowed as properties to Immutable objects, use Immutable objects.");
+                        throw new InvalidOperationException("Structs are not allowed as properties to Immutable objects, use Immutable objects.");
                     }
                 }
             }
@@ -232,8 +232,8 @@ namespace DomainObjects.Core
 
                     if (cparams[i].ParameterType != props[i].PropertyInfo.PropertyType)
                     {
-                        var collectionType = GetCollectionType(props[i].PropertyInfo.PropertyType);
-                        var isSupportedCollection = collectionType.TypeEnum != SupportedCollectionTypeEnum.None && collectionType.ElementType.IsSubclassOf(typeof(Immutable));
+                        var collectionType = GetCollectionTypeDescriptor(props[i].PropertyInfo.PropertyType);
+                        var isSupportedCollection = collectionType.TypeEnum != SupportedCollectionType.None && collectionType.ElementType.IsSubclassOf(typeof(Immutable));
                         if (isSupportedCollection && ImplementsIEnumerableOfImmutableType(cparams[i].ParameterType) != collectionType.ElementType)
                             break;
                     }
@@ -242,7 +242,7 @@ namespace DomainObjects.Core
                 break;
             }
             if (!foundCtor)
-                throw new Exception("Immutable doesn't have a constructor with all property types, or types are not in the appropriate order.");
+                throw new InvalidOperationException("Immutable doesn't have a constructor with all property types, or types are not in the appropriate order.");
         }
 
         //public T Clone()
@@ -285,8 +285,8 @@ namespace DomainObjects.Core
     public class Mutator<T>
         where T : Immutable
     {
-        List<Mutation> mutations = new List<Mutation>();
-        T source;
+        readonly List<Mutation> mutations = new List<Mutation>();
+        readonly T source;
         public Mutator(T source)
         {
             this.source = source;
@@ -380,7 +380,7 @@ namespace DomainObjects.Core
             var ctorProps = new List<object>();
             foreach (var p in source.GetType().GetPropertiesEx())
             {
-                var changedProperty = mutations.Where(x => x.Property == p.PropertyInfo).FirstOrDefault();
+                var changedProperty = mutations.FirstOrDefault(x => x.Property == p.PropertyInfo);
                 if (changedProperty == null)
                     ctorProps.Add(p.Get(source));
                 else

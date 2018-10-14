@@ -40,36 +40,22 @@ namespace DomainObjects.Serialization
             return this;
         }
 
-        //public void AddValue(string name, sbyte value);
-       
-        //public void AddValue(string name, object value, Type type);
-        
-        //public void AddValue(string name, bool value);
-       
-        //public void AddValue(string name, DateTime value);
-       
-        //public void AddValue(string name, decimal value);
-       
-        //public void AddValue(string name, double value);
-        
-        //public void AddValue(string name, object value);
-      
-        //public void AddValue(string name, float value);
-        
-        //public void AddValue(string name, long value);
-      
-   
-        //public void AddValue(string name, uint value);
-       
-        //public void AddValue(string name, int value);
-       
-        //public void AddValue(string name, ushort value);
-       
-        //public void AddValue(string name, short value);
-     
-        //public void AddValue(string name, byte value);
-       
-        //public void AddValue(string name, ulong value);
-        //public void AddValue(string name, char value);
+        public void AddValue(string name, object value, Type type) => info.AddValue(name, value, type);
+        public void AddValue(string name, object value) => info.AddValue(name, value);
+        public void AddValue(string name, sbyte value) => info.AddValue(name, value);
+        public void AddValue(string name, bool value) => info.AddValue(name, value);
+        public void AddValue(string name, DateTime value) => info.AddValue(name, value);
+        public void AddValue(string name, TimeSpan value) => info.AddValue(name, value, typeof(TimeSpan));
+        public void AddValue(string name, decimal value) => info.AddValue(name, value);
+        public void AddValue(string name, double value) => info.AddValue(name, value);
+        public void AddValue(string name, float value) => info.AddValue(name, value);
+        public void AddValue(string name, long value) => info.AddValue(name, value);
+        public void AddValue(string name, uint value) => info.AddValue(name, value);
+        public void AddValue(string name, int value) => info.AddValue(name, value);
+        public void AddValue(string name, ushort value) => info.AddValue(name, value);
+        public void AddValue(string name, short value) => info.AddValue(name, value);
+        public void AddValue(string name, byte value) => info.AddValue(name, value);
+        public void AddValue(string name, ulong value) => info.AddValue(name, value);
+        public void AddValue(string name, char value) => info.AddValue(name, value);
     }
 }
