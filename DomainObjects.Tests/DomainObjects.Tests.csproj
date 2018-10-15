@@ -116,13 +116,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Dynamix\Dynamix\Dynamix.csproj">
-      <Project>{8cd44b0c-c50d-4328-8efd-9b0b4dd9bdd2}</Project>
-      <Name>Dynamix</Name>
-    </ProjectReference>
     <ProjectReference Include="..\DomainObjects\DomainObjects.csproj">
       <Project>{b46a1906-58d6-4559-851c-7f4f42553bb4}</Project>
       <Name>DomainObjects</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Dynamix\Dynamix\Dynamix.csproj">
+      <Project>{8cd44b0c-c50d-4328-8efd-9b0b4dd9bdd2}</Project>
+      <Name>Dynamix</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

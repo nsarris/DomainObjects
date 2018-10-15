@@ -140,18 +140,17 @@
     <Compile Include="Repositories\IRepository.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Dynamix\Dynamix\Dynamix.csproj">
-      <Project>{8cd44b0c-c50d-4328-8efd-9b0b4dd9bdd2}</Project>
-      <Name>Dynamix</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="DomainObjects.ruleset" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="TODO.txt" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Dynamix\Dynamix\Dynamix.csproj">
+      <Project>{8cd44b0c-c50d-4328-8efd-9b0b4dd9bdd2}</Project>
+      <Name>Dynamix</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
