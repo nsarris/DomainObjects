@@ -43,18 +43,25 @@ namespace DomainObjects.Core
 
         public DomainObjectSerializer(Type objectType)
         {
-            var eventNames = objectType.GetEvents().Select(x => x.Name).ToList();
+            var entityMetadata = objectType.IsDomainEntity() ?
+                        Metadata.DomainModelMetadataRegistry.GetEntityMetadta(objectType)
+                        : null;
 
-            if (objectType.GetInterfaces().Contains(typeof(IDynamicProxy)))
-                objectType = objectType.BaseType;
+            var types = new[] { objectType }.Concat(objectType.GetBaseTypes())
+                .Where(x => !x.GetInterfaces().Contains(typeof(IDynamicProxy)) 
+                    && !x.IsFrameworkType())
+                .ToList();
 
-            this.fields = objectType
+            var eventNames = types.SelectMany(x => x.GetEvents().Select(e => e.Name)).ToList();
+
+            this.fields = types.SelectMany(t => t
                 .GetFieldsEx(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                .Where(x => !x.FieldInfo.HasAttribute<NonSerializedAttribute>() 
-                    && !eventNames.Contains(x.Name))
-                .ToDictionary(x => x.Name,x => GetFieldWithTargetType(x, objectType));
+                .Where(x => !x.FieldInfo.HasAttribute<NonSerializedAttribute>()
+                    && (entityMetadata == null || string.IsNullOrEmpty(x.AutoPropertyName) || !entityMetadata.IsIgnored(x.AutoPropertyName))
+                    && !eventNames.Contains(x.Name)))
+                .ToDictionary(x => x.Name, x => GetFieldWithTargetType(x, objectType));
 
-            autoPropertyFields = fields.Values
+            this.autoPropertyFields = fields.Values
                 .Where(x => x.field.AutoPropertyName != null)
                 .ToDictionary(x => x.field.AutoPropertyName);
         }

@@ -11,18 +11,20 @@ namespace DomainObjects.Metadata
     {
         
         private readonly List<DomainValuePropertyMetadata> keyProperties;
+        private readonly HashSet<string> ignoredProperties;
         private readonly Func<object, object> keySelector;
         private readonly Func<object, object> keyValueSelector;
         
         
         public bool IsRoot { get; }
 
-        public DomainEntityMetadata(Type entityType, IEnumerable<DomainPropertyMetadata> propertyMetadata)
-            :base(entityType, propertyMetadata)
+        public DomainEntityMetadata(Type entityType, IEnumerable<DomainPropertyMetadata> properties, IEnumerable<string> ignoredProperties)
+            :base(entityType, properties)
         {
             keyProperties = this.propertyMetadata.Values.OfType<DomainValuePropertyMetadata>().Where(x => x.IsKeyMember).ToList();
             keySelector = DomainKeySelectorBuilder.BuildKeySelector(entityType, keyProperties.Select(x => x.Property.PropertyInfo).ToList());
             keyValueSelector = DomainKeySelectorBuilder.BuildKeyValueSelector(entityType, keyProperties.Select(x => x.Property.PropertyInfo).ToList());
+            this.ignoredProperties = new HashSet<string>(ignoredProperties);
 
             IsRoot = entityType.IsAggregateRoot();
         }
@@ -70,8 +72,6 @@ namespace DomainObjects.Metadata
             }
         }
 
-        
-
         public DomainAggregatePropertyMetadata GetAggregateProperty(string propertyName)
         {
             var p = propertyMetadata[propertyName] as DomainAggregatePropertyMetadata;
@@ -98,6 +98,11 @@ namespace DomainObjects.Metadata
         public IEnumerable<DomainAggregateListPropertyMetadata> GetAggregateListProperties()
         {
             return propertyMetadata.Values.OfType<DomainAggregateListPropertyMetadata>();
+        }
+
+        public bool IsIgnored(string propertyName)
+        {
+            return ignoredProperties.Contains(propertyName);
         }
     }
 }

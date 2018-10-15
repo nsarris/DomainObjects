@@ -52,7 +52,7 @@ namespace DomainObjects.ModelBuilder
                 properties.Add(propertyMetadata);
             }
 
-            return new DomainEntityMetadata(Descriptor.Type, properties);
+            return new DomainEntityMetadata(Descriptor.Type, properties, Configuration.IgnoredMembers);
         }
 
         private int? GetKeyPosition(PropertyDescriptor property) => Configuration?.KeyMembers.IndexOf(property.Property.Name);
