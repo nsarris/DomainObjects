@@ -1,182 +1,335 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
-using Dynamix;
+using DomainObjects.ChangeTracking;
+using DomainObjects.Metadata;
+using DomainObjects.Validation;
+using DomainObjects.Serialization;
+using Dynamix.Reflection;
 
 namespace DomainObjects.Core
 {
-    public enum DomainObjectState
+    #pragma warning disable S3925 // "ISerializable" should be implemented correctly
+    public abstract class DomainEntity : DomainObject, IKeyProvider, ITrackableObject
     {
-        New,
-        Existing,
-        Deleted
-    }
+        #region Model Metadata
 
-    public class DomainKeyAttribute : Attribute
-    {
-        public int Index { get; private set; }
-        public DomainKeyAttribute(int index)
+        [NonSerialized]
+        private DomainEntityMetadata entityMetadata;
+
+        public DomainEntityMetadata GetEntityMetadata()
         {
-            this.Index = index;
-        }
-    }
+            if (entityMetadata == null)
+                entityMetadata = DomainModelMetadataRegistry.GetEntityMetadta(this.GetType());
 
-    public abstract class DomainEntity : DomainObject, IKeyProvider
-    {
+            return entityMetadata;
+        }
+
+        #endregion
+
+        #region Ctor
+
+        protected DomainEntity()
+        {
+            changeTracker = new ChangeTracker(this);
+            changeTracker.BeforePropertyChanged += (object sender, PropertyChangedExtendedEventArgs e) => OnBeforePropertyChanged(e.PropertyName, e.Before, e.After);
+            changeTracker.AfterPropertyChanged += (object sender, PropertyChangedExtendedEventArgs e) => OnAfterPropertyChanged(e.PropertyName, e.Before, e.After);
+        }
+
+        protected DomainEntity(SerializationInfo info, StreamingContext context)
+            : this()
+        {
+            Deserialize(info, context);
+            //TODO: Try get, handle changetracking state
+            SetObjectState(info.GetValue<DomainObjectState>("_state_"));
+        }
+
+        protected override void Serialize(SerializationInfo info, StreamingContext context)
+        {
+            base.Serialize(info, context);
+            //if serialize state
+            info.AddValue("_state_", GetObjectState());
+        }
+
+        #endregion
+
         #region Key and Equality
-        public object GetKey()
+
+        private readonly UnassignedKey unassignedKey = new UnassignedKey();
+        private bool keyIsAssigned;
+
+        public bool GetKeyIsAssigned() => keyIsAssigned;
+        internal UnassignedKey GetUnAssignedKey() => unassignedKey;
+
+        public IDomainKey GetKey()
         {
-            return DomainEntityKeyProvider.GetKey(this);
+            return (IDomainKey)GetEntityMetadata().GetKey(this);
         }
 
-        public override bool Equals(object obj)
+        public object GetKeyValue()
         {
-            if (obj == null)
-                return false;
-
-            if (this.GetType() != obj.GetType())
-                return false;
-
-            return GetKey().Equals(((DomainEntity)obj).GetKey());
+            return GetEntityMetadata().GetKeyValue(this);
         }
 
-        public override int GetHashCode()
+        public bool KeyEquals(DomainEntity other)
         {
-            return GetKey().GetHashCode();
-        }
-
-        public static bool operator ==(DomainEntity x, DomainEntity y)
-        {
-            if (object.ReferenceEquals(x, null) || object.ReferenceEquals(y, null))
+            if (other == null || other.GetType() != this.GetType())
                 return false;
 
-            return x.Equals(y);
+            return GetKey().Equals(other.GetKey());
         }
 
-        public static bool operator !=(DomainEntity x, DomainEntity y)
+        public void SetKey(params object[] values)
         {
-            if (x == null || y == null)
-                return false;
+            AssertSetKey();
 
-            return !x.Equals(y);
+            GetEntityMetadata().SetKey(this, values);
+
+            keyIsAssigned = true;
+        }
+
+        public void SetKey(object value)
+        {
+            AssertSetKey();
+
+            GetEntityMetadata().SetKey(this, value);
+
+            keyIsAssigned = true;
+        }
+
+        protected void AssertSetKey()
+        {
+            if (keyIsAssigned)
+                throw new InvalidOperationException($"Key has already been marked as set for entity {this.GetType().Name}");
+        }
+
+        #endregion
+
+        #region ObjectState
+
+        private DomainObjectState state = DomainObjectState.Uninitialized;
+
+        public DomainObjectState GetObjectState()
+        {
+            return state;
+        }
+
+        private void Init(bool isNew)
+        {
+            this.keyIsAssigned = this.GetEntityMetadata().GetKeyProperties().All(x => !Equals(x.Property.Get(this), x.Property.Type.DefaultOf()));
+
+            if (isNew)
+            {
+                MarkNew();
+            }
+            else
+            {
+                if (!this.keyIsAssigned)
+                    throw new InvalidOperationException($"Entity of type {this.GetType().Name} cannot be marked as existing when all of the key property values are default");
+
+                MarkExisting();
+            }
+
+            BeginTrackingDeep();
+        }
+
+        public void InitNew() => Init(true);
+        public void InitExisting() => Init(false);
+
+        public void MarkNew()
+        {
+            state = DomainObjectState.New;
+        }
+
+        public void MarkExisting()
+        {
+            state = DomainObjectState.Existing;
+        }
+
+        public void MarkDeleted()
+        {
+            state = DomainObjectState.Deleted;
+        }
+
+        protected void SetObjectState(DomainObjectState state)
+        {
+            this.state = state;
         }
 
         #endregion
 
         #region Change Tracking
 
-        //object initvals;
-        //public bool HasChanges { get; private set; }
-        //List<string> changedProps = new List<string>();
-        //public List<string> ChangedProperties { get { return changedProps.ToList(); } }
-        //public void BeginTrackChanges()
-        //{
-        //    initvals = Activator.CreateInstance(this.GetType());
-        //    this.PropertyChanged += ViewModelBase_PropertyChanged;
-        //    foreach (var prop in this.GetType().GetProperties()
-        //        .Where(x => x.GetSetMethod() != null))
-        //        prop.SetValue(initvals, prop.GetValue(this));
-        //}
+        [NonSerialized]
+        private readonly ChangeTracker changeTracker;
 
-        //void ViewModelBase_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        //{
-        //    if (initvals != null)
-        //    {
-        //        var initval = this.GetType().GetProperty(e.PropertyName).GetValue(initvals);
-        //        var currentval = this.GetType().GetProperty(e.PropertyName).GetValue(this);
+        public void MarkChanged()
+        {
+            changeTracker.MarkChanged();
+        }
 
-        //        if ((initval == null && currentval != null)
-        //            || (initval == null && currentval != null))
-        //        {
-        //            changedProps.Add(e.PropertyName);
-        //            HasChanges = true;
-        //        }
-        //        else if (initval != null && currentval != null && !initval.Equals(currentval))
-        //        {
-        //            changedProps.Add(e.PropertyName);
-        //            HasChanges = true;
-        //        }
-        //        else
-        //        {
-        //            changedProps.RemoveAll(x => x == e.PropertyName);
-        //        }
+        public void MarkUnchanged()
+        {
+            changeTracker.MarkUnchanged();
+        }
 
-        //        if (changedProps.Count == 0)
-        //            HasChanges = false;
-        //    }
-        //}
+        public bool GetIsChanged()
+        {
+            return changeTracker.GetIsChanged();
+        }
+
+        public bool GetIsChangedDeep()
+        {
+            return changeTracker.GetIsChangedDeep();
+        }
 
 
-        //public void CancelChanges()
-        //{
-        //    if (initvals != null)
-        //    {
-        //        foreach (var prop in this.GetType().GetProperties()
-        //            .Where(x => x.GetSetMethod() != null))
-        //            prop.SetValue(this, prop.GetValue(initvals));
-        //        initvals = null;
-        //        this.PropertyChanged += ViewModelBase_PropertyChanged;
-        //    }
-        //}
+        public void ResetChanges()
+        {
+            changeTracker.ResetChanges();
+        }
 
-        //public void AcceptChanges()
-        //{
-        //    if (initvals != null)
-        //    {
-        //        initvals = null;
-        //        this.PropertyChanged += ViewModelBase_PropertyChanged;
-        //    }
-        //}
+        public void AcceptChanges()
+        {
+            changeTracker.AcceptChanges();
+        }
+
+        public IReadOnlyDictionary<string, object> GetChanges()
+        {
+            return changeTracker.GetChanges();
+        }
+
+        public void BeginTracking()
+        {
+            changeTracker.BeginTracking();
+        }
+
+        public void StopTracking()
+        {
+            changeTracker.StopTracking();
+        }
+
+        protected void OnPropertyChanged(string propertyName, object before, object after)
+        {
+            changeTracker.OnPropertyChanged(propertyName, before, after);
+        }
+
+        protected virtual void OnBeforePropertyChanged(string propertyName, object before, object after)
+        {
+
+        }
+
+        protected virtual void OnAfterPropertyChanged(string propertyName, object before, object after)
+        {
+
+        }
+
+        public void ResetChangesDeep()
+        {
+            changeTracker.ResetChangesDeep();
+        }
+
+        public void AcceptChangesDeep()
+        {
+            changeTracker.AcceptChangesDeep();
+        }
+
+        public void MarkChangedDeep()
+        {
+            changeTracker.MarkChangedDeep();
+        }
+
+        public void MarkUnchangedDeep()
+        {
+            changeTracker.MarkUnchangedDeep();
+        }
+
+        public void BeginTrackingDeep()
+        {
+            changeTracker.BeginTrackingDeep();
+        }
+
+        public void StopTrackingDeep()
+        {
+            changeTracker.StopTrackingDeep();
+        }
+
 
         #endregion
+    }
+
+    public abstract class DomainEntity<T> : DomainEntity where T : DomainEntity<T>
+    {
+        protected DomainEntity()
+        {
+
+        }
+        protected DomainEntity(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+
+        }
 
         #region Validation
 
-        //public IEnumerable<ValidationResult> Validate()
-        //{
-        //    return Validate(null);
-        //}
+        public virtual DomainValidationResult Validate()
+        {
+            return Validate(null);
+        }
 
-        //public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        //{
-        //    var result = new List<ValidationResult>();
-
-        //    foreach (var prop in this.GetType().GetPropertiesEx())
-        //    {
-        //        var attrs = prop.PropertyInfo.GetCustomAttributes(typeof(ValidationAttribute), true).Cast<ValidationAttribute>();
-        //        foreach (var a in attrs)
-        //        {
-        //            var v = prop.Get(this);
-
-        //            if (!a.IsValid(v))
-        //            {
-        //                var name = prop.PropertyInfo.Name;
-        //                //Translation
-        //                result.Add(new ValidationResult(a.FormatErrorMessage("[" + name + "]"), new[] { prop.PropertyInfo.Name }));
-        //            }
-        //        }
-        //    }
-
-        //    return result;
-        //}
+        public virtual DomainValidationResult Validate(IDomainValidator<T> validator)
+        {
+            return DomainValidationResult.Success;
+        }
 
         #endregion
 
         #region Clone?
 
-        //???
+        //T Clone()???
 
         #endregion
-
-        
     }
-    public class DomainEntity<TKey> : DomainEntity, IKeyProvider<TKey>
+
+    public abstract class DomainEntity<T, TKey> : DomainEntity<T>, IKeyProvider<TKey>
+        where T : DomainEntity<T>
     {
-        public new TKey GetKey()
+        protected DomainEntity()
         {
-            return (TKey)base.GetKey();
+
+        }
+        protected DomainEntity(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+
+        }
+
+        public new DomainKey<TKey> GetKey()
+        {
+            return (DomainKey<TKey>)base.GetKey();
+        }
+
+        public void SetKey(TKey key)
+        {
+            base.SetKey(key);
+        }
+
+        public new TKey GetKeyValue()
+        {
+            return (TKey)base.GetKeyValue();
+        }
+
+        public bool KeyEquals(T other)
+        {
+            return this.GetKey() == other.GetKey();
+        }
+
+        public bool KeyEquals(DomainKey<TKey> other)
+        {
+            return this.GetKey() == other;
         }
     }
+    #pragma warning restore S3925 // "ISerializable" should be implemented correctly
 }

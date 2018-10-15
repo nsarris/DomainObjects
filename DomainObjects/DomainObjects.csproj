@@ -9,12 +9,13 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DomainObjects</RootNamespace>
     <AssemblyName>DomainObjects</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SccProjectName>SAK</SccProjectName>
     <SccLocalPath>SAK</SccLocalPath>
     <SccAuxPath>SAK</SccAuxPath>
     <SccProvider>SAK</SccProvider>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -24,6 +25,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>7.3</LangVersion>
+    <CodeAnalysisRuleSet>DomainObjects.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -32,13 +35,21 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>7.3</LangVersion>
+    <CodeAnalysisRuleSet>DomainObjects.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Collections.Immutable, Version=1.2.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\..\DALIA.2\DALIA.DebugTest\packages\System.Collections.Immutable.1.4.0\lib\portable-net45+win8+wp8+wpa81\System.Collections.Immutable.dll</HintPath>
+    <Reference Include="System.Collections.Immutable, Version=1.2.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Collections.Immutable.1.5.0\lib\netstandard2.0\System.Collections.Immutable.dll</HintPath>
     </Reference>
     <Reference Include="System.Core" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -47,20 +58,86 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChangeTracking\ChangeTracker.cs" />
+    <Compile Include="Core\Aggregate.cs" />
+    <Compile Include="Core\AggregateList.cs" />
+    <Compile Include="Core\AggregateReadOnlyList.cs" />
+    <Compile Include="Core\AggregateRoot.cs" />
     <Compile Include="Core\DomainEntity.cs" />
-    <Compile Include="Core\DomainEntityKeyProvider.cs" />
+    <Compile Include="ChangeTracking\TrackableBase.cs" />
+    <Compile Include="ChangeTracking\TrackableVisitor.cs" />
+    <Compile Include="Core\DomainEntityFactory.cs" />
+    <Compile Include="Core\DomainKeyValue.cs" />
+    <Compile Include="Core\DomainObjectSerializer.cs" />
+    <Compile Include="Core\DomainObjectState.cs" />
+    <Compile Include="Serialization\DomainObjectSerializer.cs" />
+    <Compile Include="Serialization\SerializationExtensions.cs" />
+    <Compile Include="Core\ValueObjectList.cs" />
+    <Compile Include="Core\ValueObjectReadOnlyList.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="Internal\ExpressionHelper.cs" />
+    <Compile Include="Internal\ProxyTypeBuilder.cs" />
+    <Compile Include="Metadata\DomainAggregateListPropertyMetadata.cs" />
+    <Compile Include="Metadata\DomainAggregatePropertyMetadata.cs" />
+    <Compile Include="Metadata\DomainKeyAttribute.cs" />
+    <Compile Include="Metadata\DomainKeySelectorBuilder.cs" />
     <Compile Include="Core\DomainKey.cs" />
+    <Compile Include="Metadata\DomainObjectMetadata.cs" />
+    <Compile Include="Metadata\IKeyProvider.cs" />
+    <Compile Include="ModelBuilder\ValueObjectModelBuilderConfiguration.cs" />
+    <Compile Include="Repositories\IEntityCommandHandler.cs" />
+    <Compile Include="Repositories\IEntityFactory.cs" />
+    <Compile Include="Repositories\IEntityQueryProvider.cs" />
+    <Compile Include="Serialization\SerializationInfoWrapper.cs" />
+    <Compile Include="Validation\DomainValidationError.cs" />
+    <Compile Include="Validation\DomainValidationResult.cs" />
+    <Compile Include="Validation\IDomainValidator.cs" />
     <Compile Include="Core\DomainObject.cs" />
-    <Compile Include="Core\DomainValue.cs" />
-    <Compile Include="Core\EnumerableTypeDescriptor.cs" />
-    <Compile Include="Core\Immutable.cs" />
-    <Compile Include="Core\ObjectCloner.cs" />
-    <Compile Include="Core\ObjectComparer.cs" />
-    <Compile Include="Core\Trackable.cs" />
-    <Compile Include="Patterns\Specification\IBuildSpecification.cs" />
+    <Compile Include="Core\DomainValueObject.cs" />
+    <Compile Include="_Obsolete\Immutable.cs" />
+    <Compile Include="_Obsolete\ObjectCloner.cs" />
+    <Compile Include="Internal\ObjectComparer.cs" />
+    <Compile Include="ChangeTracking\Trackable.cs" />
+    <Compile Include="ChangeTracking\TrackableList.cs" />
+    <Compile Include="Internal\TypeHelper.cs" />
+    <Compile Include="Metadata\Enums.cs" />
+    <Compile Include="Metadata\DomainEntityMetadata.cs" />
+    <Compile Include="Metadata\DomainModelMetadata.cs" />
+    <Compile Include="Metadata\DomainModelMetadataRegistry.cs" />
+    <Compile Include="Internal\EnumerableExtensions.cs" />
+    <Compile Include="Metadata\DomainPropertyMetadata.cs" />
+    <Compile Include="Metadata\DomainValueListPropertyMetadata.cs" />
+    <Compile Include="Metadata\DomainValuePropertyMetadata.cs" />
+    <Compile Include="Metadata\DomainValueObjectMetadata.cs" />
+    <Compile Include="ModelBuilder\Configuration\AggregateListModelConfiguration.cs" />
+    <Compile Include="ModelBuilder\Configuration\AggregatePropertyModelConfiguration.cs" />
+    <Compile Include="ModelBuilder\Configuration\AggregateReadOnlyListModelConfiguration.cs" />
+    <Compile Include="ModelBuilder\Configuration\BooleanPropertyModelConfiguration.cs" />
+    <Compile Include="ModelBuilder\Configuration\TimeSpanPropertyModelConfiguration.cs" />
+    <Compile Include="ModelBuilder\Configuration\DateTimePropertyModelConfiguration.cs" />
+    <Compile Include="ModelBuilder\Configuration\ValueListPropertyModelConfiguration.cs" />
+    <Compile Include="ModelBuilder\Configuration\ValueReadOnlyListModelConfiguration.cs" />
+    <Compile Include="ModelBuilder\Descriptors\AggregateListPropertyDescriptor.cs" />
+    <Compile Include="ModelBuilder\Descriptors\AggregatePropertyDescriptor.cs" />
+    <Compile Include="ModelBuilder\Descriptors\ValueListPropertyDescriptor.cs" />
+    <Compile Include="ModelBuilder\Descriptors\CollectionPropertyDescriptor.cs" />
+    <Compile Include="ModelBuilder\Descriptors\EntityDescriptor.cs" />
+    <Compile Include="ModelBuilder\Descriptors\PropertyDescriptor.cs" />
+    <Compile Include="ModelBuilder\Descriptors\UnsupportedPropertyDescriptor.cs" />
+    <Compile Include="ModelBuilder\Descriptors\ValuePropertyDescriptor.cs" />
+    <Compile Include="ModelBuilder\Descriptors\ValueTypeDescriptor.cs" />
+    <Compile Include="ModelBuilder\DomainModelBuilder.cs" />
+    <Compile Include="ModelBuilder\EntityModelBuilder.cs" />
+    <Compile Include="ModelBuilder\EntityModelBuilderConfiguration.cs" />
+    <Compile Include="ModelBuilder\Configuration\EnumPropertyModelConfiguration.cs" />
+    <Compile Include="ModelBuilder\Configuration\NumericPropertyModelConfiguration.cs" />
+    <Compile Include="ModelBuilder\Configuration\PropertyModelConfiguration.cs" />
+    <Compile Include="ModelBuilder\Configuration\StringPropertyModelConfiguration.cs" />
+    <Compile Include="ModelBuilder\Configuration\UnsupportedTypePropertyModelConfiguration.cs" />
+    <Compile Include="ModelBuilder\Configuration\ValueObjectPropertyModelConfiguration.cs" />
+    <Compile Include="ModelBuilder\ValueObjectModelBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\IRepository.cs" />
-    <Compile Include="Repositories\IRepositoryFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Dynamix\Dynamix\Dynamix.csproj">
@@ -69,7 +146,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="DomainObjects.ruleset" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="TODO.txt" />
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

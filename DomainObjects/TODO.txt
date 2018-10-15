@@ -1,0 +1,8 @@
+﻿1. Are Same (compare values/deep)
+2. Use attributes for model building?
+3. BuildValidators from datamodel metadata (linq2db / ef / dalia - extension project)
+4. Cloning
+5. Immutable mutator
+6. Add validation check: Cannot configure framework properties (Parent etc)
+7. Serialization: Allow non supported type private fields? Allow serialize unsupported properties?
+8. Entity interface -> Expose changetracker instead of functions, consider same for state

@@ -1,132 +1,144 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Dynamix;
-using Dynamix.Reflection;
 
 namespace DomainObjects.Core
 {
-    public class DomainKey : DynamicType
+    internal class UnassignedKey { }
+
+    public interface IDomainKey
     {
-        private const int HashMultiplier = 31;
+        object Value { get; }
+        bool IsAssigned { get; }
+    }
+
+
+    public sealed class DomainKey<T> : IDomainKey, IEquatable<DomainKey<T>>, IEquatable<T>
+    {
+        public T Value { get; }
+        public bool IsAssigned => UnassignedKey == null;
+        private UnassignedKey UnassignedKey { get; }
+
+        object IDomainKey.Value => Value;
+
+        internal DomainKey(UnassignedKey unassignedKey)
+        {
+            this.UnassignedKey = unassignedKey;
+        }
+
+        internal DomainKey(T value)
+        {
+            this.Value = value;
+        }
 
         public override bool Equals(object obj)
         {
-            if (obj == null)
+            if (!(obj is DomainKey<T> other))
                 return false;
 
-            if (this.GetType() == obj.GetType())
-            {
-                foreach (var prop in this.GetType().GetPropertiesEx())
-                {
-                    if (!prop.CanGet || !PropertyEquals(prop.Get(this),prop.Get(obj)))
-                        return false;
-                }
-            }
-            else
-            {
-                var leftProps = this.GetType().GetPropertiesEx().ToList();
-                var rightProps = obj.GetType().GetPropertiesEx().ToList();
-
-                if (leftProps.Count != rightProps.Count)
-                    return false;
-
-                foreach (var prop in leftProps.Zip(leftProps, (x, y) => new { Left = x, Right = y }))
-                {
-                    if (prop.Left.PropertyInfo.Name != prop.Right.PropertyInfo.Name
-                        || (!prop.Left.CanGet || !prop.Right.CanGet)
-                        || !PropertyEquals(prop.Left.Get(this), prop.Right.Get(obj)))
-                        return false;
-                }
-            }
-            return true;
+            return Equals(other);
         }
 
-        private bool PropertyEquals(object left, object right)
+        public bool Equals(DomainKey<T> other)
         {
-            if (left == null && right == null)
-                return true;
-            else if (left == null || right == null)
+            if (other is null)
                 return false;
+
+            if (IsAssigned && other.IsAssigned)
+            {
+                if (Value == null && other.Value == null)
+                    return true;
+                if (Value == null || other.Value == null)
+                    return false;
+
+                return Value.Equals(other.Value);
+            }
+            else if (!IsAssigned && !other.IsAssigned)
+                return other.UnassignedKey == UnassignedKey;
             else
-                return left.Equals(right);
+                return false;
+        }
+
+        public bool Equals(T other)
+        {
+            return other == this;
         }
 
         public override int GetHashCode()
         {
-            unchecked
-            {
-                var properties = this.GetType().GetPropertiesEx().ToList();
-                
-                if (properties.Count == 0)
-                {
-                    return base.GetHashCode();
-                }
-
-                // It's possible for two objects to return the same hash code based on 
-                // identically valued properties, even if they're of two different types, 
-                // so we include the object's type in the hash calculation
-                int hashCode = this.GetType().GetHashCode();
-
-                foreach (var prop in properties)
-                {
-                    object value = prop.Get(this);
-                    if (value != null)
-                        hashCode = (hashCode * HashMultiplier) ^ value.GetHashCode();
-                }
-
-                return hashCode;
-            }
+            return IsAssigned ? Value.GetHashCode() : UnassignedKey.GetHashCode();
         }
 
-        public static bool operator ==(DomainKey x, DomainKey y)
+        public static bool operator ==(DomainKey<T> x, DomainKey<T> y)
         {
-            if (object.ReferenceEquals(x, null) || object.ReferenceEquals(y, null))
+            if (x is null && y is null)
+                return true;
+
+            if (x is null || y is null)
                 return false;
 
             return x.Equals(y);
         }
 
-        public static bool operator ==(object x, DomainKey y)
+        public static bool operator !=(DomainKey<T> x, DomainKey<T> y)
         {
-            if (object.ReferenceEquals(x, null) || object.ReferenceEquals(y, null))
+            return !(x == y);
+        }
+
+
+
+
+        public static bool operator ==(object x, DomainKey<T> y)
+        {
+            if (x is DomainKey<T> domainKey)
+                return domainKey == x;
+            else
+                return false;
+        }
+
+        public static bool operator ==(DomainKey<T> x, object y)
+        {
+            return y == x;
+        }
+
+        public static bool operator !=(object x, DomainKey<T> y)
+        {
+            return !(x == y);
+        }
+
+        public static bool operator !=(DomainKey<T> x, object y)
+        {
+            return !(x == y);
+        }
+
+        public static bool operator ==(T x, DomainKey<T> y)
+        {
+            if (y == null && x == null)
+                return true;
+            else if (y == null)
                 return false;
 
-            return y.Equals(x);
-        }
-
-        public static bool operator ==(DomainKey x,object  y)
-        {
-            if (object.ReferenceEquals(x, null) || object.ReferenceEquals(y, null))
+            if (y.IsAssigned)
+                return y.Value.Equals(x);
+            else
                 return false;
-
-            return x.Equals(y);
         }
 
-        public static bool operator !=(DomainKey x, DomainKey y)
+        public static bool operator ==(DomainKey<T> x, T y)
         {
-            if (object.ReferenceEquals(x, null) || object.ReferenceEquals(y, null))
-                return true;
-
-            return !x.Equals(y);
+            return y == x;
         }
 
-        public static bool operator !=(object x, DomainKey y)
+        public static bool operator !=(T x, DomainKey<T> y)
         {
-            if (object.ReferenceEquals(x, null) || object.ReferenceEquals(y, null))
-                return true;
-
-            return !x.Equals(y);
+            return !(x == y);
         }
 
-        public static bool operator !=(DomainKey x,object  y)
+        public static bool operator !=(DomainKey<T> x, T y)
         {
-            if (object.ReferenceEquals(x, null) || object.ReferenceEquals(y, null))
-                return true;
-
-            return !x.Equals(y);
+            return !(x == y);
         }
     }
 }
