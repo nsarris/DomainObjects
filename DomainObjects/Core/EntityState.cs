@@ -1,6 +1,6 @@
 ﻿namespace DomainObjects.Core
 {
-    public enum DomainObjectState
+    public enum EntityState
     {
         Uninitialized,
         New,

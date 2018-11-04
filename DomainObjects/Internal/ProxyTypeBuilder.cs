@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -69,7 +70,7 @@ namespace DomainObjects.Internal
 
                 //Add IDynamicProxy interface
                 typeBuilder.AddInterfaceImplementation(typeof(IDynamicProxy));
-
+                
                 //Inherit all constructors
                 CreatePassthroughConstructors(typeBuilder, type);
 

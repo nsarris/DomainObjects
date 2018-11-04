@@ -17,6 +17,17 @@ namespace DomainObjects.Metadata
             this.propertyMetadata = propertyMetadata.ToDictionary(x => x.Name);
             IsShallow = propertyMetadata.All(x => x is DomainValuePropertyMetadata v && v.DomainValueType != DomainValueType.ValueObject);
         }
+
+        public bool ContainsProperty(string propertyName)
+        {
+            return propertyMetadata.ContainsKey(propertyName);
+        }
+
+        public bool TryGetProperty(string propertyName, out DomainPropertyMetadata propertyMetadata)
+        {
+            return this.propertyMetadata.TryGetValue(propertyName, out propertyMetadata);
+        }
+
         public DomainPropertyMetadata GetProperty(string propertyName)
         {
             return propertyMetadata[propertyName];
