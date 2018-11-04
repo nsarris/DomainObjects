@@ -19,14 +19,11 @@ namespace DomainObjects.Core
         #region Model Metadata
 
         [NonSerialized]
-        private DomainEntityMetadata entityMetadata;
+        private Lazy<DomainEntityMetadata> entityMetadata;
 
         public DomainEntityMetadata GetEntityMetadata()
         {
-            if (entityMetadata == null)
-                entityMetadata = DomainModelMetadataRegistry.GetEntityMetadta(this.GetType());
-
-            return entityMetadata;
+            return entityMetadata.Value;
         }
 
         #endregion
@@ -35,9 +32,11 @@ namespace DomainObjects.Core
 
         protected DomainEntity()
         {
-            changeTracker = new ChangeTracker(this);
-            changeTracker.BeforePropertyChanged += (object sender, PropertyChangedExtendedEventArgs e) => OnBeforePropertyChanged(e.PropertyName, e.Before, e.After);
-            changeTracker.AfterPropertyChanged += (object sender, PropertyChangedExtendedEventArgs e) => OnAfterPropertyChanged(e.PropertyName, e.Before, e.After);
+            entityMetadata = new Lazy<DomainEntityMetadata>(() => DomainModelMetadataRegistry.GetEntityMetadta(this.GetType()));
+
+            ChangeTracker = new ChangeTracker(this);
+            ChangeTracker.BeforePropertyChanged += (object sender, PropertyChangedExtendedEventArgs e) => OnBeforePropertyChanged(e.PropertyName, e.Before, e.After);
+            ChangeTracker.AfterPropertyChanged += (object sender, PropertyChangedExtendedEventArgs e) => OnAfterPropertyChanged(e.PropertyName, e.Before, e.After);
         }
 
         protected DomainEntity(SerializationInfo info, StreamingContext context)
@@ -45,14 +44,6 @@ namespace DomainObjects.Core
         {
             Deserialize(info, context);
             //TODO: Try get, handle changetracking state
-            SetObjectState(info.GetValue<DomainObjectState>("_state_"));
-        }
-
-        protected override void Serialize(SerializationInfo info, StreamingContext context)
-        {
-            base.Serialize(info, context);
-            //if serialize state
-            info.AddValue("_state_", GetObjectState());
         }
 
         #endregion
@@ -63,7 +54,7 @@ namespace DomainObjects.Core
         private bool keyIsAssigned;
 
         public bool GetKeyIsAssigned() => keyIsAssigned;
-        internal UnassignedKey GetUnAssignedKey() => unassignedKey;
+        internal UnassignedKey GetUnassignedKey() => unassignedKey;
 
         public IDomainKey GetKey()
         {
@@ -109,13 +100,13 @@ namespace DomainObjects.Core
 
         #endregion
 
-        #region ObjectState
+        #region EntityState
 
-        private DomainObjectState state = DomainObjectState.Uninitialized;
+        private EntityState entityState = EntityState.Uninitialized;
 
-        public DomainObjectState GetObjectState()
+        public EntityState GetEntityState()
         {
-            return state;
+            return entityState;
         }
 
         private void Init(bool isNew)
@@ -134,7 +125,7 @@ namespace DomainObjects.Core
                 MarkExisting();
             }
 
-            BeginTrackingDeep();
+            ChangeTracker.BeginTrackingDeep();
         }
 
         public void InitNew() => Init(true);
@@ -142,80 +133,80 @@ namespace DomainObjects.Core
 
         public void MarkNew()
         {
-            state = DomainObjectState.New;
+            entityState = EntityState.New;
         }
 
         public void MarkExisting()
         {
-            state = DomainObjectState.Existing;
+            entityState = EntityState.Existing;
         }
 
         public void MarkDeleted()
         {
-            state = DomainObjectState.Deleted;
+            entityState = EntityState.Deleted;
         }
 
-        protected void SetObjectState(DomainObjectState state)
+        protected void SetObjectState(EntityState state)
         {
-            this.state = state;
+            this.entityState = state;
         }
 
         #endregion
 
         #region Change Tracking
 
-        [NonSerialized]
-        private readonly ChangeTracker changeTracker;
+        [field:NonSerialized]
+        public ChangeTracker ChangeTracker { get; }
 
-        public void MarkChanged()
+        void ITrackable.MarkChanged()
         {
-            changeTracker.MarkChanged();
+            ChangeTracker.MarkChanged();
         }
 
-        public void MarkUnchanged()
+        void ITrackable.MarkUnchanged()
         {
-            changeTracker.MarkUnchanged();
+            ChangeTracker.MarkUnchanged();
         }
 
-        public bool GetIsChanged()
+        bool ITrackable.GetIsChanged()
         {
-            return changeTracker.GetIsChanged();
+            return ChangeTracker.GetIsChanged();
         }
 
-        public bool GetIsChangedDeep()
+        bool ITrackable.GetIsChangedDeep()
         {
-            return changeTracker.GetIsChangedDeep();
+            return ChangeTracker.GetIsChangedDeep();
         }
 
 
-        public void ResetChanges()
+        void ITrackable.ResetChanges()
         {
-            changeTracker.ResetChanges();
+            ChangeTracker.ResetChanges();
         }
 
-        public void AcceptChanges()
+        void ITrackable.AcceptChanges()
         {
-            changeTracker.AcceptChanges();
+            ChangeTracker.AcceptChanges();
         }
 
-        public IReadOnlyDictionary<string, object> GetChanges()
+        IReadOnlyDictionary<string, object> ITrackableObject.GetChanges()
         {
-            return changeTracker.GetChanges();
+            return ChangeTracker.GetChanges();
         }
 
-        public void BeginTracking()
+        void ITrackable.BeginTracking()
         {
-            changeTracker.BeginTracking();
+            ChangeTracker.BeginTracking();
         }
 
-        public void StopTracking()
+        void ITrackable.StopTracking()
         {
-            changeTracker.StopTracking();
+            ChangeTracker.StopTracking();
         }
 
         protected void OnPropertyChanged(string propertyName, object before, object after)
         {
-            changeTracker.OnPropertyChanged(propertyName, before, after);
+            ChangeTracker.OnPropertyChanged(propertyName, before, after);
         }
 
         protected virtual void OnBeforePropertyChanged(string propertyName, object before, object after)
@@ -228,36 +219,35 @@ namespace DomainObjects.Core
 
         }
 
-        public void ResetChangesDeep()
+        void ITrackable.ResetChangesDeep()
         {
-            changeTracker.ResetChangesDeep();
+            ChangeTracker.ResetChangesDeep();
         }
 
-        public void AcceptChangesDeep()
+        void ITrackable.AcceptChangesDeep()
         {
-            changeTracker.AcceptChangesDeep();
+            ChangeTracker.AcceptChangesDeep();
         }
 
-        public void MarkChangedDeep()
+        void ITrackable.MarkChangedDeep()
         {
-            changeTracker.MarkChangedDeep();
+            ChangeTracker.MarkChangedDeep();
         }
 
-        public void MarkUnchangedDeep()
+        void ITrackable.MarkUnchangedDeep()
         {
-            changeTracker.MarkUnchangedDeep();
+            ChangeTracker.MarkUnchangedDeep();
         }
 
-        public void BeginTrackingDeep()
+        void ITrackable.BeginTrackingDeep()
         {
-            changeTracker.BeginTrackingDeep();
+            ChangeTracker.BeginTrackingDeep();
         }
 
-        public void StopTrackingDeep()
+        void ITrackable.StopTrackingDeep()
         {
-            changeTracker.StopTrackingDeep();
+            ChangeTracker.StopTrackingDeep();
         }
-
 
         #endregion
     }
@@ -289,7 +279,8 @@ namespace DomainObjects.Core
 
         #region Clone?
 
-        //T Clone()???
+        //TODO
+        //T Clone() 
 
         #endregion
     }

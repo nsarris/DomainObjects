@@ -16,14 +16,14 @@ namespace DomainObjects.Tests
         public void TestNewEntity()
         {
             var repo = new CustomerRepository();
-            var customer = repo.CreateNew();
+            var customer = repo.CreateNew(); 
 
-            Assert.IsTrue(customer.GetObjectState() == Core.DomainObjectState.New);
-            Assert.IsFalse(customer.GetIsChanged());
+            Assert.IsTrue(customer.GetEntityState() == Core.EntityState.New);
+            Assert.IsFalse(customer.ChangeTracker.GetIsChanged());
             
             customer.Name = "New Name";
 
-            Assert.IsTrue(customer.GetIsChanged());
+            Assert.IsTrue(customer.ChangeTracker.GetIsChanged());
         }
 
         [Test]
@@ -32,17 +32,17 @@ namespace DomainObjects.Tests
             var repo = new CustomerRepository();
             var customer = repo.GetById(1);
 
-            Assert.IsTrue(customer.GetObjectState() == Core.DomainObjectState.Existing);
-            Assert.IsFalse(customer.GetIsChanged());
+            Assert.IsTrue(customer.GetEntityState() == Core.EntityState.Existing);
+            Assert.IsFalse(customer.ChangeTracker.GetIsChanged());
 
             customer.Name = "New Name";
 
-            Assert.IsTrue(customer.GetIsChanged());
+            Assert.IsTrue(customer.ChangeTracker.GetIsChanged());
 
             customer.MainAddress = new Address("", "", "", "", null, null);
-            customer.AcceptChangesDeep();
+            customer.ChangeTracker.AcceptChangesDeep();
 
-            Assert.IsFalse(customer.GetIsChanged());
+            Assert.IsFalse(customer.ChangeTracker.GetIsChanged());
 
             customer.MainAddress = new Address("", "", "", "", null, null);
 
@@ -55,7 +55,7 @@ namespace DomainObjects.Tests
             //Assert.IsTrue(EqualityComparer<Address>.Default.Equals(a1, a2));
             //Assert.IsFalse(object.ReferenceEquals(a1, a2));
 
-            Assert.IsFalse(customer.GetIsChanged());
+            Assert.IsFalse(customer.ChangeTracker.GetIsChanged());
         }
 
         [Test]
@@ -66,24 +66,24 @@ namespace DomainObjects.Tests
             var repo = new InvoiceRepository();
             var invoice = repo.GetById(1);
 
-            Assert.IsTrue(invoice.GetObjectState() == Core.DomainObjectState.Existing);
-            Assert.IsFalse(invoice.GetIsChanged());
-            Assert.IsFalse(invoice.GetIsChangedDeep());
+            Assert.IsTrue(invoice.GetEntityState() == Core.EntityState.Existing);
+            Assert.IsFalse(invoice.ChangeTracker.GetIsChanged());
+            Assert.IsFalse(invoice.ChangeTracker.GetIsChangedDeep());
 
             var line = invoice.CreateNewLine();
             line.Quantity = 1;
             line.ProductId = 1;
             
-            Assert.IsTrue(invoice.GetIsChangedDeep());
+            Assert.IsTrue(invoice.ChangeTracker.GetIsChangedDeep());
 
-            invoice.AcceptChangesDeep();
-            Assert.IsFalse(invoice.GetIsChangedDeep());
+            invoice.ChangeTracker.AcceptChangesDeep();
+            Assert.IsFalse(invoice.ChangeTracker.GetIsChangedDeep());
 
             invoice.InvoiceLines.First().Quantity = 3;
-            Assert.IsTrue(invoice.GetIsChangedDeep());
+            Assert.IsTrue(invoice.ChangeTracker.GetIsChangedDeep());
 
-            invoice.AcceptChangesDeep();
-            Assert.IsFalse(invoice.GetIsChangedDeep());
+            invoice.ChangeTracker.AcceptChangesDeep();
+            Assert.IsFalse(invoice.ChangeTracker.GetIsChangedDeep());
         }
     }
 }

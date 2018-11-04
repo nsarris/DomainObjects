@@ -185,6 +185,7 @@ namespace DomainObjects.Tests.Sales
     [Serializable]
     public class Invoice : AggregateRoot<Invoice, int>
     {
+        private int entityState = 3;
         public Invoice()
         {
 

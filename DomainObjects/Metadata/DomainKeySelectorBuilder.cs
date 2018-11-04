@@ -95,7 +95,7 @@ namespace DomainObjects.Metadata
 
             return Expression.New(
                     constructor: keyCtorUnSet,
-                    arguments: Expression.Call(entityExpression, nameof(DummyEntity.GetUnAssignedKey), new Type[0], new Expression[0]));
+                    arguments: Expression.Call(entityExpression, nameof(DummyEntity.GetUnassignedKey), new Type[0], new Expression[0]));
         }
 
         public static Func<object, object> BuildKeySelector(Type entityType, IEnumerable<PropertyInfo> keyPropertiesEnumerable)
