@@ -64,11 +64,43 @@ namespace DomainObjects.Tests.Sales
     }
 
     //[AddINotifyPropertyChangedInterface]
-    [Serializable]
-    public class Customer : AggregateRoot<Customer, int>
+    //[Serializable]
+    public class Person : AggregateRoot<Customer, int>
     {
-        //private string testInnerField  = "test";
-        public virtual int Id { get; private set; }
+        public virtual int Id { get; protected set; }
+        public virtual string Surname { get; set; }
+        public virtual string Firstname { get; set; }
+
+        private string privateField = nameof(privateField);
+        private string privateReadOnlyField = nameof(privateReadOnlyField);
+        private string PrivateProperty { get; set; } = nameof(PrivateProperty);
+        private string PrivateReadOnlyProperty { get; } = nameof(PrivateReadOnlyProperty);
+        private string PrivateReturnOnlyProperty => DateTime.Now.ToString();
+
+        public Person()
+        {
+
+        }
+        public Person(int id)
+        {
+            Id = id;
+        }
+
+        protected Person(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+
+        }
+    }
+
+    public class Vendor : Person
+    {
+
+    }
+
+    public class Customer : Person
+    {
+        //private string privateField = nameof(privateField) + "child";
+
         public virtual int Code { get; set; }
         public virtual decimal Quantity { get; set; }
         public virtual string Name { get; set; }
@@ -81,9 +113,9 @@ namespace DomainObjects.Tests.Sales
         {
 
         }
-        public Customer(int id, string name)
+
+        public Customer(int id, string name) : base(id)
         {
-            Id = id;
             Name = name;
         }
 
@@ -148,6 +180,7 @@ namespace DomainObjects.Tests.Sales
     [Serializable]
     public class Invoice : AggregateRoot<Invoice, int>
     {
+        private int entityState = 3;
         public Invoice()
         {
 

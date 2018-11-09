@@ -22,7 +22,6 @@ namespace DomainObjects.Core
     internal class DomainObjectSerializer
     {
         static readonly Dictionary<Type, DomainObjectSerializer> cache = new Dictionary<Type, DomainObjectSerializer>();
-        readonly Dictionary<string, (FieldInfoEx field, Type targetType)> autoPropertyFields;
         readonly Dictionary<string, (FieldInfoEx field, Type targetType)> fields;
 
         public static DomainObjectSerializer GetSerializer<T>()
@@ -43,26 +42,37 @@ namespace DomainObjects.Core
 
         public DomainObjectSerializer(Type objectType)
         {
-            var eventNames = objectType.GetEvents().Select(x => x.Name).ToList();
+            var entityMetadata = objectType.IsDomainEntity() ?
+                        Metadata.DomainModelMetadataRegistry.GetEntityMetadta(objectType)
+                        : null;
 
-            if (objectType.GetInterfaces().Contains(typeof(IDynamicProxy)))
-                objectType = objectType.BaseType;
+            var types = new[] { objectType }.Concat(objectType.GetBaseTypes())
+                .Where(x => !x.GetInterfaces().Contains(typeof(IDynamicProxy)) 
+                    && !x.IsFrameworkType())
+                .ToList();
 
-            this.fields = objectType
+            var eventNames = types.SelectMany(x => x.GetEvents().Select(e => e.Name)).ToList();
+
+            this.fields = types.SelectMany(t => t
                 .GetFieldsEx(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                .Where(x => !x.FieldInfo.HasAttribute<NonSerializedAttribute>() 
-                    && !eventNames.Contains(x.Name))
-                .ToDictionary(x => x.Name,x => GetFieldWithTargetType(x, objectType));
-
-            autoPropertyFields = fields.Values
-                .Where(x => x.field.AutoPropertyName != null)
-                .ToDictionary(x => x.field.AutoPropertyName);
+                .Where(x => !x.FieldInfo.HasAttribute<NonSerializedAttribute>()
+                    && (entityMetadata == null || string.IsNullOrEmpty(x.AutoPropertyName) || !entityMetadata.IsIgnored(x.AutoPropertyName))
+                    && !eventNames.Contains(x.Name)))
+                .GroupBy(x => x.FieldInfo.Name)
+                .SelectMany(x => {
+                    var c = x.Count();
+                    return x.Select(f => new
+                    {
+                        Field = f,
+                        Name = $"{(c == 1 ? "" : $"[{f.FieldInfo.DeclaringType}]")}{f.AutoPropertyName ?? f.Name}"
+                    });
+                })
+                .ToDictionary(x => x.Name, x => GetFieldWithTargetType(x.Field, objectType));
         }
 
         private (FieldInfoEx field, Type targetType) GetField(string name)
         {
-            if (autoPropertyFields.TryGetValue(name, out var field)
-               || fields.TryGetValue(name, out field))
+            if (fields.TryGetValue(name, out var field))
                 return field;
             else
                 return (null,null);
@@ -74,8 +84,9 @@ namespace DomainObjects.Core
                 return (field, field.Type);
 
             return (field, 
-                objectType.GetPropertyEx(field.AutoPropertyName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.PropertyInfo?.GetAttribute<DeserializeAsAttribute>()?.Type
-                ?? field.Type);
+                objectType.GetPropertiesEx(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                .FirstOrDefault(x => x.Name == field.AutoPropertyName && x.PropertyInfo.DeclaringType == field.FieldInfo.DeclaringType)
+                ?.PropertyInfo?.GetAttribute<DeserializeAsAttribute>()?.Type ?? field.Type);
         }
 
         public void Deserialize(SerializationInfo info, object obj)
@@ -87,14 +98,13 @@ namespace DomainObjects.Core
                 var (field, tatgetType) = GetField(item.Name);
                 if (field != null)
                     field.Set(obj, converter.Convert(item.Value, tatgetType));
-                        
             }
         }
 
         public void Serialize(SerializationInfo info, object obj)
         {
-            foreach(var (field, _) in fields.Values)
-                info.AddValue(field.AutoPropertyName ?? field.Name, field.Get(obj));
+            foreach(var f in fields)
+                info.AddValue(f.Key, f.Value.field.Get(obj));
         }
     }
 }

@@ -5,6 +5,7 @@ using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,20 +19,20 @@ namespace DomainObjects.Serialization
             return objectType.IsSubclassOf(typeof(DomainEntity)) ?
                 ProxyTypeBuilder.BuildPropertyChangedProxy(objectType) : objectType;
         }
+
         protected override JsonContract CreateContract(Type objectType)
         {
             return base.CreateContract(GetActualTypeCreate(objectType));
-        }
-
-        protected override JsonObjectContract CreateObjectContract(Type objectType)
-        {
-            return base.CreateObjectContract(GetActualTypeCreate(objectType));
         }
     }
 
     public class DomainSerializer
     {
-        static JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings() { ContractResolver = new DomainObjectContractResolver(), ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
+        static readonly JsonSerializerSettings jsonSerializerSettings 
+            = new JsonSerializerSettings() {
+                ContractResolver = new DomainObjectContractResolver(),
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
 
         public string Serialize(DomainObject domainObject)
         {
