@@ -133,7 +133,7 @@ namespace DomainObjects.Core
 
         public virtual void OnPersisted()
         {
-            changeTracker.AcceptChangesDeep();
+            ChangeTracker.AcceptChangesDeep();
             MarkExistingDeep();
         }
 
@@ -152,7 +152,22 @@ namespace DomainObjects.Core
             entityState = EntityState.Deleted;
         }
 
-        protected void SetObjectState(DomainObjectState state)
+        public void MarkNewDeep()
+        {
+            DomainEntityVisitor.Instance.Visit(this, x => x.MarkNew());
+        }
+
+        public void MarkExistingDeep()
+        {
+            DomainEntityVisitor.Instance.Visit(this, x => x.MarkExisting());
+        }
+
+        public void MarkDeletedDeep()
+        {
+            DomainEntityVisitor.Instance.Visit(this, x => x.MarkDeleted());
+        }
+
+        protected void SetObjectState(EntityState state)
         {
             this.entityState = state;
         }

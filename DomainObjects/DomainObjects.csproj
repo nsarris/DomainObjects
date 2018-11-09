@@ -74,7 +74,6 @@
     <Compile Include="Core\DomainEntityFactory.cs" />
     <Compile Include="Core\DomainKeyValue.cs" />
     <Compile Include="Core\DomainObjectSerializer.cs" />
-    <Compile Include="Core\DomainObjectState.cs" />
     <Compile Include="Core\DomainEntityVisitor.cs" />
     <Compile Include="Core\EntityState.cs" />
     <Compile Include="Serialization\DomainObjectSerializer.cs" />

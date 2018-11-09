@@ -29,7 +29,7 @@ namespace DomainObjects.Tests
             var name = "someone";
 
             var c1 = ctor1.Construct(new object[] { id, name });
-            Assert.IsTrue(c1.Id == id && c1.Name == name && c1.GetEntityState() == EntityState.Uninitialized);
+            Assert.IsTrue(c1.Id == id && c1.Name == name && c1.GetEntityState()  == EntityState.Uninitialized);
 
             c1 = ctor1.New.Construct(("id", id), ("name", name));
             Assert.IsTrue(c1.Id == id && c1.Name == name && c1.GetEntityState() == EntityState.New);

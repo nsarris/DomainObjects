@@ -1,4 +1,5 @@
-﻿using DomainObjects.ModelBuilder;
+﻿using DomainObjects.Core;
+using DomainObjects.ModelBuilder;
 using DomainObjects.Tests.Sales;
 using NUnit.Framework;
 using System;
@@ -18,15 +19,15 @@ namespace DomainObjects.Tests
             var repo = new CustomerRepository();
             var customer = repo.CreateNew();
 
-            Assert.IsTrue(customer.GetObjectState() == Core.DomainObjectState.New);
+            Assert.IsTrue(customer.GetEntityState() == EntityState.New);
 
             customer.MarkExisting();
 
-            Assert.IsTrue(customer.GetObjectState() == Core.DomainObjectState.Existing);
+            Assert.IsTrue(customer.GetEntityState() == EntityState.Existing);
 
             customer.MarkDeleted();
 
-            Assert.IsTrue(customer.GetObjectState() == Core.DomainObjectState.Deleted);
+            Assert.IsTrue(customer.GetEntityState() == EntityState.Deleted);
         }
 
         [Test]
@@ -35,19 +36,19 @@ namespace DomainObjects.Tests
             var repo = new CustomerRepository();
             var customer = repo.CreateNew();
 
-            Assert.IsTrue(customer.GetObjectState() == Core.DomainObjectState.New);
-            Assert.IsFalse(customer.GetIsChanged());
+            Assert.IsTrue(customer.GetEntityState() == EntityState.New);
+            Assert.IsFalse(customer.ChangeTracker.GetIsChanged());
 
             customer.Name = "New Name";
 
-            Assert.IsTrue(customer.GetIsChanged());
+            Assert.IsTrue(customer.ChangeTracker.GetIsChanged());
 
             customer.MainAddress = new Address("", "", "", "", null, null);
 
             customer.OnPersisted();
 
-            Assert.IsTrue(customer.GetObjectState() == Core.DomainObjectState.Existing);
-            Assert.IsFalse(customer.GetIsChanged());
+            Assert.IsTrue(customer.GetEntityState() == EntityState.Existing);
+            Assert.IsFalse(customer.ChangeTracker.GetIsChanged());
         }
 
         [Test]
@@ -56,9 +57,9 @@ namespace DomainObjects.Tests
             var repo = new InvoiceRepository();
             var invoice = repo.CreateNew();
 
-            Assert.IsTrue(invoice.GetObjectState() == Core.DomainObjectState.New);
-            Assert.IsFalse(invoice.GetIsChanged());
-            Assert.IsFalse(invoice.GetIsChangedDeep());
+            Assert.IsTrue(invoice.GetEntityState() == EntityState.New);
+            Assert.IsFalse(invoice.ChangeTracker.GetIsChanged());
+            Assert.IsFalse(invoice.ChangeTracker.GetIsChangedDeep());
 
             var line = invoice.CreateNewLine();
             line.Quantity = 1;
@@ -66,8 +67,8 @@ namespace DomainObjects.Tests
 
             invoice.OnPersisted();
 
-            Assert.IsTrue(invoice.GetObjectState() == Core.DomainObjectState.Existing);
-            Assert.IsFalse(invoice.GetIsChangedDeep());
+            Assert.IsTrue(invoice.GetEntityState() == EntityState.Existing);
+            Assert.IsFalse(invoice.ChangeTracker.GetIsChangedDeep());
         }
     }
 }
