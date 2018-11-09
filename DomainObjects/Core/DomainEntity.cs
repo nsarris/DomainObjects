@@ -65,9 +65,9 @@ namespace DomainObjects.Core
         public bool GetKeyIsAssigned() => keyIsAssigned;
         internal UnassignedKey GetUnAssignedKey() => unassignedKey;
 
-        public IDomainKey GetKey()
+        public DomainKey GetKey()
         {
-            return (IDomainKey)GetEntityMetadata().GetKey(this);
+            return (DomainKey)GetEntityMetadata().GetKey(this);
         }
 
         public object GetKeyValue()
@@ -137,8 +137,14 @@ namespace DomainObjects.Core
             BeginTrackingDeep();
         }
 
-        public void InitNew() => Init(true);
-        public void InitExisting() => Init(false);
+        public virtual void OnCreated() => Init(true);
+        public virtual void OnLoaded() => Init(false);
+
+        public virtual void OnPersisted()
+        {
+            changeTracker.AcceptChangesDeep();
+            MarkExistingDeep();
+        }
 
         public void MarkNew()
         {
@@ -153,6 +159,21 @@ namespace DomainObjects.Core
         public void MarkDeleted()
         {
             state = DomainObjectState.Deleted;
+        }
+
+        public void MarkNewDeep()
+        {
+            DomainEntityVisitor.Instance.Visit(this, x => x.MarkNew());
+        }
+
+        public void MarkExistingDeep()
+        {
+            DomainEntityVisitor.Instance.Visit(this, x => x.MarkExisting());
+        }
+
+        public void MarkDeletedDeep()
+        {
+            DomainEntityVisitor.Instance.Visit(this, x => x.MarkDeleted());
         }
 
         protected void SetObjectState(DomainObjectState state)

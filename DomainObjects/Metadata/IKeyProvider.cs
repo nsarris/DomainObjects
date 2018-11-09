@@ -4,7 +4,7 @@ namespace DomainObjects.Metadata
 {
     public interface IKeyProvider
     {
-        IDomainKey GetKey();
+        DomainKey GetKey();
         //void SetKey(object key);
         //object GetKeyValue();
         //bool KeyEquals(object other);

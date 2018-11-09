@@ -8,40 +8,32 @@ namespace DomainObjects.Core
 {
     internal class UnassignedKey { }
 
-    public interface IDomainKey
+    #pragma warning disable S4035 // Classes implementing "IEquatable<T>" should be sealed
+    public class DomainKey : IEquatable<DomainKey>
     {
-        object Value { get; }
-        bool IsAssigned { get; }
-    }
-
-
-    public sealed class DomainKey<T> : IDomainKey, IEquatable<DomainKey<T>>, IEquatable<T>
-    {
-        public T Value { get; }
+        public object Value { get; }
         public bool IsAssigned => UnassignedKey == null;
         private UnassignedKey UnassignedKey { get; }
-
-        object IDomainKey.Value => Value;
 
         internal DomainKey(UnassignedKey unassignedKey)
         {
             this.UnassignedKey = unassignedKey;
         }
 
-        internal DomainKey(T value)
+        internal DomainKey(object value)
         {
             this.Value = value;
         }
 
         public override bool Equals(object obj)
         {
-            if (!(obj is DomainKey<T> other))
+            if (!(obj is DomainKey other))
                 return false;
 
             return Equals(other);
         }
 
-        public bool Equals(DomainKey<T> other)
+        public bool Equals(DomainKey other)
         {
             if (other is null)
                 return false;
@@ -61,17 +53,12 @@ namespace DomainObjects.Core
                 return false;
         }
 
-        public bool Equals(T other)
-        {
-            return other == this;
-        }
-
         public override int GetHashCode()
         {
             return IsAssigned ? Value.GetHashCode() : UnassignedKey.GetHashCode();
         }
 
-        public static bool operator ==(DomainKey<T> x, DomainKey<T> y)
+        public static bool operator ==(DomainKey x, DomainKey y)
         {
             if (x is null && y is null)
                 return true;
@@ -82,35 +69,74 @@ namespace DomainObjects.Core
             return x.Equals(y);
         }
 
-        public static bool operator !=(DomainKey<T> x, DomainKey<T> y)
+        public static bool operator !=(DomainKey x, DomainKey y)
         {
             return !(x == y);
         }
 
 
-
-
-        public static bool operator ==(object x, DomainKey<T> y)
+        public static bool operator ==(object x, DomainKey y)
         {
-            if (x is DomainKey<T> domainKey)
+            if (x is DomainKey domainKey)
                 return domainKey == x;
             else
                 return false;
         }
 
-        public static bool operator ==(DomainKey<T> x, object y)
+        public static bool operator ==(DomainKey x, object y)
         {
             return y == x;
         }
 
-        public static bool operator !=(object x, DomainKey<T> y)
+        public static bool operator !=(object x, DomainKey y)
         {
             return !(x == y);
         }
 
-        public static bool operator !=(DomainKey<T> x, object y)
+        public static bool operator !=(DomainKey x, object y)
         {
             return !(x == y);
+        }
+    }
+    #pragma warning restore S4035 // Classes implementing "IEquatable<T>" should be sealed
+
+    public sealed class DomainKey<T> : DomainKey, IEquatable<DomainKey<T>>, IEquatable<T>
+    {
+        public new T Value => (T)base.Value;
+        
+        internal DomainKey(T value)
+            :base(value)
+        {
+            
+        }
+        internal DomainKey(UnassignedKey unassignedKey)
+            :base(unassignedKey)
+        {
+            
+        }
+
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is DomainKey<T> other))
+                return false;
+
+            return Equals(other);
+        }
+
+        public bool Equals(T other)
+        {
+            return other == this;
+        }
+
+        public bool Equals(DomainKey<T> other)
+        {
+            return base.Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
 
         public static bool operator ==(T x, DomainKey<T> y)

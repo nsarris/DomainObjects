@@ -66,10 +66,16 @@
     <Compile Include="Core\DomainEntity.cs" />
     <Compile Include="ChangeTracking\TrackableBase.cs" />
     <Compile Include="ChangeTracking\TrackableVisitor.cs" />
+    <Compile Include="Core\DomainEntityFactories.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DomainEntityFactories.tt</DependentUpon>
+    </Compile>
     <Compile Include="Core\DomainEntityFactory.cs" />
     <Compile Include="Core\DomainKeyValue.cs" />
     <Compile Include="Core\DomainObjectSerializer.cs" />
     <Compile Include="Core\DomainObjectState.cs" />
+    <Compile Include="Core\DomainEntityVisitor.cs" />
     <Compile Include="Serialization\DomainObjectSerializer.cs" />
     <Compile Include="Serialization\SerializationExtensions.cs" />
     <Compile Include="Core\ValueObjectList.cs" />
@@ -144,6 +150,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Core\DomainEntityFactories.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>DomainEntityFactories.cs</LastGenOutput>
+    </Content>
     <Content Include="TODO.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -151,6 +161,9 @@
       <Project>{8cd44b0c-c50d-4328-8efd-9b0b4dd9bdd2}</Project>
       <Name>Dynamix</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

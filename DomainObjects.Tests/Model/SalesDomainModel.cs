@@ -5,11 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FluentValidation;
-using FluentValidation.Internal;
-using FluentValidation.Results;
-using FluentValidation.Validators;
-using DomainObjects.Validation;
 using System.Runtime.Serialization;
 
 namespace DomainObjects.Tests.Sales

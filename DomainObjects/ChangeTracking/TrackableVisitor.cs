@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DomainObjects.ChangeTracking
 {
-    internal class TrackableVisitor 
+    internal class TrackableVisitor
     {
         public readonly static TrackableVisitor Instance = new TrackableVisitor();
 
@@ -35,24 +35,21 @@ namespace DomainObjects.ChangeTracking
                 if (innerTrackable.GetIsChanged())
                     return true;
             }
-            else
-                if (trackable.GetIsChanged())
-                    return true;
+            else if (trackable.GetIsChanged())
+                return true;
 
-            foreach(var prop in trackedObject.GetType().GetPropertiesEx().Where(x => x.CanGet && x.PropertyInfo.GetIndexParameters().Length == 0))
+            foreach (var prop in trackedObject.GetType().GetPropertiesEx().Where(x => x.CanGet && x.PropertyInfo.GetIndexParameters().Length == 0))
             {
                 if (prop.Type.IsAssignableTo(typeof(ITrackableObject))
                     && GetIsChangedDeep(prop.Get(trackedObject) as ITrackableObject, visited))
-                        return true;
-                
+                    return true;
+
                 if (prop.Type.IsAssignableTo(typeof(ITrackableCollection)))
                 {
-                    var trackableList = prop.Get(trackedObject) as ITrackableCollection;
-
-                    if (trackableList == null)
+                    if (!(prop.Get(trackedObject) is ITrackableCollection trackableList))
                         return false;
 
-                    if ((prop.Get(trackedObject) as ITrackableCollection).GetIsChanged())
+                    if (trackableList.GetIsChanged())
                         return true;
 
                     if (trackableList.ElementType.IsAssignableTo(typeof(ITrackableObject)))
@@ -75,8 +72,8 @@ namespace DomainObjects.ChangeTracking
             if (trackable == null)
                 return;
 
-            var trackedObject = trackable is ChangeTracker changeTracker 
-                ? changeTracker.GetTrackedObject() 
+            var trackedObject = trackable is ChangeTracker changeTracker
+                ? changeTracker.GetTrackedObject()
                 : trackable;
 
             if (trackedObject == null || visited.Contains(trackedObject))
@@ -93,21 +90,18 @@ namespace DomainObjects.ChangeTracking
             {
                 if (prop.Type.IsAssignableTo(typeof(ITrackableObject)))
                     Visit(prop.Get(trackedObject) as ITrackableObject, action, visited);
-                        
-                if (prop.Type.IsAssignableTo(typeof(ITrackableCollection)))
+
+                if (prop.Type.IsAssignableTo(typeof(ITrackableCollection))
+                    && prop.Get(trackedObject) is ITrackableCollection trackableList)
                 {
-                    var trackableList = prop.Get(trackedObject) as ITrackableCollection;
+                    action(trackableList);
 
-                    if (trackableList != null)
-                    {
-                        action(trackableList);
-
-                        if (trackableList.ElementType.IsAssignableTo(typeof(ITrackableObject)))
-                            foreach (ITrackableObject item in trackableList)
-                                Visit(item, action, visited);
-                    }
+                    if (trackableList.ElementType.IsAssignableTo(typeof(ITrackableObject)))
+                        foreach (ITrackableObject item in trackableList)
+                            Visit(item, action, visited);
                 }
             }
         }
     }
 }
+

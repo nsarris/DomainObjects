@@ -32,7 +32,7 @@ namespace DomainObjects.Tests
 
 
             //var c = ProxyTypeBuilder.CreateInstance<Customer>(() => new Customer(1, "123"));
-            var c1 = ProxyTypeBuilder.CreateInstance<Customer>(() => new Customer(1, customer.Name));
+            var c1 = ProxyTypeBuilder.CreateInstance(() => new Customer(1, customer.Name));
         }
     }
 }
