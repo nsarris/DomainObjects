@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using DomainObjects.Tests.Sales;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,18 +12,19 @@ namespace DomainObjects.Tests
     public class EqualityTests
     {
         [Test]
-        public void TestMethod()
+        public void TestEntityKeyEquality()
         {
-            //var book1 = new Book(1, "Test1");
-            //var book2 = new Book(1, "Test2");
-            //var book3 = new Book(2, "Test2");
+            var repo = new CustomerRepository();
+            var customer1 = repo.CreateNew();
+            var customer2 = repo.GetById(1);
 
-            ////var author = new Author();
+            Assert.IsFalse(customer1.KeyEquals(customer2));
+            Assert.IsFalse(customer1.GetKey() == customer2.GetKey());
 
-            //Assert.AreEqual(book1, book2);
-            //Assert.AreNotEqual(book1, book3);
+            customer1.SetKey(1);
 
-
+            Assert.IsTrue(customer1.KeyEquals(customer2));
+            Assert.IsTrue(customer1.GetKey() == customer2.GetKey());
         }
     }
 }
