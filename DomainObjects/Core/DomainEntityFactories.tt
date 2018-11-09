@@ -4,7 +4,7 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ output extension=".cs" #>
-<# var numOfGenericParameters = 4; #>
+<# var numOfGenericParameters = 16; #>
 using System;
 using DomainObjects.Internal;
 using Dynamix.Reflection;
@@ -12,7 +12,7 @@ using Dynamix.Reflection;
 namespace DomainObjects.Core
 {
 <# for (var i = 2; i <= numOfGenericParameters; i++) { 
-	var generics = string.Join(", ",Enumerable.Range(1, i).Select(x => "TArgs" + x));
+	var generics = string.Join(", ",Enumerable.Range(1, i).Select(x => "TArg" + x));
 #>	public class DomainEntityFactory<T, <#= generics #>> 
 		: TypeConstructor<T, <#= generics #>>
         where T : DomainEntity
