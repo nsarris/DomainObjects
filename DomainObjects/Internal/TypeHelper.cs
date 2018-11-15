@@ -89,6 +89,12 @@ namespace DomainObjects
 
             return readOnly || type.IsOrSubclassOfGeneric(typeof(ValueObjectList<>), out elementType);
         }
+        public static bool IsDomainObjectFactory(this Type type)
+        {
+            return type.IsGenericOrGenericSuperclassOf(typeof(DomainEntityFactory<,>))
+                ;
+        }
+
 
         public static bool IsFrameworkType(this Type type)
         {
