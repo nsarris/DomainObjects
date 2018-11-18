@@ -91,9 +91,8 @@ namespace DomainObjects.ModelBuilder
                         valueTypeDescriptors.AddIfNotNull(ScanValueObjectTypeRecursive(propertyType, visitedTypes));
 
                 }
-                else if (propertyType.HasGenericDefinition(typeof(ValueObjectReadOnlyList<>)))
+                else if (propertyType.IsDomainValueObjectList(out var elementType, out var _))
                 {
-                    var elementType = propertyType.GetGenericArguments().First();
                     var elementValueType = elementType.GetSupportedValueType();
 
                     if (!elementValueType.HasValue)

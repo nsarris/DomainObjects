@@ -96,16 +96,17 @@ namespace DomainObjects
 
         public static bool IsDomainValueObjectList(this Type type, out Type elementType, out bool readOnly)
         {
-            readOnly = type.IsOrSubclassOfGeneric(typeof(ValueObjectReadOnlyList<>), out var actualType);
-
-            if (readOnly || type.IsOrSubclassOfGeneric(typeof(ValueObjectList<>), out actualType))
+            if (type.ImplementsGeneric(typeof(IValueObjectReadOnlyList<>), out var actualType)
+                || type.IsOrSubclassOfGeneric(typeof(IValueObjectReadOnlyList<>), out actualType))
             {
                 elementType = actualType.GetGenericArguments().Single();
+                readOnly = !type.ImplementsGeneric(typeof(IValueObjectList<>)) && !type.IsOrSubclassOfGeneric(typeof(IValueObjectList<>));
                 return true;
             }
             else
             {
                 elementType = null;
+                readOnly = false;
                 return false;
             }
         }

@@ -65,7 +65,7 @@ namespace DomainObjects.Tests
             line.SetKey(2);
             
             var serializedInvoice = serializer.Serialize(invoice);
-
+            
             var invoiceCopy = serializer.Deserialize<Invoice>(serializedInvoice);
             Assert.IsTrue(ObjectComparer.Default.DeepEquals(invoice, invoiceCopy));
         }

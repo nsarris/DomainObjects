@@ -47,7 +47,7 @@ namespace DomainObjects.ChangeTracking
 
         public TrackableReadOnlyList(IList<T> list)
         {
-            internalList = list.ToList();
+            internalList = list?.ToList() ?? new List<T>();
         }
 
         public TrackableReadOnlyList(IEnumerable<T> collection)

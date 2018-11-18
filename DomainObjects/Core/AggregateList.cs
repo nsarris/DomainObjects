@@ -16,11 +16,11 @@ namespace DomainObjects.Core
         {
         }
 
-        public AggregateList(IList<T> list) : base(list)
+        public AggregateList(IList<T> list) : base(list ?? new List<T>())
         {
         }
 
-        public AggregateList(IEnumerable<T> collection) : base(collection)
+        public AggregateList(IEnumerable<T> collection) : base(collection ?? new List<T>())
         {
         }
     }

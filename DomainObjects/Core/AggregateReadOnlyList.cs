@@ -14,11 +14,16 @@ namespace DomainObjects.Core
     public class AggregateReadOnlyList<T> : ReadOnlyCollection<T>, IAggregateReadOnlyList<T>
         where T : Aggregate<T>
     {
-        public AggregateReadOnlyList(IList<T> list) : base(list.ToList())
+        public AggregateReadOnlyList() : this(Enumerable.Empty<T>())
+        {
+
+        }
+
+        public AggregateReadOnlyList(IList<T> list) : base(list?.ToList() ?? new List<T>())
         {
         }
 
-        public AggregateReadOnlyList(IEnumerable<T> collection) : base(collection.ToList())
+        public AggregateReadOnlyList(IEnumerable<T> collection) : base(collection?.ToList() ?? new List<T>())
         {
         }
     }
