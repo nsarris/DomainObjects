@@ -42,9 +42,10 @@ namespace DomainObjects.ChangeTracking
             {
                 if (prop.Type.IsAssignableTo(typeof(ITrackableObject))
                     && GetIsChangedDeep(prop.Get(trackedObject) as ITrackableObject, visited))
+                {
                     return true;
-
-                if (prop.Type.IsAssignableTo(typeof(ITrackableCollection)))
+                }
+                else if (prop.Type.IsAssignableTo(typeof(ITrackableCollection)))
                 {
                     if (!(prop.Get(trackedObject) is ITrackableCollection trackableList))
                         return false;
@@ -56,6 +57,15 @@ namespace DomainObjects.ChangeTracking
                         foreach (ITrackableObject item in trackableList)
                             if (GetIsChangedDeep(item, visited))
                                 return true;
+                }
+                else if (prop.IsEnumerable)
+                {
+                    foreach (var item in prop.EnumerableDescriptor.AsEnumerable(prop.Get(trackedObject)))
+                    {
+                        if (item != null && item is ITrackableObject enumeratedTrackable
+                            && GetIsChangedDeep(enumeratedTrackable, visited))
+                            return true;
+                    }
                 }
             }
 
@@ -89,9 +99,10 @@ namespace DomainObjects.ChangeTracking
             foreach (var prop in trackedObject.GetType().GetPropertiesEx().Where(x => x.CanGet && x.PropertyInfo.GetIndexParameters().Length == 0))
             {
                 if (prop.Type.IsAssignableTo(typeof(ITrackableObject)))
+                {
                     Visit(prop.Get(trackedObject) as ITrackableObject, action, visited);
-
-                if (prop.Type.IsAssignableTo(typeof(ITrackableCollection))
+                }
+                else if (prop.Type.IsAssignableTo(typeof(ITrackableCollection))
                     && prop.Get(trackedObject) is ITrackableCollection trackableList)
                 {
                     action(trackableList);
@@ -99,6 +110,14 @@ namespace DomainObjects.ChangeTracking
                     if (trackableList.ElementType.IsAssignableTo(typeof(ITrackableObject)))
                         foreach (ITrackableObject item in trackableList)
                             Visit(item, action, visited);
+                }
+                else if (prop.IsEnumerable)
+                {
+                    foreach (var item in prop.EnumerableDescriptor.AsEnumerable(prop.Get(trackedObject)))
+                    {
+                        if (item != null && item is ITrackableObject enumeratedTrackable)
+                            Visit(enumeratedTrackable, action, visited);
+                    }
                 }
             }
         }

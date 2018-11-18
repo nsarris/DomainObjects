@@ -3,6 +3,7 @@ using DomainObjects.Metadata;
 using Dynamix.Reflection;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DomainObjects
 {
@@ -73,22 +74,47 @@ namespace DomainObjects
 
         public static bool IsAggregateList(this Type type)
         {
-            return type.IsOrSubclassOfGeneric(typeof(AggregateList<>));
+            return type.ImplementsGeneric(typeof(IAggregateReadOnlyList<>));
         }
 
         public static bool IsAggregateList(this Type type, out Type elementType, out bool readOnly)
         {
-            readOnly = type.IsOrSubclassOfGeneric(typeof(AggregateReadOnlyList<>), out elementType);
-
-            return readOnly || type.IsOrSubclassOfGeneric(typeof(AggregateList<>), out elementType);
+            if (type.ImplementsGeneric(typeof(IAggregateReadOnlyList<>), out var actualType)
+                || type.IsOrSubclassOfGeneric(typeof(IAggregateReadOnlyList<>), out actualType))
+            {
+                elementType = actualType.GetGenericArguments().Single();
+                readOnly = !type.ImplementsGeneric(typeof(IAggregateList<>)) && !type.IsOrSubclassOfGeneric(typeof(IAggregateList<>));
+                return true;
+            }
+            else
+            {
+                elementType = null;
+                readOnly = false;
+                return false;
+            }
         }
 
         public static bool IsDomainValueObjectList(this Type type, out Type elementType, out bool readOnly)
         {
-            readOnly = type.IsOrSubclassOfGeneric(typeof(ValueObjectReadOnlyList<>), out elementType);
-
-            return readOnly || type.IsOrSubclassOfGeneric(typeof(ValueObjectList<>), out elementType);
+            if (type.ImplementsGeneric(typeof(IValueObjectReadOnlyList<>), out var actualType)
+                || type.IsOrSubclassOfGeneric(typeof(IValueObjectReadOnlyList<>), out actualType))
+            {
+                elementType = actualType.GetGenericArguments().Single();
+                readOnly = !type.ImplementsGeneric(typeof(IValueObjectList<>)) && !type.IsOrSubclassOfGeneric(typeof(IValueObjectList<>));
+                return true;
+            }
+            else
+            {
+                elementType = null;
+                readOnly = false;
+                return false;
+            }
         }
+        public static bool IsDomainObjectFactory(this Type type)
+        {
+            return type.IsGenericOrGenericSuperclassOf(typeof(DomainEntityFactory<,>));
+        }
+
 
         public static bool IsFrameworkType(this Type type)
         {

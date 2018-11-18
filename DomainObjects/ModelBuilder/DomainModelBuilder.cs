@@ -91,9 +91,8 @@ namespace DomainObjects.ModelBuilder
                         valueTypeDescriptors.AddIfNotNull(ScanValueObjectTypeRecursive(propertyType, visitedTypes));
 
                 }
-                else if (propertyType.HasGenericDefinition(typeof(ValueObjectReadOnlyList<>)))
+                else if (propertyType.IsDomainValueObjectList(out var elementType, out var _))
                 {
-                    var elementType = propertyType.GetGenericArguments().First();
                     var elementValueType = elementType.GetSupportedValueType();
 
                     if (!elementValueType.HasValue)
@@ -138,9 +137,8 @@ namespace DomainObjects.ModelBuilder
                     propertyDescriptors.Add(new AggregatePropertyDescriptor(property));
                     aggregateDescriptors.AddIfNotNull(ScanEntityTypeRecursive(propertyType, visitedTypes));
                 }
-                else if (propertyType.IsAggregateList(out var listElementType, out var readOnly))
+                else if (propertyType.IsAggregateList(out var elementType, out var readOnly))
                 {
-                    var elementType = listElementType.GetGenericArguments().Single();
                     if (!elementType.IsAggregate())
                         propertyDescriptors.Add(new UnsupportedPropertyDescriptor(property));
                     else
@@ -149,9 +147,8 @@ namespace DomainObjects.ModelBuilder
                         aggregateDescriptors.AddIfNotNull(ScanEntityTypeRecursive(elementType, visitedTypes));
                     }
                 }
-                else if (propertyType.IsDomainValueObjectList(out listElementType, out readOnly))
+                else if (propertyType.IsDomainValueObjectList(out elementType, out readOnly))
                 {
-                    var elementType = listElementType.GetGenericArguments().First();
                     var elementValueType = elementType.GetSupportedValueType();
 
                     if (!elementValueType.HasValue)

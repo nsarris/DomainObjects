@@ -16,7 +16,7 @@ namespace DomainObjects.Tests
         public void TestNewEntity()
         {
             var repo = new CustomerRepository();
-            var customer = repo.CreateNew(); 
+            var customer = repo.Create(); 
 
             Assert.IsTrue(customer.GetEntityState() == Core.EntityState.New);
             Assert.IsFalse(customer.ChangeTracker.GetIsChanged());
