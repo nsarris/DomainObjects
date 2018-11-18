@@ -3,7 +3,13 @@ using System.Collections.Generic;
 
 namespace DomainObjects.Core
 {
-    public class AggregateList<T> : TrackableList<T>
+    public interface IAggregateList<out T> : ITrackableCollection<T>, IAggregateReadOnlyList<T>
+        where T : Aggregate<T>
+    {
+
+    }
+
+    public class AggregateList<T> : TrackableList<T>, IAggregateList<T>
         where T : Aggregate<T>
     {
         public AggregateList()

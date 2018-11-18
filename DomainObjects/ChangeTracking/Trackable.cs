@@ -41,6 +41,7 @@ namespace DomainObjects.ChangeTracking
     public interface ITrackableCollection<out T> : ITrackableCollection
     {
         //GetChanges
+        bool ElementTypeIsTrackable { get; }
         new IEnumerable<T> GetAdded();
         new IEnumerable<T> GetRemoved();
     }

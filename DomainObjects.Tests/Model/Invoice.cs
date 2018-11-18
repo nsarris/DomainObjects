@@ -10,6 +10,8 @@ namespace DomainObjects.Tests.Sales
         DomainEntityFactory<InvoiceLine, Invoice> linefactory = new DomainEntityFactory<InvoiceLine, Invoice>();
 
         private int entityState = 3;
+        private AggregateList<InvoiceLine> invoiceLines = new AggregateList<InvoiceLine>(); 
+
         protected Invoice()
         {
 
@@ -28,13 +30,13 @@ namespace DomainObjects.Tests.Sales
         public virtual int Id { get; private set; }
         public virtual int CustomerId { get; set; }
         public virtual DateTime DateTime { get; set; }
-        public AggregateList<InvoiceLine> InvoiceLines { get; } = new AggregateList<InvoiceLine>();
+        public IAggregateReadOnlyList<InvoiceLine> InvoiceLines => invoiceLines;
 
 
         public InvoiceLine CreateNewLine()
         {
             var line = linefactory.New.Construct(this);
-            this.InvoiceLines.Add(line);
+            this.invoiceLines.Add(line);
             return line;
         }
     }

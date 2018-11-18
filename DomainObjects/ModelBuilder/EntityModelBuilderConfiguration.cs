@@ -239,7 +239,7 @@ namespace DomainObjects.ModelBuilder
             return configuration;
         }
 
-        public AggregateListEntityPropertyModelConfiguration<T> Aggregate<TAggregate>(Expression<Func<T, AggregateList<TAggregate>>> memberSelector)
+        public AggregateListEntityPropertyModelConfiguration<T> Aggregate<TAggregate>(Expression<Func<T, IAggregateList<TAggregate>>> memberSelector)
             where TAggregate : Aggregate<TAggregate>
         {
             var configuration = new AggregateListEntityPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
@@ -247,7 +247,7 @@ namespace DomainObjects.ModelBuilder
             return configuration;
         }
 
-        public AggregateReadOnlyListEntityPropertyModelConfiguration<T> Aggregate<TAggregate>(Expression<Func<T, AggregateReadOnlyList<TAggregate>>> memberSelector)
+        public AggregateReadOnlyListEntityPropertyModelConfiguration<T> Aggregate<TAggregate>(Expression<Func<T, IAggregateReadOnlyList<TAggregate>>> memberSelector)
             where TAggregate : Aggregate<TAggregate>
         {
             var configuration = new AggregateReadOnlyListEntityPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
