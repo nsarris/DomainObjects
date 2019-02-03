@@ -55,8 +55,12 @@ namespace DomainObjects.Core
 
             this.fields = types.SelectMany(t => t
                 .GetFieldsEx(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                .Where(x => !x.FieldInfo.HasAttribute<NonSerializedAttribute>()
-                    && (entityMetadata == null || string.IsNullOrEmpty(x.AutoPropertyName) || !entityMetadata.IsIgnored(x.AutoPropertyName))
+                .Where(x => 
+                    !x.FieldInfo.HasAttribute<NonSerializedAttribute>()
+                    && !x.FieldInfo.FieldType.IsEntityFactory()
+                    && (entityMetadata == null 
+                    || string.IsNullOrEmpty(x.AutoPropertyName) 
+                    || !entityMetadata.IsIgnored(x.AutoPropertyName))
                     && !eventNames.Contains(x.Name)))
                 .GroupBy(x => x.FieldInfo.Name)
                 .SelectMany(x => {

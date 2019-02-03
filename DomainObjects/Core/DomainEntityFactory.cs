@@ -16,7 +16,7 @@ namespace DomainObjects.Core
 
         public DomainEntityFactory(Action<T> initializer = null)
         {
-            var concreteType = ProxyTypeBuilder.BuildPropertyChangedProxy<T>();
+            var concreteType = ProxyTypeBuilder.BuildDomainEntityProxy<T>();
             New = new TypeConstructor<T, TArgs>(concreteType, x => { initializer?.Invoke(x); x.OnCreated(); });
             Existing = new TypeConstructor<T, TArgs>(concreteType, x => { initializer?.Invoke(x); x.OnLoaded(); });
         }

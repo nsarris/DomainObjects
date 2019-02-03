@@ -13,7 +13,7 @@ namespace DomainObjects.Core
 
         public DomainEntityFactory(Action<T> initializer = null)
         {
-            var concreteType = ProxyTypeBuilder.BuildPropertyChangedProxy<T>();
+            var concreteType = ProxyTypeBuilder.BuildDomainEntityProxy<T>();
             New = new TypeConstructor<T, TArg1, TArg2>(concreteType, x => { initializer?.Invoke(x); x.OnCreated(); });
             Existing = new TypeConstructor<T, TArg1, TArg2>(concreteType, x => { initializer?.Invoke(x); x.OnLoaded(); });
         }
@@ -28,7 +28,7 @@ namespace DomainObjects.Core
 
         public DomainEntityFactory(Action<T> initializer = null)
         {
-            var concreteType = ProxyTypeBuilder.BuildPropertyChangedProxy<T>();
+            var concreteType = ProxyTypeBuilder.BuildDomainEntityProxy<T>();
             New = new TypeConstructor<T, TArg1, TArg2, TArg3>(concreteType, x => { initializer?.Invoke(x); x.OnCreated(); });
             Existing = new TypeConstructor<T, TArg1, TArg2, TArg3>(concreteType, x => { initializer?.Invoke(x); x.OnLoaded(); });
         }
@@ -43,7 +43,7 @@ namespace DomainObjects.Core
 
         public DomainEntityFactory(Action<T> initializer = null)
         {
-            var concreteType = ProxyTypeBuilder.BuildPropertyChangedProxy<T>();
+            var concreteType = ProxyTypeBuilder.BuildDomainEntityProxy<T>();
             New = new TypeConstructor<T, TArg1, TArg2, TArg3, TArg4>(concreteType, x => { initializer?.Invoke(x); x.OnCreated(); });
             Existing = new TypeConstructor<T, TArg1, TArg2, TArg3, TArg4>(concreteType, x => { initializer?.Invoke(x); x.OnLoaded(); });
         }
@@ -58,7 +58,7 @@ namespace DomainObjects.Core
 
         public DomainEntityFactory(Action<T> initializer = null)
         {
-            var concreteType = ProxyTypeBuilder.BuildPropertyChangedProxy<T>();
+            var concreteType = ProxyTypeBuilder.BuildDomainEntityProxy<T>();
             New = new TypeConstructor<T, TArg1, TArg2, TArg3, TArg4, TArg5>(concreteType, x => { initializer?.Invoke(x); x.OnCreated(); });
             Existing = new TypeConstructor<T, TArg1, TArg2, TArg3, TArg4, TArg5>(concreteType, x => { initializer?.Invoke(x); x.OnLoaded(); });
         }
@@ -73,7 +73,7 @@ namespace DomainObjects.Core
 
         public DomainEntityFactory(Action<T> initializer = null)
         {
-            var concreteType = ProxyTypeBuilder.BuildPropertyChangedProxy<T>();
+            var concreteType = ProxyTypeBuilder.BuildDomainEntityProxy<T>();
             New = new TypeConstructor<T, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6>(concreteType, x => { initializer?.Invoke(x); x.OnCreated(); });
             Existing = new TypeConstructor<T, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6>(concreteType, x => { initializer?.Invoke(x); x.OnLoaded(); });
         }
@@ -88,7 +88,7 @@ namespace DomainObjects.Core
 
         public DomainEntityFactory(Action<T> initializer = null)
         {
-            var concreteType = ProxyTypeBuilder.BuildPropertyChangedProxy<T>();
+            var concreteType = ProxyTypeBuilder.BuildDomainEntityProxy<T>();
             New = new TypeConstructor<T, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7>(concreteType, x => { initializer?.Invoke(x); x.OnCreated(); });
             Existing = new TypeConstructor<T, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7>(concreteType, x => { initializer?.Invoke(x); x.OnLoaded(); });
         }
@@ -103,7 +103,7 @@ namespace DomainObjects.Core
 
         public DomainEntityFactory(Action<T> initializer = null)
         {
-            var concreteType = ProxyTypeBuilder.BuildPropertyChangedProxy<T>();
+            var concreteType = ProxyTypeBuilder.BuildDomainEntityProxy<T>();
             New = new TypeConstructor<T, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8>(concreteType, x => { initializer?.Invoke(x); x.OnCreated(); });
             Existing = new TypeConstructor<T, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8>(concreteType, x => { initializer?.Invoke(x); x.OnLoaded(); });
         }
@@ -118,7 +118,7 @@ namespace DomainObjects.Core
 
         public DomainEntityFactory(Action<T> initializer = null)
         {
-            var concreteType = ProxyTypeBuilder.BuildPropertyChangedProxy<T>();
+            var concreteType = ProxyTypeBuilder.BuildDomainEntityProxy<T>();
             New = new TypeConstructor<T, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9>(concreteType, x => { initializer?.Invoke(x); x.OnCreated(); });
             Existing = new TypeConstructor<T, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9>(concreteType, x => { initializer?.Invoke(x); x.OnLoaded(); });
         }
@@ -133,7 +133,7 @@ namespace DomainObjects.Core
 
         public DomainEntityFactory(Action<T> initializer = null)
         {
-            var concreteType = ProxyTypeBuilder.BuildPropertyChangedProxy<T>();
+            var concreteType = ProxyTypeBuilder.BuildDomainEntityProxy<T>();
             New = new TypeConstructor<T, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10>(concreteType, x => { initializer?.Invoke(x); x.OnCreated(); });
             Existing = new TypeConstructor<T, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10>(concreteType, x => { initializer?.Invoke(x); x.OnLoaded(); });
         }
@@ -148,7 +148,7 @@ namespace DomainObjects.Core
 
         public DomainEntityFactory(Action<T> initializer = null)
         {
-            var concreteType = ProxyTypeBuilder.BuildPropertyChangedProxy<T>();
+            var concreteType = ProxyTypeBuilder.BuildDomainEntityProxy<T>();
             New = new TypeConstructor<T, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11>(concreteType, x => { initializer?.Invoke(x); x.OnCreated(); });
             Existing = new TypeConstructor<T, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11>(concreteType, x => { initializer?.Invoke(x); x.OnLoaded(); });
         }
@@ -163,7 +163,7 @@ namespace DomainObjects.Core
 
         public DomainEntityFactory(Action<T> initializer = null)
         {
-            var concreteType = ProxyTypeBuilder.BuildPropertyChangedProxy<T>();
+            var concreteType = ProxyTypeBuilder.BuildDomainEntityProxy<T>();
             New = new TypeConstructor<T, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12>(concreteType, x => { initializer?.Invoke(x); x.OnCreated(); });
             Existing = new TypeConstructor<T, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12>(concreteType, x => { initializer?.Invoke(x); x.OnLoaded(); });
         }
@@ -178,7 +178,7 @@ namespace DomainObjects.Core
 
         public DomainEntityFactory(Action<T> initializer = null)
         {
-            var concreteType = ProxyTypeBuilder.BuildPropertyChangedProxy<T>();
+            var concreteType = ProxyTypeBuilder.BuildDomainEntityProxy<T>();
             New = new TypeConstructor<T, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13>(concreteType, x => { initializer?.Invoke(x); x.OnCreated(); });
             Existing = new TypeConstructor<T, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13>(concreteType, x => { initializer?.Invoke(x); x.OnLoaded(); });
         }
@@ -193,7 +193,7 @@ namespace DomainObjects.Core
 
         public DomainEntityFactory(Action<T> initializer = null)
         {
-            var concreteType = ProxyTypeBuilder.BuildPropertyChangedProxy<T>();
+            var concreteType = ProxyTypeBuilder.BuildDomainEntityProxy<T>();
             New = new TypeConstructor<T, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14>(concreteType, x => { initializer?.Invoke(x); x.OnCreated(); });
             Existing = new TypeConstructor<T, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14>(concreteType, x => { initializer?.Invoke(x); x.OnLoaded(); });
         }
@@ -208,7 +208,7 @@ namespace DomainObjects.Core
 
         public DomainEntityFactory(Action<T> initializer = null)
         {
-            var concreteType = ProxyTypeBuilder.BuildPropertyChangedProxy<T>();
+            var concreteType = ProxyTypeBuilder.BuildDomainEntityProxy<T>();
             New = new TypeConstructor<T, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15>(concreteType, x => { initializer?.Invoke(x); x.OnCreated(); });
             Existing = new TypeConstructor<T, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15>(concreteType, x => { initializer?.Invoke(x); x.OnLoaded(); });
         }
@@ -223,7 +223,7 @@ namespace DomainObjects.Core
 
         public DomainEntityFactory(Action<T> initializer = null)
         {
-            var concreteType = ProxyTypeBuilder.BuildPropertyChangedProxy<T>();
+            var concreteType = ProxyTypeBuilder.BuildDomainEntityProxy<T>();
             New = new TypeConstructor<T, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15, TArg16>(concreteType, x => { initializer?.Invoke(x); x.OnCreated(); });
             Existing = new TypeConstructor<T, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TArg7, TArg8, TArg9, TArg10, TArg11, TArg12, TArg13, TArg14, TArg15, TArg16>(concreteType, x => { initializer?.Invoke(x); x.OnLoaded(); });
         }

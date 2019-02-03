@@ -86,10 +86,10 @@ namespace DomainObjects.Tests.Sales
             Id = id;
         }
 
-        protected Person(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
+        //protected Person(SerializationInfo info, StreamingContext context) : base(info, context)
+        //{
 
-        }
+        //}
     }
 
     public class Vendor : Person
@@ -119,13 +119,13 @@ namespace DomainObjects.Tests.Sales
             Name = name;
         }
 
-        protected Customer(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
+        //protected Customer(SerializationInfo info, StreamingContext context) : base(info, context)
+        //{
 
-        }
+        //}
     }
 
-    [Serializable]
+    //[Serializable]
     public class Address : DomainValueObject<Address>
     {
         public Address(string street, string number, string city, string postCode, Phone primaryPhone, IEnumerable<Phone> otherPhones)
@@ -138,10 +138,10 @@ namespace DomainObjects.Tests.Sales
             OtherPhones = new ValueObjectReadOnlyList<Phone>(otherPhones);
         }
 
-        protected Address(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
+        //protected Address(SerializationInfo info, StreamingContext context) : base(info, context)
+        //{
 
-        }
+        //}
 
         public string Street { get; }
         public string Number { get; }
@@ -152,7 +152,8 @@ namespace DomainObjects.Tests.Sales
 
 
     }
-    [Serializable]
+
+    //[Serializable]
     public class Phone : DomainValueObject<Phone>
     {
         public Phone(string number, int kind)
@@ -161,10 +162,10 @@ namespace DomainObjects.Tests.Sales
             Kind = kind;
         }
 
-        protected Phone(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
+        //protected Phone(SerializationInfo info, StreamingContext context) : base(info, context)
+        //{
 
-        }
+        //}
 
         public string Number { get; }
         public int Kind { get; }
@@ -177,10 +178,11 @@ namespace DomainObjects.Tests.Sales
 
 
     //[AddINotifyPropertyChangedInterface]
-    [Serializable]
+    //[Serializable]
     public class Invoice : AggregateRoot<Invoice, int>
     {
         private int entityState = 3;
+        private AggregateList<InvoiceLine> invoiceLines = new AggregateList<InvoiceLine>();
         public Invoice()
         {
 
@@ -191,17 +193,17 @@ namespace DomainObjects.Tests.Sales
             Id = id;
         }
 
-        protected Invoice(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
+        //protected Invoice(SerializationInfo info, StreamingContext context) : base(info, context)
+        //{
 
-        }
+        //}
 
         public virtual int Id { get; private set; }
         public virtual int CustomerId { get; set; }
         public virtual DateTime DateTime { get; set; }
-        public AggregateList<InvoiceLine> InvoiceLines { get; } = new AggregateList<InvoiceLine>();
+        public AggregateReadOnlyList<InvoiceLine> InvoiceLines => invoiceLines;
 
-        [NonSerialized]
+        //[NonSerialized]
         DomainEntityFactory<InvoiceLine, Invoice> linefactory = new DomainEntityFactory<InvoiceLine, Invoice>();
 
         public InvoiceLine CreateNewLine()
@@ -213,7 +215,7 @@ namespace DomainObjects.Tests.Sales
     }
 
     //[AddINotifyPropertyChangedInterface]
-    [Serializable]
+    //[Serializable]
     public class InvoiceLine : Aggregate<InvoiceLine, Invoice, int>
     {
         public virtual int Id { get; private set; }
@@ -226,10 +228,10 @@ namespace DomainObjects.Tests.Sales
             
         }
 
-        protected InvoiceLine(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
+        //protected InvoiceLine(SerializationInfo info, StreamingContext context) : base(info, context)
+        //{
 
-        }
+        //}
     }
 
     public class Product : AggregateRoot<Product, int>
@@ -242,9 +244,9 @@ namespace DomainObjects.Tests.Sales
 
         }
 
-        protected Product(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
+        //protected Product(SerializationInfo info, StreamingContext context) : base(info, context)
+        //{
 
-        }
+        //}
     }
 }

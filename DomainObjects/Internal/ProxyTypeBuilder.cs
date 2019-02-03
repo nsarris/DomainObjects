@@ -38,11 +38,7 @@ namespace DomainObjects.Internal
         static readonly Dictionary<Type, Type> cache = new Dictionary<Type, Type>();
         static readonly object syncRoot = new object();
 
-
-        public static Type BuildPropertyChangedProxy<T>() where T : class 
-            => BuildPropertyChangedProxy(typeof(T));
-
-        public static Type BuildPropertyChangedProxy(Type type) 
+        public static Type BuildDomainObjectProxy(Type type, bool injectPropertyChanged, bool implementSerializable)
         {
             if (!type.IsClass)
                 throw new ArgumentException("A proxy can only be built for class types", nameof(type));
@@ -63,73 +59,76 @@ namespace DomainObjects.Internal
                 foreach (var attribute in BuildCustomAttributes(type.GetCustomAttributesData()))
                     typeBuilder.SetCustomAttribute(attribute);
 
+                //Add IDynamicProxy interface
+                typeBuilder.AddInterfaceImplementation(typeof(IDynamicProxy));
+
                 //Force Add SerializableAttribute
-                if (!type.HasAttribute<SerializableAttribute>())
+                if (implementSerializable && !type.HasAttribute<SerializableAttribute>())
                     typeBuilder.SetCustomAttribute(
                         new CustomAttributeBuilder(typeof(SerializableAttribute).GetConstructor(new Type[] { }), new object[] { }));
 
-                //Add IDynamicProxy interface
-                typeBuilder.AddInterfaceImplementation(typeof(IDynamicProxy));
-                
                 //Inherit all constructors
-                CreatePassthroughConstructors(typeBuilder, type);
+                CreatePassthroughConstructors(typeBuilder, type, implementSerializable);
 
-                //Declare OnPropertyChanged method
-                var onPropertyChangedMethod = type.GetMethod(OnPropertyChangedMethodName,
-                    BindingFlags.Instance | BindingFlags.NonPublic);
-
-                //Override all non inexed virtual properties intercepting them with OnPropertyChanged
-                var propertyInfos = type.GetProperties().Where(p => p.CanRead && p.CanWrite && p.GetIndexParameters().Length == 0 && p.SetMethod.IsVirtual);
-                foreach (var item in propertyInfos)
+                if (injectPropertyChanged)
                 {
-                    var baseMethod = item.SetMethod;
-                    var setAccessor = typeBuilder.DefineMethod
-                           (baseMethod.Name, baseMethod.Attributes, typeof(void), new[] { item.PropertyType });
-                    
-                    var il = setAccessor.GetILGenerator();
-                    var retLabel = il.DefineLabel();
-                    //Declare local and load current value
-                    il.DeclareLocal(item.PropertyType);
-                    il.Emit(OpCodes.Ldarg_0);
-                    il.Emit(OpCodes.Call, item.GetMethod);
-                    il.Emit(OpCodes.Stloc_0);
+                    //Declare OnPropertyChanged method
+                    var onPropertyChangedMethod = type.GetMethod(OnPropertyChangedMethodName,
+                        BindingFlags.Instance | BindingFlags.NonPublic);
 
-                    //Check if same value
-                    //Goto to retLabel if
-                    if (!item.PropertyType.IsValueType)
+                    //Override all non indexed virtual properties intercepting them with OnPropertyChanged
+                    var propertyInfos = type.GetProperties().Where(p => p.CanRead && p.CanWrite && p.GetIndexParameters().Length == 0 && p.SetMethod.IsVirtual);
+                    foreach (var item in propertyInfos)
                     {
-                        il.Emit(OpCodes.Ldloc_0);
+                        var baseMethod = item.SetMethod;
+                        var setAccessor = typeBuilder.DefineMethod
+                               (baseMethod.Name, baseMethod.Attributes, typeof(void), new[] { item.PropertyType });
+
+                        var il = setAccessor.GetILGenerator();
+                        var retLabel = il.DefineLabel();
+                        //Declare local and load current value
+                        il.DeclareLocal(item.PropertyType);
+                        il.Emit(OpCodes.Ldarg_0);
+                        il.Emit(OpCodes.Call, item.GetMethod);
+                        il.Emit(OpCodes.Stloc_0);
+
+                        //Check if same value
+                        //Goto to retLabel if
+                        if (!item.PropertyType.IsValueType)
+                        {
+                            il.Emit(OpCodes.Ldloc_0);
+                            il.Emit(OpCodes.Ldarg_1);
+                            il.Emit(OpCodes.Beq, retLabel);
+                        }
+                        else
+                        {
+                            var (defaultComparerGetter, equalsMethod) = GetDefaultComparerPropertyGetter(item.PropertyType);
+
+                            il.Emit(OpCodes.Call, defaultComparerGetter);
+
+                            il.Emit(OpCodes.Ldloc_0);
+                            il.Emit(OpCodes.Ldarg_1);
+                            il.Emit(OpCodes.Callvirt, equalsMethod);
+                            il.Emit(OpCodes.Brtrue, retLabel);
+                        }
+
+                        //Call base to 
+                        il.Emit(OpCodes.Ldarg_0);
                         il.Emit(OpCodes.Ldarg_1);
-                        il.Emit(OpCodes.Beq, retLabel);
-                    }
-                    else
-                    {
-                        var (defaultComparerGetter, equalsMethod) = GetDefaultComparerPropertyGetter(item.PropertyType);
+                        il.Emit(OpCodes.Call, baseMethod);
 
-                        il.Emit(OpCodes.Call, defaultComparerGetter);
-
+                        il.Emit(OpCodes.Ldarg_0);
+                        il.Emit(OpCodes.Ldstr, item.Name);
                         il.Emit(OpCodes.Ldloc_0);
+                        if (item.PropertyType.IsValueType) il.Emit(OpCodes.Box, item.PropertyType);
                         il.Emit(OpCodes.Ldarg_1);
-                        il.Emit(OpCodes.Callvirt, equalsMethod);
-                        il.Emit(OpCodes.Brtrue, retLabel);
+                        if (item.PropertyType.IsValueType) il.Emit(OpCodes.Box, item.PropertyType);
+                        il.Emit(OpCodes.Call, onPropertyChangedMethod);
+
+                        il.MarkLabel(retLabel);
+                        il.Emit(OpCodes.Ret);
+                        typeBuilder.DefineMethodOverride(setAccessor, baseMethod);
                     }
-
-                    //Call base to 
-                    il.Emit(OpCodes.Ldarg_0);
-                    il.Emit(OpCodes.Ldarg_1);
-                    il.Emit(OpCodes.Call, baseMethod);
-
-                    il.Emit(OpCodes.Ldarg_0);
-                    il.Emit(OpCodes.Ldstr, item.Name);
-                    il.Emit(OpCodes.Ldloc_0);
-                    if (item.PropertyType.IsValueType) il.Emit(OpCodes.Box, item.PropertyType);
-                    il.Emit(OpCodes.Ldarg_1);
-                    if (item.PropertyType.IsValueType) il.Emit(OpCodes.Box, item.PropertyType);
-                    il.Emit(OpCodes.Call, onPropertyChangedMethod);
-
-                    il.MarkLabel(retLabel);
-                    il.Emit(OpCodes.Ret);
-                    typeBuilder.DefineMethodOverride(setAccessor, baseMethod);
                 }
 
                 //Build Type
@@ -142,6 +141,21 @@ namespace DomainObjects.Internal
             }
         }
 
+
+        public static Type BuildSerializableProxy<T>() where T : class
+            => BuildSerializableProxy(typeof(T));
+
+        public static Type BuildSerializableProxy(Type type)
+            => BuildDomainObjectProxy(type, false, true);
+
+
+        public static Type BuildDomainEntityProxy<T>() where T : class 
+            => BuildDomainEntityProxy(typeof(T));
+
+        public static Type BuildDomainEntityProxy(Type type)
+            => BuildDomainObjectProxy(type, true, true);
+        
+
         private static (MethodInfo defaultComparerGetter, MethodInfo equalsMethod) GetDefaultComparerPropertyGetter(Type type)
         {
             var genericEqualityComparer = typeof(EqualityComparer<>).MakeGenericTypeCached(new Type[] { type });
@@ -151,9 +165,22 @@ namespace DomainObjects.Internal
         }
         
 
-        private static void CreatePassthroughConstructors(this TypeBuilder builder, Type baseType)
+        private static void CreatePassthroughConstructors(this TypeBuilder builder, Type baseType, bool forceAddSerialiable)
         {
-            foreach (var constructor in baseType.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+            var bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+            var serializationConstructorParameters = new[] { typeof(SerializationInfo), typeof(StreamingContext) };
+
+            var constructors = baseType.GetConstructors(bindingFlags).ToList();
+
+            //Add deserialization constructor searching up inheritance chain
+            if (forceAddSerialiable && !constructors.Any(c => c.GetParameters().Select(p => p.ParameterType).SequenceEqual(serializationConstructorParameters)))
+            {
+                var serializationConstructor = baseType.GetBaseTypes().Select(x => x.GetConstructor(bindingFlags, null, serializationConstructorParameters, null)).FirstOrDefault(x => x != null);
+                if (serializationConstructor != null)
+                    constructors.Add(serializationConstructor);
+            }
+            
+            foreach (var constructor in constructors)
             {
                 var parameters = constructor.GetParameters();
                 if (parameters.Length > 0 && parameters.Last().IsDefined(typeof(ParamArrayAttribute), false))
@@ -222,7 +249,7 @@ namespace DomainObjects.Internal
             var newExpression = (NewExpression)ctorExpression.Body;
             var ctor = newExpression.Constructor;
 
-            var proxyType = BuildPropertyChangedProxy<T>();
+            var proxyType = BuildDomainEntityProxy<T>();
 
             var newCtor = proxyType.GetConstructorsEx()
                 .FirstOrDefault(x => x.ConstructorInfo.GetParameters().Select(p => p.ParameterType).SequenceEqual(ctor.GetParameters().Select(p => p.ParameterType)));

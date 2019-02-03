@@ -3,6 +3,7 @@ using DomainObjects.Internal;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
+using Dynamix.Reflection;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -13,16 +14,20 @@ namespace DomainObjects.Serialization
 {
     public class DomainObjectContractResolver : DefaultContractResolver
     {
-        public Type GetActualTypeCreate(Type objectType)
+        public Type GetActualTypeToCreate(Type objectType)
         {
             //Assert type
-            return objectType.IsSubclassOf(typeof(DomainEntity)) ?
-                ProxyTypeBuilder.BuildPropertyChangedProxy(objectType) : objectType;
+            if (objectType.IsSubclassOf(typeof(DomainEntity)))
+                return ProxyTypeBuilder.BuildDomainEntityProxy(objectType);
+            else if (objectType.IsSubclassOfGeneric(typeof(DomainValueObject<>)))
+                return ProxyTypeBuilder.BuildSerializableProxy(objectType);
+            else
+                return objectType;
         }
 
         protected override JsonContract CreateContract(Type objectType)
         {
-            return base.CreateContract(GetActualTypeCreate(objectType));
+            return base.CreateContract(GetActualTypeToCreate(objectType));
         }
     }
 
