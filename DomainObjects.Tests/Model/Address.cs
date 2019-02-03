@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 
 namespace DomainObjects.Tests.Sales
 {
-    [Serializable]
+    //[Serializable]
     public class Address : DomainValueObject<Address>
     {
         public Address(string street, string number, string city, string postCode, Phone primaryPhone, IEnumerable<Phone> otherPhones)
@@ -18,10 +18,10 @@ namespace DomainObjects.Tests.Sales
             OtherPhones = new ValueObjectReadOnlyList<Phone>(otherPhones);
         }
 
-        protected Address(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
+        //protected Address(SerializationInfo info, StreamingContext context) : base(info, context)
+        //{
 
-        }
+        //}
 
         public string Street { get; }
         public string Number { get; }
