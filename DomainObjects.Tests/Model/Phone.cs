@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace DomainObjects.Tests.Sales
 {
-    [Serializable]
+    //[Serializable]
     public class Phone : DomainValueObject<Phone>
     {
         public Phone(string number, int kind)
@@ -13,10 +13,10 @@ namespace DomainObjects.Tests.Sales
             Kind = kind;
         }
 
-        protected Phone(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
+        //protected Phone(SerializationInfo info, StreamingContext context) : base(info, context)
+        //{
 
-        }
+        //}
 
         public string Number { get; }
         public int Kind { get; }

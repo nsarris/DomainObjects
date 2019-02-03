@@ -73,7 +73,10 @@ namespace DomainObjects.Internal
             var leftType = right.GetType();
             var rightType = left.GetType();
             if (leftType != rightType)
-                return false;
+            {
+                return (leftType.Implements(typeof(IDynamicProxy)) || rightType.Implements(typeof(IDynamicProxy)))
+                    && (leftType.IsAssignableFrom(rightType) || rightType.IsAssignableFrom(leftType));
+            }
 
             //values types
             if (leftType.IsValueType)

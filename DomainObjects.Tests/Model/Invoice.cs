@@ -10,7 +10,7 @@ namespace DomainObjects.Tests.Sales
         DomainEntityFactory<InvoiceLine, Invoice> linefactory = new DomainEntityFactory<InvoiceLine, Invoice>();
 
         private int entityState = 3;
-        private AggregateList<InvoiceLine> invoiceLines = new AggregateList<InvoiceLine>(); 
+        private readonly AggregateList<InvoiceLine> invoiceLines = new AggregateList<InvoiceLine>(); 
 
         protected Invoice()
         {

@@ -47,7 +47,7 @@ namespace DomainObjects.Tests
         public void TypeConstructorTest()
         {
 
-            var ctor1 = new TypeConstructor<Customer, int, string>(ProxyTypeBuilder.BuildPropertyChangedProxy<Customer>(), (Customer x) => x.OnLoaded());
+            var ctor1 = new TypeConstructor<Customer, int, string>(ProxyTypeBuilder.BuildDomainEntityProxy<Customer>(), (Customer x) => x.OnLoaded());
 
             var id = 1;
             var name = "someone";
