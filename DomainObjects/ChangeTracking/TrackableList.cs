@@ -47,7 +47,7 @@ namespace DomainObjects.ChangeTracking
 
         public TrackableReadOnlyList(IList<T> list)
         {
-            internalList = list.ToList();
+            internalList = list?.ToList() ?? new List<T>();
         }
 
         public TrackableReadOnlyList(IEnumerable<T> collection)
@@ -107,7 +107,7 @@ namespace DomainObjects.ChangeTracking
             if (GetIsChanged())
                 return true;
 
-            if (typeof(ITrackable).IsAssignableFrom(typeof(T)))
+            if (ElementTypeIsTrackable)
                 foreach (var item in internalList)
                     if ((item as ITrackable).GetIsChangedDeep())
                         return true;
@@ -115,7 +115,9 @@ namespace DomainObjects.ChangeTracking
             return false;
         }
 
-  
+        public bool ElementTypeIsTrackable { get; } = typeof(ITrackable).IsAssignableFrom(typeof(T));
+        
+
         public virtual void ResetChanges()
         {
             
@@ -391,7 +393,6 @@ namespace DomainObjects.ChangeTracking
             removedItems.Clear();
         }
 
-
         public override IEnumerable<T> GetAdded()
         {
             return addedItems;
@@ -421,9 +422,6 @@ namespace DomainObjects.ChangeTracking
         {
             markedChanged = false;
         }
-
-
-
     }
 }
 

@@ -87,8 +87,16 @@
   <ItemGroup>
     <Compile Include="EqualityTests.cs" />
     <Compile Include="ModelBuilderTests.cs" />
+    <Compile Include="Model\Address.cs" />
+    <Compile Include="Model\Customer.cs" />
+    <Compile Include="Model\CustomerRepository.cs" />
+    <Compile Include="Model\Invoice.cs" />
+    <Compile Include="Model\InvoiceLine.cs" />
+    <Compile Include="Model\InvoiceRepository.cs" />
+    <Compile Include="Model\Person.cs" />
+    <Compile Include="Model\Phone.cs" />
+    <Compile Include="Model\Product.cs" />
     <Compile Include="ProxyBuildTests.cs" />
-    <Compile Include="Model\SalesDomainModel.cs" />
     <Compile Include="SerializationTests.cs" />
     <Compile Include="Setup.cs" />
     <Compile Include="EntityStateTests.cs" />

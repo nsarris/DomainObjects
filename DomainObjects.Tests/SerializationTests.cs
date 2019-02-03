@@ -45,6 +45,7 @@ namespace DomainObjects.Tests
                 new Address("2", "2", null, null, new Phone("9123", 1), null),
                 new Address("3", "3", null, null, new Phone("123123", 1), null),
                 });
+
             var serializedCustomer = serializer.Serialize(customer);
 
             var customerCopy = serializer.Deserialize<Customer>(serializedCustomer);
@@ -52,7 +53,7 @@ namespace DomainObjects.Tests
 
             var invoiceRepository = new InvoiceRepository();
 
-            var invoice = invoiceRepository.CreateNew();
+            var invoice = invoiceRepository.Create();
             var line = invoice.CreateNewLine();
             line.Quantity = 0.5m;
             line.ProductId = 1;
@@ -64,7 +65,7 @@ namespace DomainObjects.Tests
             line.SetKey(2);
             
             var serializedInvoice = serializer.Serialize(invoice);
-
+            
             var invoiceCopy = serializer.Deserialize<Invoice>(serializedInvoice);
             Assert.IsTrue(ObjectComparer.Default.DeepEquals(invoice, invoiceCopy));
         }

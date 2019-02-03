@@ -198,7 +198,7 @@ namespace DomainObjects.ModelBuilder
         //        return new UnsupportedTypePropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
         //}
 
-        public ValueListValueObjectPropertyModelConfiguration<T> ValueObjectList<TValue>(Expression<Func<T, ValueObjectList<TValue>>> memberSelector)
+        public ValueListValueObjectPropertyModelConfiguration<T> ValueObjectList<TValue>(Expression<Func<T, IValueObjectList<TValue>>> memberSelector)
             where TValue : DomainValueObject<TValue>
         {
             var configuration = new ValueListValueObjectPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
@@ -206,7 +206,7 @@ namespace DomainObjects.ModelBuilder
             return configuration;
         }
 
-        public ValueReadOnlyListValueObjectPropertyModelConfiguration<T> ValueObjectList<TValue>(Expression<Func<T, ValueObjectReadOnlyList<TValue>>> memberSelector)
+        public ValueReadOnlyListValueObjectPropertyModelConfiguration<T> ValueObjectList<TValue>(Expression<Func<T, IValueObjectReadOnlyList<TValue>>> memberSelector)
             where TValue : DomainValueObject<TValue>
         {
             var configuration = new ValueReadOnlyListValueObjectPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));

@@ -72,10 +72,11 @@ namespace DomainObjects.ModelBuilder
             if (unsupportedProperty != null)
                 throw new InvalidOperationException($"Unsupported property {unsupportedProperty.Property.Name} of Type {unsupportedProperty.Property.Type.Name} in Entity {Descriptor.Type.Name}");
 
-            var ctors = Descriptor.Type.GetConstructors(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+            //TODO: Not in proxy mode
+            //var ctors = Descriptor.Type.GetConstructors(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
 
-            if (ctors.Length == 0)
-                throw new InvalidOperationException($"Entity type {Descriptor.Type.Name} does not have any public constructors");
+            //if (ctors.Length == 0)
+            //    throw new InvalidOperationException($"Entity type {Descriptor.Type.Name} does not have any public constructors");
 
             ValidateKey(properties.Where(x => x.KeyPosition >= 0).Select(x => x.Property).ToList());
         }

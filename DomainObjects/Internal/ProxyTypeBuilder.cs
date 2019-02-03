@@ -164,23 +164,25 @@ namespace DomainObjects.Internal
             return (propertyGetMethod, genericEqualityComparer.GetMethod("Equals", new Type[] { type , type }));
         }
         
-
-        private static void CreatePassthroughConstructors(this TypeBuilder builder, Type baseType, bool forceAddSerialiable)
+        private static bool IsSerializationConstructor(ConstructorInfo ctor)
         {
-            var bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-            var serializationConstructorParameters = new[] { typeof(SerializationInfo), typeof(StreamingContext) };
+            return ctor.GetParameters().Select(x => x.ParameterType).SequenceEqual(new [] { typeof(SerializationInfo), typeof(StreamingContext) });
+        }
 
-            var constructors = baseType.GetConstructors(bindingFlags).ToList();
+        private static void CreatePassthroughConstructors(this TypeBuilder builder, Type baseType)
+        {
+            var ctors = baseType.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).AsEnumerable();
 
-            //Add deserialization constructor searching up inheritance chain
-            if (forceAddSerialiable && !constructors.Any(c => c.GetParameters().Select(p => p.ParameterType).SequenceEqual(serializationConstructorParameters)))
+            if (!ctors.Any(IsSerializationConstructor))
             {
-                var serializationConstructor = baseType.GetBaseTypes().Select(x => x.GetConstructor(bindingFlags, null, serializationConstructorParameters, null)).FirstOrDefault(x => x != null);
-                if (serializationConstructor != null)
-                    constructors.Add(serializationConstructor);
+                //Add serialization ctor
+                ctors = ctors.Concat(
+                    new[] { baseType.GetBaseTypes()
+                    .SelectMany(x => x.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+                    .FirstOrDefault(IsSerializationConstructor)} ?? Enumerable.Empty<ConstructorInfo>());
             }
-            
-            foreach (var constructor in constructors)
+
+            foreach (var constructor in ctors)
             {
                 var parameters = constructor.GetParameters();
                 if (parameters.Length > 0 && parameters.Last().IsDefined(typeof(ParamArrayAttribute), false))
@@ -191,8 +193,9 @@ namespace DomainObjects.Internal
                 var parameterTypes = parameters.Select(p => p.ParameterType).ToArray();
                 var requiredCustomModifiers = parameters.Select(p => p.GetRequiredCustomModifiers()).ToArray();
                 var optionalCustomModifiers = parameters.Select(p => p.GetOptionalCustomModifiers()).ToArray();
+                var attributes = IsSerializationConstructor(constructor) ? MethodAttributes.Assembly : constructor.Attributes;
 
-                var ctor = builder.DefineConstructor(MethodAttributes.Public, constructor.CallingConvention, parameterTypes, requiredCustomModifiers, optionalCustomModifiers);
+                var ctor = builder.DefineConstructor(attributes, constructor.CallingConvention, parameterTypes, requiredCustomModifiers, optionalCustomModifiers);
                 for (var i = 0; i < parameters.Length; ++i)
                 {
                     var parameter = parameters[i];
@@ -226,6 +229,8 @@ namespace DomainObjects.Internal
 
                 emitter.Emit(OpCodes.Ret);
             }
+
+            
         }
 
         private static CustomAttributeBuilder[] BuildCustomAttributes(IEnumerable<CustomAttributeData> customAttributes)

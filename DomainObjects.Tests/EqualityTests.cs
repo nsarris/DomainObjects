@@ -15,7 +15,7 @@ namespace DomainObjects.Tests
         public void TestEntityKeyEquality()
         {
             var repo = new CustomerRepository();
-            var customer1 = repo.CreateNew();
+            var customer1 = repo.Create();
             var customer2 = repo.GetById(1);
 
             Assert.IsFalse(customer1.KeyEquals(customer2));

@@ -3,7 +3,13 @@ using System.Collections.Generic;
 
 namespace DomainObjects.Core
 {
-    public class ValueObjectList<T> : TrackableList<T>
+    public interface IValueObjectList<out T> : ITrackableCollection<T>, IValueObjectReadOnlyList<T>
+    where T : DomainValueObject<T>
+    {
+
+    }
+
+    public class ValueObjectList<T> : TrackableList<T>, IValueObjectList<T>
         where T : DomainValueObject<T>
     {
         public ValueObjectList()

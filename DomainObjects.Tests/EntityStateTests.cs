@@ -17,7 +17,7 @@ namespace DomainObjects.Tests
         public void TestEntityStates()
         {
             var repo = new CustomerRepository();
-            var customer = repo.CreateNew();
+            var customer = repo.Create();
 
             Assert.IsTrue(customer.GetEntityState() == EntityState.New);
 
@@ -34,7 +34,7 @@ namespace DomainObjects.Tests
         public void TestPropertyChange()
         {
             var repo = new CustomerRepository();
-            var customer = repo.CreateNew();
+            var customer = repo.Create();
 
             Assert.IsTrue(customer.GetEntityState() == EntityState.New);
             Assert.IsFalse(customer.ChangeTracker.GetIsChanged());
@@ -55,7 +55,7 @@ namespace DomainObjects.Tests
         public void TestAggregateChange()
         {
             var repo = new InvoiceRepository();
-            var invoice = repo.CreateNew();
+            var invoice = repo.Create();
 
             Assert.IsTrue(invoice.GetEntityState() == EntityState.New);
             Assert.IsFalse(invoice.ChangeTracker.GetIsChanged());

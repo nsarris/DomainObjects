@@ -215,7 +215,7 @@ namespace DomainObjects.ModelBuilder
         //        return new UnsupportedTypePropertyModelConfiguration(ReflectionHelper.GetProperty(memberSelector));
         //}
 
-        public ValueListEntityPropertyModelConfiguration<T> ValueObjectList<TValue>(Expression<Func<T, ValueObjectList<TValue>>> memberSelector)
+        public ValueListEntityPropertyModelConfiguration<T> ValueObjectList<TValue>(Expression<Func<T, IValueObjectList<TValue>>> memberSelector)
             where TValue : DomainValueObject<TValue>
         {
             var configuration = new ValueListEntityPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
@@ -223,7 +223,7 @@ namespace DomainObjects.ModelBuilder
             return configuration;
         }
 
-        public ValueReadOnlyListEntityPropertyModelConfiguration<T> ValueObjectList<TValue>(Expression<Func<T, ValueObjectReadOnlyList<TValue>>> memberSelector)
+        public ValueReadOnlyListEntityPropertyModelConfiguration<T> ValueObjectList<TValue>(Expression<Func<T, IValueObjectReadOnlyList<TValue>>> memberSelector)
             where TValue : DomainValueObject<TValue>
         {
             var configuration = new ValueReadOnlyListEntityPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
@@ -239,7 +239,7 @@ namespace DomainObjects.ModelBuilder
             return configuration;
         }
 
-        public AggregateListEntityPropertyModelConfiguration<T> Aggregate<TAggregate>(Expression<Func<T, AggregateList<TAggregate>>> memberSelector)
+        public AggregateListEntityPropertyModelConfiguration<T> Aggregate<TAggregate>(Expression<Func<T, IAggregateList<TAggregate>>> memberSelector)
             where TAggregate : Aggregate<TAggregate>
         {
             var configuration = new AggregateListEntityPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
@@ -247,7 +247,7 @@ namespace DomainObjects.ModelBuilder
             return configuration;
         }
 
-        public AggregateReadOnlyListEntityPropertyModelConfiguration<T> Aggregate<TAggregate>(Expression<Func<T, AggregateReadOnlyList<TAggregate>>> memberSelector)
+        public AggregateReadOnlyListEntityPropertyModelConfiguration<T> Aggregate<TAggregate>(Expression<Func<T, IAggregateReadOnlyList<TAggregate>>> memberSelector)
             where TAggregate : Aggregate<TAggregate>
         {
             var configuration = new AggregateReadOnlyListEntityPropertyModelConfiguration<T>(this, ReflectionHelper.GetProperty(memberSelector));
