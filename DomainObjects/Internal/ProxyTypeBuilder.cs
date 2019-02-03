@@ -169,11 +169,11 @@ namespace DomainObjects.Internal
             return ctor.GetParameters().Select(x => x.ParameterType).SequenceEqual(new [] { typeof(SerializationInfo), typeof(StreamingContext) });
         }
 
-        private static void CreatePassthroughConstructors(this TypeBuilder builder, Type baseType)
+        private static void CreatePassthroughConstructors(this TypeBuilder builder, Type baseType, bool forceAddSerializable)
         {
             var ctors = baseType.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).AsEnumerable();
 
-            if (!ctors.Any(IsSerializationConstructor))
+            if (forceAddSerializable && !ctors.Any(IsSerializationConstructor))
             {
                 //Add serialization ctor
                 ctors = ctors.Concat(
