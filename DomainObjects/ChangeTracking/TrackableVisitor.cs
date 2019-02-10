@@ -1,5 +1,6 @@
 ﻿using Dynamix.Reflection;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -60,7 +61,7 @@ namespace DomainObjects.ChangeTracking
                 }
                 else if (prop.IsEnumerable)
                 {
-                    foreach (var item in prop.EnumerableDescriptor.AsEnumerable(prop.Get(trackedObject)))
+                    foreach (var item in (IEnumerable)prop.Get(trackedObject))
                     {
                         if (item != null && item is ITrackableObject enumeratedTrackable
                             && GetIsChangedDeep(enumeratedTrackable, visited))
@@ -113,7 +114,7 @@ namespace DomainObjects.ChangeTracking
                 }
                 else if (prop.IsEnumerable)
                 {
-                    foreach (var item in prop.EnumerableDescriptor.AsEnumerable(prop.Get(trackedObject)))
+                    foreach (var item in (IEnumerable)prop.Get(trackedObject))
                     {
                         if (item != null && item is ITrackableObject enumeratedTrackable)
                             Visit(enumeratedTrackable, action, visited);
